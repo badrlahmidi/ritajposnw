@@ -1,0 +1,42 @@
+[1112:14032:0210/191430:VERBOSE1:policy_loader_win.cc(443)] Reading policy from the registry is disabled.
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: Google 'Pilot' log
+[1112:14032:0210/191430:VERBOSE1:pref_proxy_config_tracker_impl.cc(218)] 00D520B0: set chrome proxy config service to 09E114D0
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: Google 'Aviator' log
+[1112:14032:0210/191430:VERBOSE1:pref_proxy_config_tracker_impl.cc(355)] 00D520B0: Done pushing proxy to UpdateProxyConfig
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: DigiCert Log Server
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: Google 'Rocketeer' log
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: Certly.IO log
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: Izenpe log
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: Symantec log
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: Venafi log
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: Symantec 'Vega' log
+[1112:14032:0210/191430:VERBOSE1:install_util.cc(241)] No existing nwjs install found.
+[1112:14032:0210/191430:VERBOSE1:app_list_syncable_service_factory.cc(57)] AppListSyncableServiceFactory()
+[1112:14032:0210/191430:VERBOSE1:mutable_profile_oauth2_token_service_delegate.cc(137)] MutablePO2TS::MutablePO2TS
+[1112:14032:0210/191430:VERBOSE1:bluetooth_low_energy_event_router.cc(194)] Initializing BluetoothLowEnergyEventRouter.
+[1112:14032:0210/191430:VERBOSE1:app_list_syncable_service_factory.cc(47)] BuildInstanceFor: Default (09E4E260)
+[1112:14032:0210/191430:VERBOSE1:pref_proxy_config_tracker_impl.cc(218)] 0B0CA440: set chrome proxy config service to 0B0CAEE8
+[1112:14032:0210/191430:VERBOSE1:pref_proxy_config_tracker_impl.cc(355)] 0B0CA440: Done pushing proxy to UpdateProxyConfig
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: Google 'Pilot' log
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: Google 'Aviator' log
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: DigiCert Log Server
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: Google 'Rocketeer' log
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: Certly.IO log
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: Izenpe log
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: Symantec log
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: Venafi log
+[1112:11484:0210/191430:VERBOSE1:multi_log_ct_verifier.cc(67)] Adding CT log: Symantec 'Vega' log
+[1112:14032:0210/191430:VERBOSE1:extension_service.cc(1536)] AddComponentExtension Chromium PDF Viewer
+[1112:14032:0210/191430:VERBOSE1:extension_service.cc(1538)] Component extension Chromium PDF Viewer (mhjfbmdgcfjbbpaeojofohoefgiehjai) installing/upgrading from '' to 1
+[1112:14032:0210/191430:VERBOSE1:account_reconcilor.cc(70)] AccountReconcilor::AccountReconcilor
+[1112:14032:0210/191430:VERBOSE1:account_reconcilor.cc(81)] AccountReconcilor::Initialize
+[1112:11484:0210/191431:VERBOSE1:proxy_service.cc(1229)] Failed configuring with PAC script, falling-back to manual proxy servers.
+[1112:14032:0210/191431:INFO:CONSOLE(16)] "Uncaught SyntaxError: Unexpected identifier", source: http://localhost:3000/pos_gueliz/js/pos.js (16)
+[1112:14032:0210/191432:VERBOSE1:account_reconcilor.cc(100)] AccountReconcilor::Shutdown
+[1112:14032:0210/191432:VERBOSE1:account_reconcilor.cc(169)] AccountReconcilor::UnregisterWithCookieManagerService
+[1112:14032:0210/191432:VERBOSE1:account_reconcilor.cc(149)] AccountReconcilor::UnregisterWithTokenService
+[1112:14032:0210/191432:VERBOSE1:account_reconcilor.cc(128)] AccountReconcilor::UnregisterWithContentSettings
+[1112:14032:0210/191432:VERBOSE1:mutable_profile_oauth2_token_service_delegate.cc(518)] MutablePO2TS::Shutdown
+[1112:14032:0210/191432:VERBOSE1:account_reconcilor.cc(74)] AccountReconcilor::~AccountReconcilor
+[1112:14032:0210/191432:VERBOSE1:gaia_cookie_manager_service.cc(441)] GaiaCookieManagerService::CancelAll
+[1112:14032:0210/191432:VERBOSE1:mutable_profile_oauth2_token_service_delegate.cc(153)] MutablePO2TS::~MutablePO2TS

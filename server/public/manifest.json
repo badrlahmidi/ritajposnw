@@ -1,0 +1,11 @@
+{
+  "name": "RITAJ SMART POS",
+  "short_name": "RITAJ POS",
+  "start_url": ".",
+  "display": "fullscreen",
+  "background_color": "#ffffff",
+  "theme_color": "#0d6efd",
+  "description": "Système d'encaissement RITAJ SMART POS optimisé",
+  "orientation": "landscape",
+  "icons": []
+}

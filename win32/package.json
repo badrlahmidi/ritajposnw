@@ -1,0 +1,15 @@
+{
+  "name": "ritaj-smart-pos",
+  "version": "4.1.0",
+  "main": "http://localhost:3000/pos",
+  "window": {
+    "title": "RITAJ SMART POS — v4.1",
+    "toolbar": false,
+    "frame": true,
+    "width": 1200,
+    "height": 800,
+    "min_width": 980,
+    "min_height": 720
+  },
+  "chromium-args": "--disable-print-preview --kiosk-printing --user-data-dir='temp/' --disk-cache-size=1 --media-cache-size=1"
+}
