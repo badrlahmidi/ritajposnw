@@ -139,4 +139,23 @@ router.delete('/:id', authMiddleware, asyncHandler((req, res) => {
     res.json({ success: true });
 }));
 
+// Solde crédit d'un client spécifique (pour le widget panier)
+router.get('/:id/credits', authMiddleware, asyncHandler((req, res) => {
+    const id = parseInt(req.params.id);
+    const client = queryOne('SELECT id, nom, solde_credit FROM clients WHERE id = ?', [id]);
+    if (!client) return res.status(404).json({ error: 'Client non trouvé' });
+    res.json({ id: client.id, nom: client.nom, solde: client.solde_credit || 0 });
+}));
+
+// Liste des clients en dette (solde_credit > seuil)
+router.get('/en-dette', authMiddleware, asyncHandler((req, res) => {
+    const seuil = parseFloat(req.query.seuil) || 0;
+    const clients = queryAll(
+        'SELECT id, nom, telephone, solde_credit FROM clients WHERE solde_credit > ? AND actif = 1 ORDER BY solde_credit DESC',
+        [seuil]
+    );
+    const total = queryOne('SELECT COALESCE(SUM(solde_credit), 0) as total FROM clients WHERE solde_credit > ? AND actif = 1', [seuil]);
+    res.json({ clients, total_global: total.total || 0 });
+}));
+
 module.exports = router;

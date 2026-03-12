@@ -36,7 +36,7 @@ export const STATS = {
     });
 
     const dFin = document.getElementById('statsDateFin');
-    const multiDate = ['synthese', 'categories', 'utilisateurs', 'paiements', 'marges', 'audit'].includes(type);
+    const multiDate = ['synthese', 'categories', 'utilisateurs', 'paiements', 'marges', 'audit', 'achats', 'pertes'].includes(type);
     dFin.style.display = multiDate ? '' : 'none';
 
     this.load();
@@ -73,6 +73,10 @@ export const STATS = {
         url = `/stats/stock/alertes`;
       } else if (this.currentReport === 'audit') {
         url = `/stats/audit${params}`;
+      } else if (this.currentReport === 'achats') {
+        url = `/stats/achats${params}`;
+      } else if (this.currentReport === 'pertes') {
+        url = `/stock/pertes${params}`;
       }
 
       this.lastData = await api(url);
@@ -98,6 +102,8 @@ export const STATS = {
     else if (type === 'stock-valorisation') this.renderStockValorisation(data, dev, body);
     else if (type === 'stock-alertes') this.renderStockAlertes(data, dev, body);
     else if (type === 'audit') this.renderAudit(data, dev, body);
+    else if (type === 'achats') this.renderAchats(data, dev, body);
+    else if (type === 'pertes') this.renderPertes(data, dev, body);
   },
 
   renderSynthese(s, dev, body) {
@@ -279,7 +285,110 @@ export const STATS = {
       </div>`;
   },
 
+  renderAchats(data, dev, body) {
+    const s = data.summary || {};
+    const achats = data.achats || [];
+    const parF = data.par_fournisseur || [];
+    body.innerHTML = `
+      <div class="stats-grid mb-16">
+        <div class="stat-card mini">
+          <div class="stat-value">${s.nb_achats || 0}</div>
+          <div class="stat-label">Achats</div>
+        </div>
+        <div class="stat-card mini danger">
+          <div class="stat-value">${(s.total_achats || 0).toFixed(2)} ${dev}</div>
+          <div class="stat-label">Total Achats</div>
+        </div>
+        <div class="stat-card mini info">
+          <div class="stat-value">${s.nb_fournisseurs || 0}</div>
+          <div class="stat-label">Fournisseurs</div>
+        </div>
+      </div>
+      ${parF.length > 0 ? `
+      <div class="card mb-16">
+        <h3 class="mb-16">🏭 Par Fournisseur</h3>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead><tr><th>Fournisseur</th><th>Nb Achats</th><th>Dernière Livraison</th><th>Total</th></tr></thead>
+            <tbody>${parF.map(f => `<tr>
+              <td><strong>${f.fournisseur}</strong></td>
+              <td>${f.nb_achats}</td>
+              <td>${f.derniere_livraison ? new Date(f.derniere_livraison).toLocaleDateString('fr-FR') : '—'}</td>
+              <td><strong>${(f.total || 0).toFixed(2)} ${dev}</strong></td>
+            </tr>`).join('')}</tbody>
+          </table>
+        </div>
+      </div>` : ''}
+      <div class="card">
+        <h3 class="mb-16">📋 Détail des Achats</h3>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead><tr><th>Date</th><th>Fournisseur</th><th>Montant</th><th>Mode Paiement</th><th>Référence</th></tr></thead>
+            <tbody>${achats.length ? achats.map(a => `<tr>
+              <td>${new Date(a.date_depense).toLocaleDateString('fr-FR')}</td>
+              <td><strong>${a.fournisseur}</strong></td>
+              <td><strong class="text-danger">${(a.montant || 0).toFixed(2)} ${dev}</strong></td>
+              <td><span class="badge badge-info">${a.mode_paiement || '—'}</span></td>
+              <td><small>${a.reference_facture || a.description || '—'}</small></td>
+            </tr>`).join('') : '<tr><td colspan="5" class="text-muted text-center">Aucun achat sur cette période</td></tr>'}</tbody>
+          </table>
+        </div>
+      </div>`;
+  },
+
+  renderPertes(data, dev, body) {
+    const s = data.summary || {};
+    const pertes = data.pertes || [];
+    const parMotif = data.par_motif || [];
+    const motifEmojis = { casse: '💥', perime: '⏰', vol: '🔓', perte: '📦', qualite: '⚠️', autre: '❓' };
+    body.innerHTML = `
+      <div class="stats-grid mb-16">
+        <div class="stat-card mini danger">
+          <div class="stat-value">${s.nb_mouvements || 0}</div>
+          <div class="stat-label">Incidents</div>
+        </div>
+        <div class="stat-card mini danger">
+          <div class="stat-value">${(s.total_unites || 0).toFixed(1)}</div>
+          <div class="stat-label">Unités Perdues</div>
+        </div>
+        <div class="stat-card mini danger">
+          <div class="stat-value">${(s.valeur_totale || 0).toFixed(2)} ${dev}</div>
+          <div class="stat-label">Valeur Perdue</div>
+        </div>
+      </div>
+      ${parMotif.length > 0 ? `
+      <div class="card mb-16">
+        <h3 class="mb-16">📊 Répartition par Motif</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">
+          ${parMotif.map(m => `
+            <div style="background:#fff5f5;border:1px solid #e74c3c22;border-radius:8px;padding:12px;text-align:center">
+              <div style="font-size:1.5rem">${motifEmojis[m.motif_type] || '❓'}</div>
+              <div style="font-weight:700;font-size:0.85rem;text-transform:capitalize">${m.motif_type || 'autre'}</div>
+              <div style="color:var(--danger);font-weight:700">${(m.valeur || 0).toFixed(2)} ${dev}</div>
+              <div style="font-size:0.75rem;color:var(--text-muted)">${m.nb} incident(s) · ${(m.total_qte || 0).toFixed(1)} u.</div>
+            </div>`).join('')}
+        </div>
+      </div>` : ''}
+      <div class="card">
+        <h3 class="mb-16">📋 Détail des Pertes & Casses</h3>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead><tr><th>Date</th><th>Produit</th><th>Motif</th><th>Qté</th><th>Valeur</th><th>Par</th></tr></thead>
+            <tbody>${pertes.length ? pertes.map(p => `<tr>
+              <td>${new Date(p.date_mouvement).toLocaleDateString('fr-FR')}</td>
+              <td><strong>${p.produit_nom}</strong><br><small style="color:var(--text-muted)">${p.categorie || ''}</small></td>
+              <td><span class="badge" style="background:#e74c3c22;color:#e74c3c">${motifEmojis[p.motif?.split(':')[0]] || '❓'} ${p.motif || '—'}</span></td>
+              <td><strong class="text-danger">-${p.quantite}</strong></td>
+              <td><strong class="text-danger">${(p.valeur_perdue || 0).toFixed(2)} ${dev}</strong></td>
+              <td><small>${p.utilisateur_nom || '—'}</small></td>
+            </tr>`).join('') : '<tr><td colspan="6" class="text-muted text-center">Aucune perte enregistrée</td></tr>'}</tbody>
+          </table>
+        </div>
+      </div>`;
+  },
+
   renderHourChart(data) {
+
     const max = Math.max(...data.map(d => d.montant), 1);
     return data.map(d => {
       const h = Math.max(4, (d.montant / max) * 100);
@@ -327,6 +436,8 @@ export const STATS = {
       rows = [['Produit', 'Categorie', 'Stock Actuel', 'Seuil'], ...data.map(i => [i.nom, i.categorie, i.quantite, i.seuil_alerte])];
     } else if (type === 'audit') {
       rows = [['Date', 'Utilisateur', 'Action', 'Entite', 'Details'], ...data.map(a => [a.date_action, a.utilisateur_nom, a.action, a.entite, a.details])];
+    } else if (type === 'achats') {
+      rows = [['Date', 'Fournisseur', 'Montant', 'Mode Paiement', 'Description'], ...(data.achats || []).map(a => [a.date_depense, a.fournisseur, a.montant, a.mode_paiement, a.description])];
     }
 
     csv += rows.map(r => r.join(',')).join('\n');
@@ -337,6 +448,14 @@ export const STATS = {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  },
+
+  exportXLSX() {
+    const type = this.currentReport;
+    const dateDeb = document.getElementById('statsDate').value;
+    const dateFin = document.getElementById('statsDateFin').value;
+    const url = `${API}/stats/export/xlsx?type=${type}&date_debut=${dateDeb}&date_fin=${dateFin}&token=${state.token}`;
+    window.open(url, '_blank');
   },
 
   printA4() {

@@ -80,6 +80,86 @@ router.post('/adjust', authMiddleware, adminOnly, asyncHandler((req, res) => {
     res.json({ success: true });
 }));
 
+// ════════ ENREGISTRER UNE PERTE / CASSE ════════
+router.post('/perte', authMiddleware, adminOnly, asyncHandler((req, res) => {
+    const { produit_id, quantite, motif_type, motif_detail } = req.body;
+    if (!produit_id || !quantite || quantite <= 0) {
+        return res.status(400).json({ error: 'produit_id et quantite > 0 requis' });
+    }
+
+    const MOTIFS_VALIDES = ['casse', 'perime', 'vol', 'perte', 'qualite', 'autre'];
+    const motif = MOTIFS_VALIDES.includes(motif_type) ? motif_type : 'autre';
+
+    const sid = req.user.succursale_id || 1;
+    const stock = queryOne('SELECT * FROM stock WHERE produit_id = ? AND succursale_id = ?', [produit_id, sid]);
+    if (!stock) return res.status(404).json({ error: 'Stock non trouvé pour ce produit' });
+
+    const qtyAvant = stock.quantite;
+    const qtyApres = Math.max(0, qtyAvant - parseFloat(quantite));
+
+    run('UPDATE stock SET quantite = ?, derniere_maj = CURRENT_TIMESTAMP WHERE id = ?', [qtyApres, stock.id]);
+    run(
+        `INSERT INTO mouvements_stock
+         (produit_id, succursale_id, type, quantite, quantite_avant, quantite_apres, motif, reference, utilisateur_id)
+         VALUES (?,?,?,?,?,?,?,?,?)`,
+        [produit_id, sid, 'perte', parseFloat(quantite), qtyAvant, qtyApres,
+            `${motif}${motif_detail ? ': ' + motif_detail : ''}`,
+            `PERTE-${motif.toUpperCase()}`, req.user.id]
+    );
+
+    logAudit(req.user.id, req.user.nom, 'PERTE_STOCK', 'stock', produit_id,
+        `Perte ${quantite} unités (${motif}) — Stock: ${qtyAvant} → ${qtyApres}`);
+    res.json({ success: true, quantite_avant: qtyAvant, quantite_apres: qtyApres });
+}));
+
+// ════════ RAPPORT PERTES (pour Stats) ════════
+router.get('/pertes', authMiddleware, adminOnly, asyncHandler((req, res) => {
+    const { date_debut, date_fin } = req.query;
+    const sid = req.user.succursale_id || 1;
+    const d1 = date_debut || '1970-01-01';
+    const d2 = date_fin || '2099-12-31';
+
+    const pertes = queryAll(`
+        SELECT ms.*, p.nom as produit_nom, p.cout_revient, cat.nom as categorie,
+               (ms.quantite * p.cout_revient) as valeur_perdue,
+               u.nom as utilisateur_nom
+        FROM mouvements_stock ms
+        JOIN produits p ON ms.produit_id = p.id
+        LEFT JOIN categories cat ON p.categorie_id = cat.id
+        LEFT JOIN utilisateurs u ON ms.utilisateur_id = u.id
+        WHERE ms.type = 'perte' AND ms.succursale_id = ?
+          AND DATE(ms.date_mouvement) BETWEEN ? AND ?
+        ORDER BY ms.date_mouvement DESC
+    `, [sid, d1, d2]);
+
+    const summary = queryOne(`
+        SELECT COUNT(*) as nb_mouvements,
+               COALESCE(SUM(ms.quantite), 0) as total_unites,
+               COALESCE(SUM(ms.quantite * p.cout_revient), 0) as valeur_totale
+        FROM mouvements_stock ms
+        JOIN produits p ON ms.produit_id = p.id
+        WHERE ms.type = 'perte' AND ms.succursale_id = ?
+          AND DATE(ms.date_mouvement) BETWEEN ? AND ?
+    `, [sid, d1, d2]);
+
+    // Regrouper par motif
+    const parMotif = queryAll(`
+        SELECT SUBSTR(ms.motif, 1, INSTR(ms.motif||':', ':')-1) as motif_type,
+               COUNT(*) as nb,
+               SUM(ms.quantite) as total_qte,
+               SUM(ms.quantite * p.cout_revient) as valeur
+        FROM mouvements_stock ms
+        JOIN produits p ON ms.produit_id = p.id
+        WHERE ms.type = 'perte' AND ms.succursale_id = ?
+          AND DATE(ms.date_mouvement) BETWEEN ? AND ?
+        GROUP BY motif_type ORDER BY valeur DESC
+    `, [sid, d1, d2]);
+
+    res.json({ pertes, summary, par_motif: parMotif });
+}));
+
+
+
 // ════════ INVENTAIRE GESTION ════════
 
 // 1. Créer une session d'inventaire

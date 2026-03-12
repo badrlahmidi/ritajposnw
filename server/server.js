@@ -31,6 +31,7 @@ const discountRoutes = require('./routes/discounts');
 const caisseRoutes = require('./routes/caisse');
 const statsRoutes = require('./routes/stats');
 const systemRoutes = require('./routes/system'); // Handles setup, params, backup, audit, system
+const succursalesRoutes = require('./routes/succursales');
 
 const app = express();
 const { PORT, BASE_PATH } = config;
@@ -70,6 +71,7 @@ apiRouter.use('/depenses', expenseRoutes);
 apiRouter.use('/remises', discountRoutes);
 apiRouter.use('/caisse', caisseRoutes);
 apiRouter.use('/stats', statsRoutes);
+apiRouter.use('/succursales', succursalesRoutes);
 
 // System routes mount at root of API (handles /setup, /parametres, /system, /backup, /audit)
 apiRouter.use('/', systemRoutes);

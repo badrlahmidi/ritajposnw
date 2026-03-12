@@ -229,7 +229,39 @@ export const CartModule = {
         this.deliveryInfo = null; this.orderType = 'emporter';
         const cc = document.getElementById('cartClient'); if (cc) cc.style.display = 'none';
         const rr = document.getElementById('remiseRow'); if (rr) rr.style.display = 'none';
+        this._hideDebtBanner();
         this.renderCart(); this.hideChangeSection();
+    },
+
+    _hideDebtBanner() {
+        const b = document.getElementById('cartDebtBanner');
+        if (b) b.style.display = 'none';
+    },
+
+    async _showDebtBannerIfNeeded(client) {
+        if (!client || !client.id) { this._hideDebtBanner(); return; }
+        try {
+            const data = await (await import('../core/api.js')).api(`/clients/${client.id}/credits`);
+            const solde = data ? data.solde || 0 : 0;
+            let banner = document.getElementById('cartDebtBanner');
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'cartDebtBanner';
+                banner.style.cssText = 'display:none;background:#e74c3c;color:#fff;padding:8px 12px;border-radius:6px;margin:0 0 8px 0;font-size:0.85rem;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0';
+                const cartItems = document.getElementById('cartItems');
+                if (cartItems && cartItems.parentNode) {
+                    cartItems.parentNode.insertBefore(banner, cartItems);
+                }
+            }
+            if (solde > 0) {
+                banner.innerHTML = `
+                  <span>⚠️ Ardoise <strong>${client.nom}</strong> : <strong style="font-size:1rem">${solde.toFixed(2)} DH</strong> dû</span>
+                  <button onclick="CLIENTS.settleCredit(${client.id}, '${client.nom.replace(/'/g, "\\'")}'  , ${solde})" style="background:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.5);color:#fff;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:0.8rem;white-space:nowrap">💰 Régler</button>`;
+                banner.style.display = 'flex';
+            } else {
+                banner.style.display = 'none';
+            }
+        } catch (e) { this._hideDebtBanner(); }
     },
 
     async repeatLastOrder(clientId) {

@@ -45,8 +45,70 @@ router.get('/code-barre/:code', authMiddleware, asyncHandler((req, res) => {
         [req.user.succursale_id || 1, code]
     );
     if (!produit) return res.status(404).json({ error: 'Produit non trouvé pour ce code-barres' });
-    res.json(produit);
+    // Si c'est un produit parent, retourner ses variantes
+    const variantes = queryAll(
+        `SELECT p.*, COALESCE(s.quantite, 0) as stock_quantite
+         FROM produits p LEFT JOIN stock s ON s.produit_id = p.id AND s.succursale_id = ?
+         WHERE p.parent_id = ? AND p.actif = 1 ORDER BY p.variante_label`,
+        [req.user.succursale_id || 1, produit.id]
+    );
+    res.json({ ...produit, variantes });
 }));
+
+// Variantes d'un produit parent
+router.get('/:id/variantes', authMiddleware, asyncHandler((req, res) => {
+    const id = parseInt(req.params.id);
+    const sid = req.user.succursale_id || 1;
+    const parent = queryOne(
+        `SELECT p.*, t.taux as taux_tva FROM produits p LEFT JOIN taxes t ON p.taxe_id = t.id WHERE p.id = ?`, [id]
+    );
+    if (!parent) return res.status(404).json({ error: 'Produit non trouvé' });
+
+    const variantes = queryAll(
+        `SELECT p.*, t.taux as taux_tva, COALESCE(s.quantite, 0) as stock_quantite
+         FROM produits p
+         LEFT JOIN taxes t ON p.taxe_id = t.id
+         LEFT JOIN stock s ON s.produit_id = p.id AND s.succursale_id = ?
+         WHERE p.parent_id = ? AND p.actif = 1 ORDER BY p.variante_label, p.prix_ttc`,
+        [sid, id]
+    );
+    res.json({ parent, variantes });
+}));
+
+// Créer une variante d'un produit parent
+router.post('/:id/variantes', authMiddleware, adminOnly, asyncHandler((req, res) => {
+    const parentId = parseInt(req.params.id);
+    const parent = queryOne('SELECT * FROM produits WHERE id = ?', [parentId]);
+    if (!parent) return res.status(404).json({ error: 'Produit parent non trouvé' });
+
+    const { variante_label, prix_ttc, prix_ht, code_barre, stock_initial } = req.body;
+    if (!variante_label || !prix_ttc) return res.status(400).json({ error: 'variante_label et prix_ttc requis' });
+
+    const result = run(
+        `INSERT INTO produits (nom, categorie_id, taxe_id, prix_ht, prix_ttc, cout_revient, unite,
+         parent_id, variante_label, code_barre, actif)
+         VALUES (?,?,?,?,?,?,?,?,?,?,1)`,
+        [
+            `${parent.nom} — ${variante_label}`,
+            parent.categorie_id, parent.taxe_id,
+            parseFloat(prix_ht) || parseFloat(prix_ttc),
+            parseFloat(prix_ttc),
+            parent.cout_revient,
+            parent.unite,
+            parentId, variante_label,
+            code_barre || ''
+        ]
+    );
+    const newId = result.lastInsertRowid;
+    // Créer entrée stock
+    const sid = req.user.succursale_id || 1;
+    run('INSERT INTO stock (produit_id, succursale_id, quantite, seuil_alerte) VALUES (?,?,?,?)',
+        [newId, sid, parseFloat(stock_initial) || 0, 5]);
+
+    logAudit(req.user.id, req.user.nom, 'CREATION_VARIANTE', 'produits', newId, `Variante "${variante_label}" créée pour produit #${parentId}`);
+    res.json({ success: true, id: newId });
+}));
+
 
 // Produits proches de la DLC
 router.get('/dlc/alertes', authMiddleware, asyncHandler((req, res) => {
@@ -273,8 +335,6 @@ router.put('/:id', authMiddleware, adminOnly, upload.single('image'), v.updatePr
 
 router.delete('/:id', authMiddleware, adminOnly, asyncHandler((req, res) => {
     const id = parseInt(req.params.id);
-    // Check if used in orders? 
-    // Ideally we just hide it (actif=0) but for a real DELETE:
     const count = queryOne('SELECT COUNT(*) as c FROM commande_lignes WHERE produit_id = ?', [id]);
     if (count && count.c > 0) {
         return res.status(400).json({ error: 'Ce produit ne peut pas être supprimé car il a été utilisé dans des commandes. Vous pouvez seulement le désactiver.' });
@@ -283,6 +343,29 @@ router.delete('/:id', authMiddleware, adminOnly, asyncHandler((req, res) => {
     run('DELETE FROM produits WHERE id = ?', [id]);
     logAudit(req.user.id, req.user.nom, 'SUPPRESSION', 'produit', id, `Produit #${id} supprimé`);
     res.json({ success: true });
+}));
+
+// Alertes DLC — produits proches de péremption
+router.get('/dlc/alertes', authMiddleware, asyncHandler((req, res) => {
+    const jours = parseInt(req.query.jours) || 7;
+    const sid = req.user.succursale_id || 1;
+    const today = new Date().toISOString().slice(0, 10);
+    const limitDate = new Date(Date.now() + jours * 864e5).toISOString().slice(0, 10);
+
+    const alertes = queryAll(`
+        SELECT p.id, p.nom, p.dlc, s.quantite,
+               CAST((julianday(p.dlc) - julianday('now')) AS INTEGER) as jours_restants,
+               c.nom as categorie
+        FROM produits p
+        JOIN stock s ON s.produit_id = p.id AND s.succursale_id = ?
+        LEFT JOIN categories c ON p.categorie_id = c.id
+        WHERE p.dlc IS NOT NULL AND p.dlc != ''
+          AND p.dlc <= ? AND p.dlc >= ?
+          AND p.actif = 1 AND s.quantite > 0
+        ORDER BY p.dlc ASC
+    `, [sid, limitDate, today]);
+
+    res.json(alertes);
 }));
 
 module.exports = router;

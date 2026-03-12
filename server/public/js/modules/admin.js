@@ -23,6 +23,7 @@ export const ADMIN = {
     else if (tab === 'remises') this.loadRemises();
     else if (tab === 'depenses') this.loadDepenses();
     else if (tab === 'fournisseurs') this.loadFournisseurs();
+    else if (tab === 'succursales') this.loadSuccursales();
     else if (tab === 'clients') this.loadClients();
     else if (tab === 'parametres') this.loadParametres();
     else if (tab === 'backups') this.loadBackups();
@@ -812,6 +813,147 @@ export const ADMIN = {
       UI.toast('✅ Fournisseur supprimé', 'success');
       this.loadFournisseurs();
     } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }
+  },
+
+  // ════════ SUCCURSALES ════════
+
+  async loadSuccursales() {
+    UI.viewLoading('adminBody');
+    try {
+      const succursales = await api('/succursales');
+      const body = document.getElementById('adminBody');
+      if (!body) return;
+
+      body.innerHTML = `
+        <div class="flex-between mb-16">
+          <p>${succursales.length} succursale(s) au total</p>
+          <button class="btn btn-primary btn-sm" onclick="ADMIN.openSuccursaleForm()">+ Nouvelle Succursale</button>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th><th>Nom</th><th>Ville</th><th>Téléphone</th><th>ICE</th><th>Statut</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${succursales.map(s => `
+                <tr style="${!s.actif ? 'opacity:0.6' : ''}">
+                  <td>#${s.id}</td>
+                  <td><strong>${s.nom}</strong> ${s.id === 1 ? '<span class="badge badge-primary">Principal</span>' : ''}</td>
+                  <td>${s.ville || '—'}</td>
+                  <td>${s.telephone || '—'}</td>
+                  <td>${s.ice || '—'}</td>
+                  <td>${s.actif ? '<span class="badge badge-success">Actif</span>' : '<span class="badge badge-danger">Inactif</span>'}</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline" onclick='ADMIN.openSuccursaleForm(${JSON.stringify(s).replace(/'/g, "&#39;")})'>✏️</button>
+                    ${s.id !== 1 ? `<button class="btn btn-sm ${s.actif ? 'btn-danger' : 'btn-success'}" onclick="ADMIN.toggleSuccursale(${s.id})">${s.actif ? 'Désactiver' : 'Activer'}</button>` : ''}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    } catch (e) {
+      UI.toast('Erreur: ' + e.message, 'error');
+    }
+  },
+
+  openSuccursaleForm(s = null) {
+    let modal = document.getElementById('succursaleFormModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'succursaleFormModal';
+      modal.className = 'modal-overlay';
+      modal.style.display = 'none';
+      document.body.appendChild(modal);
+    }
+    modal.innerHTML = `
+      <div class="modal card" style="max-width:500px;width:95%">
+        <div class="modal-header">
+          <h2 id="succursaleFormTitle">${s ? '✏️ Modifier Succursale' : '🏢 Nouvelle Succursale'}</h2>
+          <button class="btn-icon modal-close" onclick="APP.closeModal('succursaleFormModal')">✕</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="succFormId" value="${s ? s.id : ''}">
+          <div class="form-group">
+            <label>Nom du magasin *</label>
+            <input type="text" id="succFormNom" class="input-full" value="${s ? s.nom : ''}" placeholder="Ex: Boutique Centre-ville">
+          </div>
+          <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><label>Ville</label><input type="text" id="succFormVille" class="input-full" value="${s ? s.ville : ''}"></div>
+            <div><label>Téléphone</label><input type="text" id="succFormTel" class="input-full" value="${s ? s.telephone : ''}"></div>
+          </div>
+          <div class="form-group">
+            <label>Adresse complète</label>
+            <textarea id="succFormAdresse" class="input-full" rows="2">${s ? s.adresse : ''}</textarea>
+          </div>
+          <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><label>Email</label><input type="email" id="succFormEmail" class="input-full" value="${s ? s.email : ''}"></div>
+            <div><label>ICE</label><input type="text" id="succFormIce" class="input-full" value="${s ? s.ice : ''}"></div>
+          </div>
+          ${s && s.id !== 1 ? `
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="checkbox" id="succFormActif" ${s.actif ? 'checked' : ''} style="width:auto"> Actif
+            </label>
+          </div>` : ''}
+          <div class="form-actions" style="margin-top:20px;justify-content:flex-end">
+            <button class="btn" onclick="APP.closeModal('succursaleFormModal')">Annuler</button>
+            <button id="btnSaveSucc" class="btn btn-primary" onclick="ADMIN.saveSuccursale()">✅ Enregistrer</button>
+          </div>
+        </div>
+      </div>
+    `;
+    modal.style.display = 'flex';
+  },
+
+  async saveSuccursale() {
+    const btn = document.getElementById('btnSaveSucc');
+    const id = document.getElementById('succFormId').value;
+    const isEdit = id && id !== '';
+
+    const body = {
+      nom: document.getElementById('succFormNom').value.trim(),
+      ville: document.getElementById('succFormVille').value.trim(),
+      telephone: document.getElementById('succFormTel').value.trim(),
+      adresse: document.getElementById('succFormAdresse').value.trim(),
+      email: document.getElementById('succFormEmail').value.trim(),
+      ice: document.getElementById('succFormIce').value.trim(),
+    };
+    if (!body.nom) return UI.toast('Le nom est requis', 'error');
+
+    const cbActif = document.getElementById('succFormActif');
+    if (cbActif) body.actif = cbActif.checked;
+
+    if (btn) UI.btnLoading(btn, true);
+    try {
+      if (isEdit) {
+        await api(`/succursales/${id}`, { method: 'PUT', body });
+      } else {
+        await api('/succursales', { method: 'POST', body });
+      }
+      UI.toast(isEdit ? 'Succursale modifiée' : 'Succursale créée', 'success');
+      APP.closeModal('succursaleFormModal');
+      this.loadSuccursales();
+    } catch (e) {
+      UI.toast('Erreur: ' + e.message, 'error');
+    } finally {
+      if (btn) UI.btnLoading(btn, false);
+    }
+  },
+
+  async toggleSuccursale(id) {
+    if (id === 1) return; // Impossible de désactiver la #1
+    if (!await UI.confirmDialog('Modifier le statut ?', "Confirmez-vous le changement de statut de cette succursale ?", { danger: true })) return;
+    try {
+      await api(`/succursales/${id}/toggle`, { method: 'PATCH' });
+      UI.toast('Statut modifié avec succès', 'success');
+      this.loadSuccursales();
+    } catch (e) {
+      UI.toast('Erreur: ' + e.message, 'error');
+    }
   },
 
   async loadClients() {

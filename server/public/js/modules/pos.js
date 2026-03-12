@@ -114,12 +114,73 @@ export const POS = {
         }
         APP.closeModal('clientSearchModal');
         this.clientSearchContext = 'pos';
+        // Afficher le bandeau de dette si le client a une ardoise
+        this._showDebtBannerIfNeeded(client);
     },
 
     removeClient() {
         this.selectedClient = null;
         this.setTarif('particulier');
         document.getElementById('cartClient').style.display = 'none';
+        this._hideDebtBanner();
+    },
+
+    // ─── Variantes ──────────────────────────────────────────────────────────
+    async openVariantPicker(parentId, parentNom) {
+        try {
+            const data = await api(`/produits/${parentId}/variantes`);
+            if (!data.variantes || data.variantes.length === 0) {
+                // Pas de variantes → ajouter le parent directement
+                this.addToCart(data.parent);
+                return;
+            }
+            this._showVarianteModal(data.parent, data.variantes);
+        } catch (e) {
+            UI.toast('Erreur chargement variantes: ' + e.message, 'error');
+        }
+    },
+
+    _showVarianteModal(parent, variantes) {
+        const dev = state.params.devise || 'DH';
+        let modal = document.getElementById('varianteModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'varianteModal';
+            modal.className = 'modal-overlay';
+            modal.style.cssText = 'display:none;z-index:5000';
+            document.body.appendChild(modal);
+        }
+
+        modal.innerHTML = `
+          <div class="modal-content" style="max-width:520px;width:95%">
+            <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)">
+              <h3 style="margin:0">🔀 ${parent.nom}</h3>
+              <button class="btn-ghost" onclick="APP.closeModal('varianteModal')" style="font-size:1.3rem">✕</button>
+            </div>
+            <div style="padding:20px">
+              <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px">Sélectionnez une variante :</p>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px">
+                ${variantes.map(v => `
+                  <button onclick="POS._selectVariante(${v.id});APP.closeModal('varianteModal')"
+                    style="background:var(--bg-card);border:2px solid var(--border);border-radius:10px;padding:14px 10px;cursor:pointer;transition:all 0.2s;text-align:center;display:flex;flex-direction:column;gap:4px;align-items:center"
+                    onmouseenter="this.style.borderColor='var(--primary)';this.style.background='var(--primary-light)'"
+                    onmouseleave="this.style.borderColor='var(--border)';this.style.background='var(--bg-card)'">
+                    <span style="font-size:1.3rem">📦</span>
+                    <strong style="font-size:0.9rem">${v.variante_label}</strong>
+                    <span style="color:var(--primary);font-weight:700">${v.prix_ttc.toFixed(2)} ${dev}</span>
+                    <small style="color:${v.stock_quantite <= 3 ? 'var(--danger)' : 'var(--text-muted)'}">${v.stock_quantite <= 0 ? '⚠️ Rupture' : 'Stock: ' + v.stock_quantite}</small>
+                  </button>`).join('')}
+              </div>
+            </div>
+          </div>`;
+
+        modal.style.display = 'flex';
+        this._variantesCache = Object.fromEntries(variantes.map(v => [v.id, v]));
+    },
+
+    _selectVariante(varianteId) {
+        const v = this._variantesCache?.[varianteId];
+        if (v) this.addToCart(v);
     },
 
     // ─── Initialisation ─────────────────────────────────────────────────────

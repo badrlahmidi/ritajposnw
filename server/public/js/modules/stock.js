@@ -340,7 +340,10 @@ export const STOCK = {
           <td><strong style="color:${isLow ? 'var(--danger)' : 'var(--success)'}">${s.quantite}</strong></td>
           <td>${s.seuil_alerte}</td>
           <td>${isLow ? '<span class="badge badge-danger">⚠️ Bas</span>' : '<span class="badge badge-success">✅ OK</span>'}</td>
-          <td><button class="btn btn-sm btn-outline" onclick="STOCK.openAdjust(${s.produit_id}, '${s.produit_nom.replace(/'/g, "\\'")}', ${s.quantite})">📝 Ajuster</button></td>
+          <td>
+            <button class="btn btn-sm btn-outline" onclick="STOCK.openAdjust(${s.produit_id}, '${s.produit_nom.replace(/'/g, "\\'")}', ${s.quantite})" style="margin-right:2px">Ajuster</button>
+            <button class="btn btn-sm btn-danger" onclick="STOCK.openPerte(${s.produit_id}, '${s.produit_nom.replace(/'/g, "\\'")}', ${s.quantite})" title="Déclarer une perte/casse">💥 Perte</button>
+          </td>
         </tr>`;
     }).join('')}</tbody></table></div>`;
   },
@@ -417,6 +420,43 @@ export const STOCK = {
       await api(`/stock/${prodId}`, { method: 'PUT', body: { quantite: qty, motif } });
       UI.toast('✅ Stock ajusté', 'success');
       APP.closeModal('stockAdjustModal');
+      this.load();
+      APP.checkStockAlerts();
+    } catch (e) {
+      UI.toast('Erreur: ' + e.message, 'error');
+    } finally {
+      if (btn) UI.btnLoading(btn, false);
+    }
+  },
+
+  openPerte(prodId, nom, current) {
+    document.getElementById('perteProdId').value = prodId;
+    document.getElementById('perteName').textContent = nom;
+    document.getElementById('perteCurrent').textContent = current;
+    document.getElementById('perteQty').value = 1;
+    document.getElementById('perteQty').max = current;
+    document.getElementById('perteMotifType').value = 'casse';
+    document.getElementById('perteMotifDetail').value = '';
+    document.getElementById('perteModal').style.display = 'flex';
+  },
+
+  async savePerte() {
+    const btn = document.getElementById('btnSavePerte');
+    const prodId = document.getElementById('perteProdId').value;
+    const qty = parseFloat(document.getElementById('perteQty').value);
+    const motifType = document.getElementById('perteMotifType').value;
+    const motifDetail = document.getElementById('perteMotifDetail').value;
+
+    if (qty <= 0) return UI.toast('Quantité invalide', 'error');
+
+    if (btn) UI.btnLoading(btn, true);
+    try {
+      await api('/stock/perte', {
+        method: 'POST',
+        body: { produit_id: prodId, quantite: qty, motif_type: motifType, motif_detail: motifDetail }
+      });
+      UI.toast('✅ Perte enregistrée et stock mis à jour', 'success');
+      APP.closeModal('perteModal');
       this.load();
       APP.checkStockAlerts();
     } catch (e) {

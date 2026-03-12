@@ -74,15 +74,24 @@ export const CatalogModule = {
             const stockBadge = p.stock_quantite <= 0
                 ? '<span class="stock-badge out">Rupture</span>'
                 : `<span class="stock-badge in-stock ${stockClass}">${p.stock_quantite}</span>`;
+
+            // Si le produit a des attributs de variantes en DB ou si un script backend marque ça...
+            // Note: On peut interroger has_variants mais sans ça on cherche variante_attributs > {}
+            const hasVariants = p.variante_attributs && p.variante_attributs !== '{}' && p.variante_attributs.length > 2;
+            const clickAction = hasVariants ? `POS.openVariantPicker(${p.id}, '${p.nom.replace(/'/g, "\\'")}')` : `POS.addToCart(${p.id})`;
+            const variantIndicator = hasVariants ? `<span style="position:absolute;top:5px;right:5px;background:var(--primary);color:#fff;border-radius:10px;padding:2px 6px;font-size:0.7rem;font-weight:700">Options</span>` : '';
+
             return `
-            <div class="product-card" onclick="POS.addToCart(${p.id})" style="--cat-color:${p.categorie_couleur || '#e67e22'}">
+            <div class="product-card" onclick="${clickAction}" style="--cat-color:${p.categorie_couleur || '#e67e22'}">
                 <div class="product-img" style="${imageStyle}">
                     ${!p.image ? `<span class="no-img-icon">📦</span>` : ''}
                     ${stockBadge}
+                    ${variantIndicator}
                 </div>
                 <div class="product-details">
                     <div class="product-name" title="${p.nom}">${p.nom}</div>
                     <div class="product-price-row">
+
                         <span class="product-price">${p.prix_ttc.toFixed(2)} DH</span>
                     </div>
                 </div>

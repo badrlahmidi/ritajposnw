@@ -478,4 +478,109 @@ router.get('/export/pdf', authMiddleware, adminOnly, asyncHandler(async (req, re
     doc.end();
 }));
 
+// ════════ RAPPORT ACHATS FOURNISSEURS ════════
+router.get('/achats', authMiddleware, adminOnly, asyncHandler((req, res) => {
+    const { date_debut, date_fin, fournisseur_id } = req.query;
+    const sid = req.user.succursale_id || 1;
+    const d1 = date_debut || '1970-01-01';
+    const d2 = date_fin || '2099-12-31';
+
+    let query = `
+        SELECT d.id, d.date_depense, f.nom as fournisseur, d.montant, d.description,
+               d.mode_paiement, d.reference_facture,
+               (SELECT COUNT(*) FROM mouvements_stock ms WHERE ms.motif LIKE '%' || f.nom || '%' OR ms.reference = 'DEP-' || d.id) as nb_articles
+        FROM depenses d
+        JOIN fournisseurs f ON d.fournisseur_id = f.id
+        WHERE DATE(d.date_depense) BETWEEN ? AND ?
+          AND d.succursale_id = ?
+          AND d.categorie = 'Achat Marchandises'
+    `;
+    const params = [d1, d2, sid];
+    if (fournisseur_id) { query += ' AND d.fournisseur_id = ?'; params.push(parseInt(fournisseur_id)); }
+    query += ' ORDER BY d.date_depense DESC';
+
+    const achats = queryAll(query, params);
+
+    const summary = queryOne(`
+        SELECT COUNT(*) as nb_achats,
+               COALESCE(SUM(d.montant), 0) as total_achats,
+               COUNT(DISTINCT d.fournisseur_id) as nb_fournisseurs
+        FROM depenses d
+        WHERE DATE(d.date_depense) BETWEEN ? AND ?
+          AND d.succursale_id = ?
+          AND d.categorie = 'Achat Marchandises'
+    `, [d1, d2, sid]);
+
+    const parFournisseur = queryAll(`
+        SELECT f.nom as fournisseur, COUNT(d.id) as nb_achats, SUM(d.montant) as total, MAX(d.date_depense) as derniere_livraison
+        FROM depenses d JOIN fournisseurs f ON d.fournisseur_id = f.id
+        WHERE DATE(d.date_depense) BETWEEN ? AND ?
+          AND d.succursale_id = ?
+          AND d.categorie = 'Achat Marchandises'
+        GROUP BY f.id ORDER BY total DESC
+    `, [d1, d2, sid]);
+
+    res.json({ achats, summary, par_fournisseur: parFournisseur });
+}));
+
+// ════════ EXPORT EXCEL (.xlsx) ════════
+router.get('/export/xlsx', authMiddleware, adminOnly, asyncHandler((req, res) => {
+    const XLSX = require('xlsx');
+    const { type, date_debut, date_fin, utilisateur_id, categorie_id } = req.query;
+    const sid = req.user.succursale_id || 1;
+    const d1 = date_debut || '1970-01-01';
+    const d2 = date_fin || '2099-12-31';
+
+    const wb = XLSX.utils.book_new();
+    let rows = [];
+    let sheetName = 'Rapport';
+
+    if (type === 'synthese') {
+        sheetName = 'Synthèse';
+        const data = queryAll(`SELECT DATE(date_creation) as Jour, COUNT(*) as Commandes, SUM(total) as "Total TTC", SUM(sous_total) as "Total HT", SUM(total_tva) as TVA FROM commandes WHERE DATE(date_creation) BETWEEN ? AND ? AND statut='payee' AND succursale_id=? GROUP BY Jour ORDER BY Jour`, [d1, d2, sid]);
+        rows = data;
+    } else if (type === 'categories') {
+        sheetName = 'Catégories';
+        rows = queryAll(`SELECT cat.nom as Catégorie, COUNT(cl.id) as Articles, SUM(cl.quantite) as Quantité, SUM(cl.sous_total_ttc) as "Total TTC" FROM commande_lignes cl JOIN produits p ON cl.produit_id=p.id JOIN categories cat ON p.categorie_id=cat.id JOIN commandes c ON cl.commande_id=c.id WHERE DATE(c.date_creation) BETWEEN ? AND ? AND c.statut='payee' AND c.succursale_id=? GROUP BY cat.id ORDER BY "Total TTC" DESC`, [d1, d2, sid]);
+    } else if (type === 'utilisateurs') {
+        sheetName = 'Caissiers';
+        rows = queryAll(`SELECT u.nom as Caissier, COUNT(c.id) as Commandes, AVG(c.total) as "Panier Moyen", SUM(c.total) as "Total Ventes" FROM commandes c JOIN utilisateurs u ON c.utilisateur_id=u.id WHERE DATE(c.date_creation) BETWEEN ? AND ? AND c.statut='payee' AND c.succursale_id=? GROUP BY u.id ORDER BY "Total Ventes" DESC`, [d1, d2, sid]);
+    } else if (type === 'paiements') {
+        sheetName = 'Paiements';
+        rows = queryAll(`SELECT mode_paiement as "Mode de Paiement", COUNT(*) as Transactions, AVG(total) as Moyenne, SUM(total) as "Total" FROM commandes WHERE DATE(date_creation) BETWEEN ? AND ? AND statut='payee' AND succursale_id=? GROUP BY mode_paiement ORDER BY "Total" DESC`, [d1, d2, sid]);
+    } else if (type === 'marges') {
+        sheetName = 'Marges';
+        rows = queryAll(`SELECT p.nom as Produit, SUM(cl.quantite) as Qté, SUM(cl.sous_total_ht) as "CA HT", SUM(cl.quantite*p.cout_revient) as "Coût Total", SUM(cl.sous_total_ht-(cl.quantite*p.cout_revient)) as "Marge Brute" FROM commande_lignes cl JOIN produits p ON cl.produit_id=p.id JOIN commandes c ON cl.commande_id=c.id WHERE DATE(c.date_creation) BETWEEN ? AND ? AND c.statut='payee' AND c.succursale_id=? GROUP BY p.id ORDER BY "Marge Brute" DESC`, [d1, d2, sid]);
+    } else if (type === 'credits') {
+        sheetName = 'Crédits';
+        rows = queryAll(`SELECT nom as Client, telephone as Téléphone, solde_credit as "Solde Crédit (DH)" FROM clients WHERE solde_credit > 0 ORDER BY solde_credit DESC`);
+    } else if (type === 'stock-valorisation') {
+        sheetName = 'Stock';
+        rows = queryAll(`SELECT p.nom as Produit, cat.nom as Catégorie, s.quantite as "Stock", p.unite as Unité, p.cout_revient as "P.U Achat", p.prix_ttc as "P.U Vente TTC", (s.quantite*p.prix_ttc) as "Valeur Vente" FROM stock s JOIN produits p ON s.produit_id=p.id LEFT JOIN categories cat ON p.categorie_id=cat.id WHERE s.succursale_id=? AND p.actif=1 ORDER BY "Valeur Vente" DESC`, [sid]);
+    } else if (type === 'stock-alertes') {
+        sheetName = 'Alertes Stock';
+        rows = queryAll(`SELECT p.nom as Produit, cat.nom as Catégorie, s.quantite as "Stock", s.seuil_alerte as "Seuil Alerte", CASE WHEN s.quantite <= 0 THEN 'Rupture' ELSE 'Stock Bas' END as État FROM stock s JOIN produits p ON s.produit_id=p.id LEFT JOIN categories cat ON p.categorie_id=cat.id WHERE s.succursale_id=? AND s.quantite<=s.seuil_alerte AND p.actif=1 ORDER BY s.quantite ASC`, [sid]);
+    } else if (type === 'audit') {
+        sheetName = 'Audit';
+        rows = queryAll(`SELECT date_action as Date, utilisateur_nom as Utilisateur, action as Action, entite as Entité, details as Détails FROM audit_log WHERE DATE(date_action) BETWEEN ? AND ? ORDER BY date_action DESC LIMIT 1000`, [d1, d2]);
+    } else if (type === 'achats') {
+        sheetName = 'Achats Fournisseurs';
+        rows = queryAll(`SELECT d.date_depense as Date, f.nom as Fournisseur, d.montant as Montant, d.mode_paiement as "Mode Paiement", d.description as Description FROM depenses d JOIN fournisseurs f ON d.fournisseur_id=f.id WHERE DATE(d.date_depense) BETWEEN ? AND ? AND d.succursale_id=? AND d.categorie='Achat Marchandises' ORDER BY d.date_depense DESC`, [d1, d2, sid]);
+    } else {
+        return res.status(400).json({ error: 'Type de rapport non supporté' });
+    }
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    // Auto-size columns
+    const colWidths = Object.keys(rows[0] || {}).map(k => ({ wch: Math.max(k.length, 12) }));
+    ws['!cols'] = colWidths;
+
+    XLSX.utils.book_append_sheet(wb, ws, sheetName.substring(0, 31));
+    const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename=rapport_${type}_${d1}_${d2}.xlsx`);
+    res.send(buffer);
+}));
+
 module.exports = router;
