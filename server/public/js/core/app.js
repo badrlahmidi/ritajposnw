@@ -433,6 +433,9 @@ export const APP = {
                 else if (view === 'stock') await STOCK.load();
                 else if (view === 'stats') await STATS.init();
                 else if (view === 'admin') await ADMIN.init();
+
+                // Refresh SVG icons
+                setTimeout(() => { if (window.lucide) window.lucide.createIcons(); }, 150);
             } catch (e) { console.error('Error loading view', e); }
         })();
     },

@@ -116,26 +116,14 @@ export const STATS = {
         <div class="stat-card mini danger"><div class="stat-value">${(s.total_depenses || 0).toFixed(2)} ${dev}</div><div class="stat-label">Dépenses</div></div>
         <div class="stat-card mini ${(s.benefice_brut || 0) >= 0 ? 'success' : 'danger'}"><div class="stat-value">${(s.benefice_brut || 0).toFixed(2)} ${dev}</div><div class="stat-label">Bénéfice Brut</div></div>
       </div>
-      <div class="report-chart-container">
+      <div class="report-chart-container card mt-20" style="padding:20px; background:#fff;">
         <h3 class="mb-16">📈 Évolution des ventes</h3>
-        <div class="hour-chart">${s.ventes_par_heure ? this.renderHourChart(s.ventes_par_heure) : s.ventes_par_jour ? this.renderDayChart(s.ventes_par_jour) : ''}</div>
+        <canvas id="chartEvoVentes" style="max-height: 250px; width:100%"></canvas>
       </div>
       
-      <div class="card mt-20">
+      <div class="card mt-20" style="padding:20px;">
         <h3 class="mb-16">🏆 Top 10 Best Sellers</h3>
-        <div style="display:flex;align-items:flex-end;height:200px;gap:10px;padding:10px 0;margin-bottom:20px;overflow-x:auto">
-            ${(s.top_produits || []).slice(0, 10).map((p, i) => {
-      const max = s.top_produits[0]?.total_montant || 1;
-      const h = Math.max(10, (p.total_montant / max) * 100);
-      const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#34495e', '#16a085', '#d35400', '#7f8c8d', '#c0392b'];
-      return `<div style="flex:1;min-width:60px;display:flex;flex-direction:column;align-items:center;height:100%">
-                    <div style="margin-top:auto;width:100%;background:${colors[i % colors.length]};height:${h}%;border-radius:4px 4px 0 0;position:relative;transition:height 0.3s" title="${p.nom}: ${p.total_montant} DH">
-                        <span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:0.8rem;font-weight:bold">${Math.round(p.total_montant)}</span>
-                    </div>
-                    <div style="margin-top:5px;font-size:0.75rem;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%">${p.nom.substring(0, 8)}</div>
-                </div>`;
-    }).join('') || '<div class="text-muted w-100 text-center" style="align-self:center">Pas de données</div>'}
-        </div>
+        <canvas id="chartTopProduits" style="max-height: 250px; width:100%"></canvas>
       </div>
       <div class="card mt-20">
         <h3 class="mb-16">🏆 Top Produits</h3>
@@ -146,6 +134,9 @@ export const STATS = {
           </table>
         </div>
       </div>`;
+
+    // Initialisation des graphiques
+    setTimeout(() => this.initSyntheseCharts(s), 50);
   },
 
   renderCategories(data, dev, body) {
@@ -387,25 +378,76 @@ export const STATS = {
       </div>`;
   },
 
-  renderHourChart(data) {
+  initSyntheseCharts(data) {
+    if (!window.Chart) return;
 
-    const max = Math.max(...data.map(d => d.montant), 1);
-    return data.map(d => {
-      const h = Math.max(4, (d.montant / max) * 100);
-      return `<div class="hour-bar" style="height:${h}%" title="${d.heure}h: ${parseFloat(d.montant).toFixed(0)} DH (${d.nb} cmd)">
-        <span class="hour-val">${d.nb}</span><span class="hour-label">${d.heure}h</span>
-      </div>`;
-    }).join('');
-  },
+    // Évolution des Ventes
+    const ctxEvo = document.getElementById('chartEvoVentes');
+    if (ctxEvo) {
+      let labels = [];
+      let montants = [];
+      let title = "Évolution " + (data.ventes_par_heure ? "par Heure" : "par Jour");
 
-  renderDayChart(data) {
-    const max = Math.max(...data.map(d => d.montant), 1);
-    return data.map(d => {
-      const h = Math.max(4, (d.montant / max) * 100);
-      return `<div class="hour-bar" style="height:${h}%" title="${d.jour}: ${parseFloat(d.montant).toFixed(0)} DH">
-        <span class="hour-val">${d.nb}</span><span class="hour-label">${d.jour.slice(5)}</span>
-      </div>`;
-    }).join('');
+      const raw = data.ventes_par_heure || data.ventes_par_jour || [];
+      raw.forEach(r => {
+        labels.push(r.heure != null ? r.heure + "h" : (r.jour || ""));
+        montants.push(r.montant || 0);
+      });
+
+      new Chart(ctxEvo, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Chiffre d\'Affaires (DH)',
+            data: montants,
+            borderColor: '#d35400',
+            backgroundColor: 'rgba(211, 84, 0, 0.1)',
+            fill: true,
+            tension: 0.3,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    // Top 10 Best Sellers
+    const ctxTop = document.getElementById('chartTopProduits');
+    if (ctxTop && data.top_produits && data.top_produits.length > 0) {
+      const top = data.top_produits.slice(0, 10);
+      new Chart(ctxTop, {
+        type: 'bar',
+        data: {
+          labels: top.map(p => p.nom.length > 15 ? p.nom.substring(0, 15) + '...' : p.nom),
+          datasets: [{
+            label: 'Total Ventes (DH)',
+            data: top.map(p => p.total_montant),
+            backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#34495e', '#16a085', '#d35400', '#7f8c8d', '#c0392b'],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
   },
 
   exportCSV() {
