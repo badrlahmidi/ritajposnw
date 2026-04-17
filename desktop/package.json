@@ -1,0 +1,75 @@
+{
+  "name": "ritaj-smart-pos-desktop",
+  "version": "5.0.0",
+  "description": "RITAJ SMART POS — Application Desktop Tactile (Café & Restaurant)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "NODE_ENV=development electron .",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "build:mac": "electron-builder --mac",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "keywords": ["pos", "cafe", "restaurant", "touchscreen", "desktop"],
+  "author": "RITAJ SMART POS",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^30.5.1",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "build": {
+    "appId": "com.ritaj.smartpos",
+    "productName": "RITAJ Smart POS",
+    "copyright": "Copyright © 2026 RITAJ Smart POS",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "extraResources": [
+      {
+        "from": "../server",
+        "to": "server",
+        "filter": [
+          "**/*",
+          "!node_modules/**",
+          "!tests/**",
+          "!backups/**",
+          "!*.db",
+          "!*.db-shm",
+          "!*.db-wal"
+        ]
+      }
+    ],
+    "files": [
+      "main.js",
+      "preload.js",
+      "build/**"
+    ],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "icon": "build/icon.png",
+      "category": "Office"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "RITAJ Smart POS"
+    }
+  }
+}

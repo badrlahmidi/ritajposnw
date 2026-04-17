@@ -333,7 +333,7 @@ export const APP = {
             headerSub.textContent = `POS v4.1 — ${state.params.ville || ''}`;
         }
 
-        const serviceTypes = ['restaurant', 'cafe', 'boulangerie', 'patisserie', 'snack', 'pizzeria', 'fast_food'];
+        const serviceTypes = ['restaurant', 'restaurant_service', 'cafe', 'cafe_classique', 'salon_the', 'fast_food', 'snack', 'pizzeria'];
         const isService = state.params.type_commerce && serviceTypes.includes(state.params.type_commerce) && state.params.feature_tables === '1';
 
         const setDisplay = (cls, show) => {

@@ -1,31 +1,60 @@
 # RITAJ SMART POS
 
-**Solution Point de Vente Multi-Métier pour le marché marocain.**
+**Solution Point de Vente — Café & Restaurant — Application Desktop Tactile.**
 
-Version 4.1 | 2026
+## Version 5.0 — Édition Café & Restaurant (2026)
+
+> **Pivot v5.0** : la solution est désormais dédiée exclusivement aux établissements **Café & Restaurant**.
+> Les profils Boulangerie et Superette ont été retirés. Six profils spécialisés sont disponibles :
+> `café`, `café classique`, `salon de thé`, `restaurant`, `restaurant service table`, `fast-food / snack`.
 
 ---
 
-## Fonctionnalités
+## Fonctionnalités v5.0
 
-- **Multi-métier** : Profils préconfigurés pour Café, Restaurant, Boulangerie, Superette
-- **TVA marocaine** : Taux conformes (0%, 7%, 10%, 14%, 20%)
-- **ICE** : Identifiant Commun de l'Entreprise sur chaque ticket
-- **Gestion de caisse** : Ouverture/fermeture, fond de caisse, écarts
-- **Stock** : Suivi en temps réel, alertes de seuil, mouvements
-- **Clients & Fidélité** : Programme de points, historique d'achats
-- **Remises & Promotions** : Pourcentage ou montant fixe
-- **Rapports** : Statistiques journalières et par période, top produits
-- **Rôles** : Admin, Manager, Caissier avec permissions distinctes
-- **Thème sombre** : Interface moderne avec dark mode
-- **Backup automatique** : Sauvegarde toutes les 4 heures
+### ☕ Café & Restaurant
+- **Profils ciblés** : 6 variantes de la famille Café/Restaurant, configurées pour le marché marocain
+- **Gestion des tables** : plan de salle drag-and-drop, statuts (libre/occupée/réservée/à nettoyer)
+- **Salles configurables** : Salle, Terrasse, Bar, VIP…
+- **KDS — Kitchen Display System** : affichage cuisine temps réel, colonnes par cours (entrées/plats/desserts/boissons)
+- **Envoi cuisine** : les lignes sont figées et envoyées au KDS en un clic
+- **Split addition** : par lignes sélectionnées ou par montant
+- **Transfert de table** : déplacer une commande vers une autre table
+- **Couverts** : gestion du nombre de couverts par table
+- **Réservations** : calendrier, CRUD, vue par date
+- **Modifiers** : options personnalisables sur les produits (sans oignons, supplément fromage…)
+- **Happy Hours** : remises automatiques par plage horaire
+
+### 🖥️ Application Desktop Tactile (Electron)
+- **Electron 30+** : remplace l'ancien NW.js, meilleur support tactile Windows 10/11
+- **Plein écran kiosque** : démarrage automatique en fullscreen, verrouillage optionnel
+- **Multi-écran** : KDS sur 2e écran automatiquement
+- **Impression thermique** : ESC/POS (Epson TM-T20, Xprinter, Star TSP143) via réseau ou USB
+- **Auto-update** : mise à jour silencieuse via electron-updater
+- **Offline** : IndexedDB + Service Worker, rejeu automatique des commandes
+
+### 🔒 Backend amélioré
+- **WebSocket** temps réel (`ws://localhost:PORT/ws`) pour KDS et plan de salle
+- **API standardisée** : `{ success, data }` ou `{ success, error: { code, message } }`
+- **Sécurité renforcée** : bcrypt 12 rounds, Helmet CSP, rate-limit 300 req/min/IP
+- **TVA marocaine** : 0%, 7%, 10%, 14%, 20% — ICE, IF, RC sur les tickets
+- **Export fiscal DGI** : conforme `SPECIFICATIONS-DGI.md`
+- **Backup** : toutes les 4h avec rotation (30 fichiers + archives 10 ans)
+
+### 🎨 Frontend tactile
+- **Design tokens** : cibles ≥ 56 px (actions primaires ≥ 72 px)
+- **Gestes** : swipe sur ligne → actions, long-press → quantité rapide
+- **Clavier virtuel** intégré (numérique + AZERTY FR/AR)
+- **i18n** : Français (défaut), Arabe (RTL), Anglais
+- **PWA** : Service Worker, offline mode, Lighthouse ≥ 90
 
 ---
 
 ## Prérequis
 
 - **Node.js** v18+ (recommandé : v20 LTS ou supérieur)
-- **Windows** 10/11 (pour la version desktop NW.js)
+- **Windows** 10/11 ou Linux (pour la version desktop Electron)
+- **npm** v9+
 
 ---
 

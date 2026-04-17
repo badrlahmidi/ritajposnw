@@ -282,4 +282,145 @@ router.put('/:id/annuler', authMiddleware, adminOnly, asyncHandler((req, res) =>
     res.json({ success: true });
 }));
 
+// ═══════════════════ EXTENSIONS RESTAURANT ═══════════════════
+
+const { broadcast } = require('../services/realtime');
+
+/**
+ * POST /api/commandes/:id/envoyer-cuisine
+ * Fige les lignes en attente, passe statut_service à 'envoyee_cuisine'
+ * et broadcase l'événement vers le KDS.
+ */
+router.post('/:id/envoyer-cuisine', authMiddleware, asyncHandler((req, res) => {
+    const { id } = req.params;
+    const cmd = queryOne('SELECT * FROM commandes WHERE id = ?', [id]);
+    if (!cmd) return res.status(404).json({ error: 'Commande introuvable' });
+    if (cmd.statut !== 'en_cours' && cmd.statut !== 'ouverte') {
+        return res.status(400).json({ error: 'La commande n\'est pas en cours' });
+    }
+
+    const now = new Date().toISOString();
+    run(
+        "UPDATE commande_lignes SET statut_ligne='en_attente', envoyee_at=? WHERE commande_id=? AND (statut_ligne IS NULL OR statut_ligne='en_attente')",
+        [now, id]
+    );
+    run("UPDATE commandes SET statut_service='envoyee_cuisine' WHERE id=?", [id]);
+
+    logAudit(req.user.id, req.user.nom, 'ENVOI_CUISINE', 'commande', Number(id), `Commande envoyée en cuisine`);
+    broadcast('commande.envoyee_cuisine', { commande_id: Number(id), envoyee_at: now });
+
+    res.json({ success: true, commande_id: Number(id) });
+}));
+
+/**
+ * POST /api/commandes/:id/split
+ * Scinde une addition.
+ * Body: { mode: 'lignes'|'montant', lignes_ids?: [...], montant?: number }
+ */
+router.post('/:id/split', authMiddleware, asyncHandler((req, res) => {
+    const { id } = req.params;
+    const { mode, lignes_ids, montant } = req.body;
+    const cmd = queryOne('SELECT * FROM commandes WHERE id = ?', [id]);
+    if (!cmd) return res.status(404).json({ error: 'Commande introuvable' });
+
+    if (mode === 'lignes' && Array.isArray(lignes_ids) && lignes_ids.length > 0) {
+        // Crée une nouvelle commande pour les lignes sélectionnées
+        const result = run(
+            `INSERT INTO commandes (numero, statut, type_commande, table_id, serveur_id, nb_couverts, statut_service, split_parent_id, succursale_id)
+             VALUES (?, 'en_cours', ?, ?, ?, 0, 'ouverte', ?, ?)`,
+            [
+                `${cmd.numero}-SPLIT-${Date.now()}`,
+                cmd.type_commande,
+                cmd.table_id,
+                cmd.serveur_id,
+                id,
+                cmd.succursale_id,
+            ]
+        );
+        const newId = result.lastInsertRowid;
+        for (const lid of lignes_ids) {
+            run('UPDATE commande_lignes SET commande_id=? WHERE id=? AND commande_id=?', [newId, lid, id]);
+        }
+        // Recalcul totaux (simplifié — les triggers DB ou le service prendront le relais)
+        broadcast('commande.split', { original_id: Number(id), new_id: newId });
+        res.json({ success: true, new_commande_id: newId });
+
+    } else if (mode === 'montant' && montant > 0) {
+        // Split par montant : crée une commande de régularisation
+        const result = run(
+            `INSERT INTO commandes (numero, statut, type_commande, table_id, statut_service, split_parent_id, succursale_id, total_ttc)
+             VALUES (?, 'en_cours', ?, ?, 'ouverte', ?, ?, ?)`,
+            [`${cmd.numero}-PART-${Date.now()}`, cmd.type_commande, cmd.table_id, id, cmd.succursale_id, montant]
+        );
+        broadcast('commande.split', { original_id: Number(id), new_id: result.lastInsertRowid });
+        res.json({ success: true, new_commande_id: result.lastInsertRowid });
+
+    } else {
+        return res.status(400).json({ error: 'Mode de split invalide. Utiliser mode=lignes avec lignes_ids, ou mode=montant avec montant.' });
+    }
+}));
+
+/**
+ * POST /api/commandes/:id/transfert-table
+ * Body: { nouvelle_table_id: number }
+ */
+router.post('/:id/transfert-table', authMiddleware, asyncHandler((req, res) => {
+    const { id } = req.params;
+    const { nouvelle_table_id } = req.body;
+    if (!nouvelle_table_id) return res.status(400).json({ error: 'nouvelle_table_id requis' });
+
+    const cmd = queryOne('SELECT * FROM commandes WHERE id = ?', [id]);
+    if (!cmd) return res.status(404).json({ error: 'Commande introuvable' });
+
+    const ancienneTable = cmd.table_id;
+    run('UPDATE commandes SET table_id=? WHERE id=?', [nouvelle_table_id, id]);
+
+    // Libérer ancienne table si plus aucune commande active
+    if (ancienneTable) {
+        const still = queryOne(
+            "SELECT COUNT(*) AS c FROM commandes WHERE table_id=? AND statut_service IN ('ouverte','envoyee_cuisine','servie')",
+            [ancienneTable]
+        );
+        if (still && still.c === 0) {
+            run("UPDATE tables SET statut='libre' WHERE id=?", [ancienneTable]);
+        }
+    }
+    run("UPDATE tables SET statut='occupee' WHERE id=?", [nouvelle_table_id]);
+
+    broadcast('commande.transfert', { commande_id: Number(id), ancienne_table: ancienneTable, nouvelle_table: nouvelle_table_id });
+    logAudit(req.user.id, req.user.nom, 'TRANSFERT_TABLE', 'commande', Number(id),
+        `Transfert table ${ancienneTable} → ${nouvelle_table_id}`);
+    res.json({ success: true });
+}));
+
+/**
+ * POST /api/commandes/:id/ajouter-couvert
+ */
+router.post('/:id/ajouter-couvert', authMiddleware, asyncHandler((req, res) => {
+    const { id } = req.params;
+    run('UPDATE commandes SET nb_couverts = nb_couverts + 1 WHERE id=?', [id]);
+    const cmd = queryOne('SELECT id, nb_couverts FROM commandes WHERE id=?', [id]);
+    if (!cmd) return res.status(404).json({ error: 'Commande introuvable' });
+    broadcast('commande.updated', { commande_id: Number(id), nb_couverts: cmd.nb_couverts });
+    res.json({ success: true, nb_couverts: cmd.nb_couverts });
+}));
+
+/**
+ * PATCH /api/commandes/lignes/:id/statut
+ * La cuisine ou le serveur change le statut d'une ligne.
+ */
+router.patch('/lignes/:id/statut', authMiddleware, asyncHandler((req, res) => {
+    const { id } = req.params;
+    const { statut } = req.body;
+    const VALID = ['en_attente', 'preparee', 'servie', 'annulee'];
+    if (!VALID.includes(statut)) return res.status(400).json({ error: 'Statut invalide' });
+
+    const ligne = queryOne('SELECT * FROM commande_lignes WHERE id=?', [id]);
+    if (!ligne) return res.status(404).json({ error: 'Ligne introuvable' });
+
+    run('UPDATE commande_lignes SET statut_ligne=? WHERE id=?', [statut, id]);
+    broadcast('ligne.prete', { ligne_id: Number(id), statut, commande_id: ligne.commande_id });
+    res.json({ success: true, id: Number(id), statut });
+}));
+
 module.exports = router;

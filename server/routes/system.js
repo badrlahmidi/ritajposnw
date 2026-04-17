@@ -131,17 +131,8 @@ router.post('/admin/reset-database', authMiddleware, adminStrict, asyncHandler((
         run("INSERT INTO categories (nom, icone, couleur, ordre, actif) VALUES ('Boissons', '🥤', '#3498db', 4, 1)");
         run("INSERT INTO tables_restaurant (numero, zone, capacite, position_x, position_y) VALUES ('101', 'salle', 4, 100, 100), ('102', 'salle', 2, 300, 100), ('201', 'terrasse', 4, 100, 100)");
 
-    } else if (mode === 'retail') {
-        run("INSERT INTO categories (nom, icone, couleur, ordre, actif) VALUES ('Fruits & Légumes', '🍎', '#2ecc71', 1, 1)");
-        run("INSERT INTO categories (nom, icone, couleur, ordre, actif) VALUES ('Épicerie', '🥫', '#f1c40f', 2, 1)");
-        run("INSERT INTO categories (nom, icone, couleur, ordre, actif) VALUES ('Produits Frais', '🧀', '#3498db', 3, 1)");
-        run("INSERT INTO categories (nom, icone, couleur, ordre, actif) VALUES ('Non-Alimentaire', '🧼', '#95a5a6', 4, 1)");
-
-        run("INSERT OR REPLACE INTO parametres (cle, valeur) VALUES ('type_commerce', 'superette')");
-        run("INSERT OR REPLACE INTO parametres (cle, valeur) VALUES ('types_commande', '[\"standard\"]')");
-        run("INSERT OR REPLACE INTO parametres (cle, valeur) VALUES ('feature_sur_place', '0')");
-        run("INSERT OR REPLACE INTO parametres (cle, valeur) VALUES ('feature_emporter', '0')");
-        run("INSERT OR REPLACE INTO parametres (cle, valeur) VALUES ('feature_livraison', '0')");
+    } else {
+        return res.status(400).json({ error: `Mode '${mode}' non supporté. Seul le mode 'restaurant' est accepté pour la réinitialisation.` });
     }
 
     logAudit(req.user.id, req.user.nom, 'RESET_DB', 'systeme', 0, `Base réinitialisée (Mode: ${mode})`);
