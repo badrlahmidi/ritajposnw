@@ -44,6 +44,10 @@ router.post('/message', authMiddleware, asyncHandler((req, res) => {
   const { message, duration_ms = 10000 } = req.body;
   if (!message) return fail(res, 400, 'MISSING_MESSAGE', 'Message requis');
 
+  // Plafonner la durée pour éviter les timers excessivement longs (max 5 min)
+  const MAX_DURATION_MS = 300_000;
+  const safeDuration = Math.min(Math.max(0, Number(duration_ms) || 0), MAX_DURATION_MS);
+
   _displayState = {
     mode: 'message',
     message,
@@ -54,12 +58,12 @@ router.post('/message', authMiddleware, asyncHandler((req, res) => {
 
   broadcast('display.updated', _displayState);
 
-  // Retour en idle après duration_ms
-  if (duration_ms > 0) {
+  // Retour en idle après safeDuration
+  if (safeDuration > 0) {
     setTimeout(() => {
       _displayState = { mode: 'idle', message: null, commande: null, total: null, updated_at: new Date().toISOString() };
       broadcast('display.updated', _displayState);
-    }, duration_ms);
+    }, safeDuration);
   }
 
   return ok(res, _displayState);

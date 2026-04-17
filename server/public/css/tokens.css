@@ -56,6 +56,7 @@
   --touch-target-min:     56px;   /* boutons standard */
   --touch-target-primary: 72px;   /* numpad, paiement, actions CTA */
   --touch-target-icon:    48px;   /* icônes / boutons secondaires */
+  --touch-feedback-scale: 0.93;   /* compression légère à l'appui tactile — feedback visuel */
 
   /* ── Rayons ─────────────────────────────────────────────────── */
   --radius-sm:   6px;
@@ -216,5 +217,5 @@ button:active, [role="button"]:active {
 }
 .vkeyboard-key:active {
   background: var(--color-primary);
-  transform: scale(0.93); /* légère compression tactile — feedback visuel sans saut */
+  transform: scale(var(--touch-feedback-scale));
 }

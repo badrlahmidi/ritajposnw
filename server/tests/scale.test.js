@@ -182,8 +182,8 @@ describe('getCurrentWeight', () => {
       expect(w.kg).toBeGreaterThan(0);
       expect(w.stable).toBe(true);
     } else {
-      // Mode disconnected ou serial sans port — on vérifie juste la structure
-      expect(w).toHaveProperty('kg');
+      // Mode disconnected ou serial sans port — kg est null ou un nombre
+      expect(typeof w.kg === 'number' || w.kg === null).toBe(true);
     }
   });
 });

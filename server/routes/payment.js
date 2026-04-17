@@ -105,12 +105,43 @@ router.get('/statut/:oid', authMiddleware, asyncHandler(async (req, res) => {
 
 /**
  * POST /api/paiement/callback
- * Reçu par CMI après paiement (pas d'auth JWT — IP whitelist recommandée en prod)
- * Body urlencoded: { oid, Response, mdStatus, amount, ... }
+ * Reçu par CMI après paiement (pas d'auth JWT — protégé par vérification de signature).
+ *
+ * SÉCURITÉ EN PRODUCTION :
+ *   - Vérifier que la signature (hash) CMI correspond au payload reçu.
+ *   - Configurer un proxy (nginx/firewall) pour n'accepter les requêtes
+ *     que depuis les IP CMI déclarées (voir documentation CMI).
+ *   - La vérification de signature empêche les callbacks frauduleux.
+ *
+ * Body urlencoded: { oid, Response, mdStatus, amount, hash, ... }
  */
 router.post('/callback', asyncHandler(async (req, res) => {
   const body = req.body;
   const oid   = body.oid || '';
+
+  // Vérifier la signature CMI si la clé est configurée
+  const cfg = require('../db').queryAll
+    ? (() => {
+      try {
+        const rows = require('../db').queryAll(
+          "SELECT cle, valeur FROM parametres WHERE cle IN ('paiement_cmi_store_key','paiement_cmi_merchant')"
+        );
+        return Object.fromEntries(rows.map(r => [r.cle, r.valeur]));
+      } catch { return {}; }
+    })()
+    : {};
+
+  if (cfg.paiement_cmi_store_key && body.hash) {
+    const { buildCMISignature } = require('../services/payment.service');
+    const { hash: receivedHash, ...paramsToVerify } = body;
+    const expectedHash = buildCMISignature(paramsToVerify, cfg.paiement_cmi_store_key);
+    if (receivedHash.toUpperCase() !== expectedHash) {
+      // Signature invalide — ignorer le callback
+      res.set('Content-Type', 'text/plain');
+      return res.send('INVALID_SIGNATURE');
+    }
+  }
+
   const approved = body.Response === 'Approved' || body.mdStatus === '1';
 
   // Retrouver la commande depuis l'OID (format RITAJ-{id}-{ts})

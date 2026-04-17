@@ -395,11 +395,22 @@
         (cmd.lignes || []).forEach(l => {
           const div = document.createElement('div');
           div.className = 'ticket-line';
-          div.innerHTML = `
-            <span class="line-qty">${l.quantite}</span>
-            <span class="line-name">${escapeHtml(l.produit_nom || l.nom || '?')}</span>
-            <span class="line-price">${formatMontant(l.total_ligne)}</span>
-          `;
+
+          const qtySpan = document.createElement('span');
+          qtySpan.className = 'line-qty';
+          qtySpan.textContent = String(l.quantite);
+
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'line-name';
+          nameSpan.textContent = l.produit_nom || l.nom || '?';
+
+          const priceSpan = document.createElement('span');
+          priceSpan.className = 'line-price';
+          priceSpan.textContent = formatMontant(l.total_ligne);
+
+          div.appendChild(qtySpan);
+          div.appendChild(nameSpan);
+          div.appendChild(priceSpan);
           container.appendChild(div);
         });
         document.getElementById('ticket-total').textContent = formatMontant(state.total);
@@ -423,7 +434,8 @@
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   // ── Charger la config commerce ────────────────────────────────
