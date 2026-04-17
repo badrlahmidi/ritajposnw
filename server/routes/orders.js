@@ -289,7 +289,7 @@ const { broadcast } = require('../services/realtime');
 /**
  * POST /api/commandes/:id/envoyer-cuisine
  * Fige les lignes en attente, passe statut_service à 'envoyee_cuisine'
- * et broadcase l'événement vers le KDS.
+ * et broadcast l'événement vers le KDS.
  */
 router.post('/:id/envoyer-cuisine', authMiddleware, asyncHandler((req, res) => {
     const { id } = req.params;

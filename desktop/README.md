@@ -3,7 +3,7 @@
 ## Installation développement
 
 ```bash
-# Prérequis : Node.js 18+
+# Prérequis : Node.js v20 LTS+ (minimum v18)
 
 # 1. Installer les dépendances serveur
 cd server && npm install

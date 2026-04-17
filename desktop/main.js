@@ -17,7 +17,7 @@ const SERVER_PORT = process.env.PORT || 3000;
 const BASE_PATH = '/pos';
 const SERVER_URL = `http://localhost:${SERVER_PORT}${BASE_PATH}`;
 const IS_DEV = process.env.NODE_ENV === 'development';
-const KIOSK_MODE = process.env.KIOSK !== 'false'; // actif par défaut
+const KIOSK_MODE = process.env.KIOSK !== '0' && process.env.KIOSK !== 'false' && process.env.KIOSK !== 'no'; // actif par défaut
 
 // ─── Variables globales ───────────────────────────────────────────────────────
 let mainWindow = null;

@@ -216,5 +216,5 @@ button:active, [role="button"]:active {
 }
 .vkeyboard-key:active {
   background: var(--color-primary);
-  transform: scale(0.93);
+  transform: scale(0.93); /* légère compression tactile — feedback visuel sans saut */
 }
