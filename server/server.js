@@ -38,6 +38,10 @@ const succursalesRoutes = require('./routes/succursales');
 const tablesRoutes = require('./routes/tables');
 const kitchenRoutes = require('./routes/kitchen');
 const reservationsRoutes = require('./routes/reservations');
+const printingRoutes = require('./routes/printing');
+const paymentRoutes = require('./routes/payment');
+const scaleRoutes = require('./routes/scale');
+const displayRoutes = require('./routes/display');
 
 const app = express();
 const { PORT, BASE_PATH } = config;
@@ -102,6 +106,10 @@ apiRouter.use('/succursales', succursalesRoutes);
 apiRouter.use('/tables', tablesRoutes);
 apiRouter.use('/cuisine', kitchenRoutes);
 apiRouter.use('/reservations', reservationsRoutes);
+apiRouter.use('/print', printingRoutes);
+apiRouter.use('/paiement', paymentRoutes);
+apiRouter.use('/balance', scaleRoutes);
+apiRouter.use('/afficheur', displayRoutes);
 
 // System routes mount at root of API (handles /setup, /parametres, /system, /backup, /audit)
 apiRouter.use('/', systemRoutes);
@@ -109,6 +117,11 @@ apiRouter.use('/', systemRoutes);
 // ═══════════════════ FALLBACK & ERRORS ═══════════════════
 
 app.use(`${BASE_PATH}/api`, apiRouter);
+
+// Page dédiée afficheur client (ne pas renvoyer vers index.html)
+app.get(`${BASE_PATH}/customer-display.html`, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/customer-display.html'));
+});
 
 // Set proper fallback for the SPA (Vue/React or vanilla routing)
 app.get(`${BASE_PATH}*`, (req, res) => {

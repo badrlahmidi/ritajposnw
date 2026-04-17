@@ -20,6 +20,9 @@ contextBridge.exposeInMainWorld('ritaj', {
   /** Ouvrir le KDS sur le 2e écran */
   openKDS: () => ipcRenderer.invoke('app:open-kds'),
 
+  /** Ouvrir l'afficheur client sur un écran supplémentaire */
+  openCustomerDisplay: () => ipcRenderer.invoke('app:open-customer-display'),
+
   /** Chemin du dossier backups */
   getBackupPath: () => ipcRenderer.invoke('app:backup-path'),
 

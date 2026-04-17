@@ -22,6 +22,7 @@ const KIOSK_MODE = process.env.KIOSK !== '0' && process.env.KIOSK !== 'false' &&
 // ─── Variables globales ───────────────────────────────────────────────────────
 let mainWindow = null;
 let kdsWindow = null;
+let customerDisplayWindow = null;
 let serverProcess = null;
 let serverReady = false;
 
@@ -118,6 +119,40 @@ function createKDSWindow() {
   kdsWindow.on('closed', () => { kdsWindow = null; });
 }
 
+// ─── Créer la fenêtre Afficheur Client (Customer Display) ─────────────────────
+/**
+ * Ouvre l'afficheur client sur le 3e écran (ou 2e si pas de KDS).
+ * Priorité d'écrans : principal=0, KDS=1, afficheur=2 (ou 1 si pas de KDS).
+ */
+function createCustomerDisplayWindow() {
+  const displays = screen.getAllDisplays();
+  // Choisir l'écran disponible (3e si dispo, sinon 2e, sinon on n'ouvre pas)
+  const targetIndex = displays.length >= 3 ? 2 : (displays.length >= 2 ? 1 : -1);
+  if (targetIndex < 0) return;
+
+  // Éviter de superposer avec la fenêtre KDS
+  if (kdsWindow && targetIndex === 1) return;
+
+  const targetDisplay = displays[targetIndex];
+  const { x, y, width, height } = targetDisplay.workArea;
+
+  customerDisplayWindow = new BrowserWindow({
+    x, y, width, height,
+    fullscreen: true,
+    autoHideMenuBar: true,
+    backgroundColor: '#0a0e1a',
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+      // Pas de preload — page publique sans IPC
+    },
+    title: 'Afficheur Client',
+  });
+
+  customerDisplayWindow.loadURL(`${SERVER_URL.replace(/\/pos$/, '')}/pos/customer-display.html`);
+  customerDisplayWindow.on('closed', () => { customerDisplayWindow = null; });
+}
+
 // ─── Verrouillage kiosque (optionnel) ─────────────────────────────────────────
 function registerKioskShortcuts() {
   if (!KIOSK_MODE || IS_DEV) return;
@@ -132,6 +167,7 @@ ipcMain.handle('app:fullscreen', () => {
   if (mainWindow) mainWindow.setFullScreen(!mainWindow.isFullScreen());
 });
 ipcMain.handle('app:open-kds', createKDSWindow);
+ipcMain.handle('app:open-customer-display', createCustomerDisplayWindow);
 ipcMain.handle('app:backup-path', () => {
   return IS_DEV
     ? path.join(__dirname, '..', 'server', 'backups')
@@ -152,6 +188,7 @@ app.whenReady().then(async () => {
 
   createMainWindow();
   createKDSWindow();
+  createCustomerDisplayWindow();
   registerKioskShortcuts();
 
   if (!IS_DEV) {
