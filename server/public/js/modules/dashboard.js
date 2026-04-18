@@ -51,7 +51,7 @@ export const DASHBOARD = {
                         ${warning > 0 ? `<span style="color:#e67e22;font-weight:600">🟡 ${warning} à surveiller</span>` : ''}
                     </div>
                 </div>
-                <button class="btn btn-sm btn-outline" onclick="APP.enterMainApp('stock');setTimeout(()=>STOCK.showAlertesDLC(),300)" style="white-space:nowrap">Voir →</button>
+                <button class="btn btn-sm btn-outline" onclick="APP.navigate('/stock/dlc')" style="white-space:nowrap">Voir →</button>
             `;
         } catch (e) {
             widget.style.display = 'none';
@@ -82,23 +82,23 @@ export const DASHBOARD = {
                     <div class="dash-alert-title">${nb} client(s) avec ardoise</div>
                     <div class="dash-alert-sub"><span style="color:#e74c3c;font-weight:700">${total.toFixed(2)} DH</span> en encours total</div>
                 </div>
-                <button class="btn btn-sm btn-outline" onclick="APP.enterMainApp('stats');setTimeout(()=>STATS.switchReport('credits'),300)" style="white-space:nowrap">Voir →</button>
+                <button class="btn btn-sm btn-outline" onclick="APP.navigate('/stats/credits')" style="white-space:nowrap">Voir →</button>
             `;
         } catch (e) {
             widget.style.display = 'none';
         }
     },
 
-    goToPOS() { APP.enterMainApp('pos'); },
-    goToHistory() { APP.enterMainApp('history'); },
-    goToProducts() { APP.enterMainApp('admin'); setTimeout(() => ADMIN.switchTab('produits'), 100); },
-    goToStock() { APP.enterMainApp('stock'); },
-    goToClients() { APP.enterMainApp('clients'); },
-    goToStats() { APP.enterMainApp('stats'); },
-    goToAdmin() { APP.enterMainApp('admin'); },
+    goToPOS() { APP.navigate('/pos'); },
+    goToHistory() { APP.navigate('/history'); },
+    goToProducts() { APP.navigate('/admin/produits'); },
+    goToStock() { APP.navigate('/stock'); },
+    goToClients() { APP.navigate('/clients'); },
+    goToStats() { APP.navigate('/stats'); },
+    goToAdmin() { APP.navigate('/admin'); },
 
     openCaisseModal() {
-        APP.enterMainApp('pos');
+        APP.navigate('/pos');
         setTimeout(() => APP.openCaisseModal(), 300);
     },
 };

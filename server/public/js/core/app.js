@@ -14,9 +14,11 @@ import { NUMPAD } from '../modules/numpad.js';
 import { SHORTCUTS } from '../modules/shortcuts.js';
 import { KDS } from '../modules/kds.js';
 import { TABLES } from '../modules/tables.js';
+import { LAUNCHER } from '../modules/launcher.js';
 
 // Expose modules to global scope for HTML event handlers
 window.POS = POS;
+window.LAUNCHER = LAUNCHER;
 window.DASHBOARD = DASHBOARD;
 window.HISTORY = HISTORY;
 window.CLIENTS = CLIENTS;
@@ -101,6 +103,139 @@ export const APP = {
     },
 
     currentView: 'pos',
+    currentPath: '/dashboard',
+
+    /* ════════ ROUTER (hash-based) ════════ */
+    _routeTitles: {
+        '/dashboard': 'Accueil',
+        '/pos': 'Caisse',
+        '/history': 'Commandes',
+        '/clients': 'Clients',
+        '/stock': 'Stock',
+        '/stock/dlc': 'Alertes DLC',
+        '/stats': 'Rapports',
+        '/admin': 'Administration',
+        '/livraison': 'Livraison',
+        '/tables': 'Tables',
+        '/kds': 'Cuisine',
+    },
+
+    // view requirements: role allowed list (undefined => any authenticated user)
+    _viewRoles: {
+        stock: ['admin', 'manager'],
+        stats: ['admin', 'manager'],
+        admin: ['admin', 'manager'],
+        kds: ['admin', 'manager'],
+    },
+
+    _parsePath(hash) {
+        const raw = (hash || '').replace(/^#/, '').trim();
+        if (!raw || raw === '/') return { view: 'dashboard', segments: [] };
+        const segs = raw.split('/').filter(Boolean);
+        return { view: segs[0], segments: segs.slice(1) };
+    },
+
+    _canAccess(view) {
+        const roles = this._viewRoles[view];
+        if (!roles) return true;
+        if (!state.user) return false;
+        return roles.includes(state.user.role);
+    },
+
+    _updateDocTitle(path) {
+        const base = (state.params && state.params.nom_commerce) || 'RITAJ SMART POS';
+        const t = this._routeTitles[path] || this._routeTitles['/' + (path || '').split('/')[1]] || '';
+        document.title = t ? `${t} — ${base}` : base;
+    },
+
+    _persistLastPath(path) {
+        try {
+            const u = state.user ? (state.user.login || state.user.id || 'u') : 'guest';
+            localStorage.setItem('pos_last_path:' + u, path);
+        } catch (e) { /* ignore */ }
+    },
+
+    _loadLastPath() {
+        try {
+            if (!state.user) return null;
+            const u = state.user.login || state.user.id || 'u';
+            return localStorage.getItem('pos_last_path:' + u);
+        } catch (e) { return null; }
+    },
+
+    /**
+     * Programmatic navigation. Updates location.hash which triggers the
+     * hashchange listener and applies the route. Use this in preference to
+     * switchView / enterMainApp directly.
+     *
+     *   APP.navigate('/pos')
+     *   APP.navigate('/admin/produits')
+     *   APP.navigate('/stats/credits')
+     *   APP.navigate('/stock/dlc')
+     *   APP.navigate('/dashboard')
+     */
+    navigate(path, { replace = false } = {}) {
+        if (!path) path = '/dashboard';
+        if (!path.startsWith('/')) path = '/' + path;
+        const target = '#' + path;
+        if (location.hash === target) {
+            // Still re-apply (e.g. tab change within the same view)
+            this._applyRoute(path);
+            return;
+        }
+        if (replace) {
+            history.replaceState(null, '', location.pathname + location.search + target);
+            this._applyRoute(path);
+        } else {
+            location.hash = path; // triggers hashchange → _applyRoute
+        }
+    },
+
+    _installRouter() {
+        if (this._routerInstalled) return;
+        this._routerInstalled = true;
+        window.addEventListener('hashchange', () => {
+            const { view } = this._parsePath(location.hash);
+            // Recovery / setup / login screens bypass the router entirely
+            if (!state.user) return;
+            const path = location.hash.slice(1) || '/dashboard';
+            this._applyRoute(path);
+        });
+    },
+
+    _applyRoute(path) {
+        const { view, segments } = this._parsePath('#' + path);
+        this.currentPath = path;
+        this._updateDocTitle(path);
+        this._persistLastPath(path);
+
+        // Dashboard → show dashboard screen
+        if (view === 'dashboard' || !view) {
+            document.getElementById('mainApp').style.display = 'none';
+            DASHBOARD.show();
+            return;
+        }
+
+        // Role guard
+        if (!this._canAccess(view)) {
+            UI.toast('🔒 Accès restreint à votre rôle', 'error');
+            this.navigate('/dashboard', { replace: true });
+            return;
+        }
+
+        // Make sure mainApp is visible, then switch to target view.
+        this.enterMainApp(view, { skipNavigate: true }).then(() => {
+            // Apply sub-route (admin tab, stats report, stock sub-view) AFTER
+            // the view's async init resolves, so no more setTimeout races.
+            if (view === 'admin' && segments[0] && window.ADMIN) {
+                try { ADMIN.switchTab(segments[0]); } catch (e) { /* ignore */ }
+            } else if (view === 'stats' && segments[0] && window.STATS) {
+                try { STATS.switchReport(segments[0]); } catch (e) { /* ignore */ }
+            } else if (view === 'stock' && segments[0] === 'dlc' && window.STOCK && STOCK.showAlertesDLC) {
+                try { STOCK.showAlertesDLC(); } catch (e) { /* ignore */ }
+            }
+        }).catch(() => { /* ignore */ });
+    },
 
     async init() {
         // 0. CHECK RECOVERY (Critical)
@@ -115,6 +250,7 @@ export const APP = {
         this.setupTheme();
         this.setupTheme();
         this.setupVirtualNumpad();
+        this._setupModalKeyboardFix();
         SHORTCUTS.init();
 
         // 1. SETUP STATUS
@@ -191,10 +327,20 @@ export const APP = {
         });
 
         this.adaptUIToBusinessType();
-        DASHBOARD.show();
+
+        // Install router once user is authenticated
+        this._installRouter();
+
+        // If a hash route exists (deep-link or refresh) honour it; otherwise
+        // restore last visited path; fallback to dashboard.
+        const hashPath = location.hash ? location.hash.slice(1) : '';
+        const lastPath = this._loadLastPath();
+        const target = hashPath || lastPath || '/dashboard';
+        // Replace so we don't stack a spurious history entry
+        this.navigate(target, { replace: true });
     },
 
-    async enterMainApp(view) {
+    async enterMainApp(view, opts = {}) {
         document.getElementById('dashboardScreen').style.display = 'none';
         const mainApp = document.getElementById('mainApp');
         mainApp.style.display = 'flex';
@@ -221,7 +367,13 @@ export const APP = {
         }
         this.checkStockAlerts();
 
-        this.switchView(view || 'pos');
+        // When called from the router we already know the view; otherwise
+        // update the hash so external calls (legacy) stay in sync.
+        if (opts.skipNavigate) {
+            await this._doSwitchView(view || 'pos');
+        } else {
+            this.navigate('/' + (view || 'pos'));
+        }
     },
 
     async checkRecoveryStatus() {
@@ -280,8 +432,7 @@ export const APP = {
     },
 
     goHome() {
-        document.getElementById('mainApp').style.display = 'none';
-        DASHBOARD.show();
+        this.navigate('/dashboard');
     },
 
     async loadPublicParams() {
@@ -307,6 +458,24 @@ export const APP = {
 
     setupVirtualNumpad() {
         if (window.NUMPAD && NUMPAD.init) NUMPAD.init();
+    },
+
+    // On touch devices the virtual keyboard often hides the focused input
+    // (especially in modals). This global listener scrolls the field into
+    // the visible portion of its scroll container when focus lands on it.
+    _setupModalKeyboardFix() {
+        if (this._kbdFixInstalled) return;
+        this._kbdFixInstalled = true;
+        document.addEventListener('focusin', (e) => {
+            const el = e.target;
+            if (!el || !(el.matches && el.matches('input, textarea, select'))) return;
+            // Only inside modals / overlays where clipping matters
+            const modal = el.closest('.modal, .modal-overlay, .confirm-box, .app-launcher');
+            if (!modal) return;
+            setTimeout(() => {
+                try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) { /* older browsers */ }
+            }, 150);
+        });
     },
 
     applyBusinessTheme() {
@@ -412,6 +581,16 @@ export const APP = {
     },
 
     switchView(view) {
+        // Public API: sync with router. The hashchange handler will call
+        // _doSwitchView via _applyRoute. If we're already on the view, run
+        // the switch synchronously (idempotent).
+        if (location.hash === '#/' + view) {
+            return this._doSwitchView(view);
+        }
+        this.navigate('/' + view);
+    },
+
+    async _doSwitchView(view) {
         this.currentView = view;
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -432,22 +611,23 @@ export const APP = {
         const navBtn = document.querySelector(`.nav-btn[data-view="${view}"]`);
         if (navBtn) navBtn.classList.add('active');
 
-        (async () => {
-            try {
-                if (view === 'pos') { await POS.loadProducts(); POS.renderProducts(); }
-                else if (view === 'history') await HISTORY.load();
-                else if (view === 'clients') await CLIENTS.load();
-                else if (view === 'livraison') await LIVRAISON.load();
-                else if (view === 'stock') await STOCK.load();
-                else if (view === 'stats') await STATS.init();
-                else if (view === 'admin') await ADMIN.init();
-                else if (view === 'kds') await KDS.load();
-                else if (view === 'tables') await TABLES.load();
+        try {
+            if (view === 'pos') { await POS.loadProducts(); POS.renderProducts(); }
+            else if (view === 'history') await HISTORY.load();
+            else if (view === 'clients') await CLIENTS.load();
+            else if (view === 'livraison') await LIVRAISON.load();
+            else if (view === 'stock') await STOCK.load();
+            else if (view === 'stats') await STATS.init();
+            else if (view === 'admin') await ADMIN.init();
+            else if (view === 'kds') await KDS.load();
+            else if (view === 'tables') await TABLES.load();
+        } catch (e) { console.error('Error loading view', e); }
 
-                // Refresh SVG icons
-                setTimeout(() => { if (window.lucide) window.lucide.createIcons(); }, 150);
-            } catch (e) { console.error('Error loading view', e); }
-        })();
+        // Refresh SVG icons immediately (requestAnimationFrame) rather than
+        // setTimeout(150) which causes a visible flash on tactile hardware.
+        if (window.lucide) {
+            requestAnimationFrame(() => { try { window.lucide.createIcons(); } catch (e) { } });
+        }
     },
 
     async recoverDatabase() {
