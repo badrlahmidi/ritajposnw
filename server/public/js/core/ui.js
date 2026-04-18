@@ -15,19 +15,23 @@ export function confirmDialog(title, message, { icon = '⚠️', confirmText = '
     return new Promise(resolve => {
         const overlay = document.createElement('div');
         overlay.className = 'confirm-overlay';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        const cancelBtn = cancelText ? `<button class="btn btn-outline" id="confirmCancel">${cancelText}</button>` : '';
         overlay.innerHTML = `
       <div class="confirm-box">
         <div class="confirm-icon">${icon}</div>
         <div class="confirm-title">${title}</div>
         <div class="confirm-message">${message}</div>
         <div class="confirm-actions">
-          <button class="btn btn-outline" id="confirmCancel">${cancelText}</button>
+          ${cancelBtn}
           <button class="btn ${danger ? 'btn-danger' : 'btn-primary'}" id="confirmOk">${confirmText}</button>
         </div>
       </div>`;
         document.body.appendChild(overlay);
         overlay.querySelector('#confirmOk').onclick = () => { overlay.remove(); resolve(true); };
-        overlay.querySelector('#confirmCancel').onclick = () => { overlay.remove(); resolve(false); };
+        const cancel = overlay.querySelector('#confirmCancel');
+        if (cancel) cancel.onclick = () => { overlay.remove(); resolve(false); };
         overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.remove(); resolve(false); } });
         overlay.querySelector('#confirmOk').focus();
     });

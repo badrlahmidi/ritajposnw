@@ -402,33 +402,42 @@ export const APP = {
             const res = await fetch(`${API}/system/restore-latest`, { method: 'POST' });
             const data = await res.json();
             if (data.success) {
-                alert(`✅ Restauration Réussie !\n\nBackup utilisé : ${data.filename}\n\nLe système va redémarrer.`);
-                window.location.reload();
+                UI.toast(`✅ Restauration réussie — ${data.filename}. Redémarrage…`, 'success');
+                setTimeout(() => window.location.reload(), 1500);
             } else {
                 throw new Error(data.error || 'Erreur inconnue');
             }
         } catch (e) {
-            alert('❌ Échec de la restauration : ' + e.message);
+            UI.toast('❌ Échec de la restauration : ' + e.message, 'error');
         } finally {
             UI.btnLoading(btn, false, 'Tentative de Récupération');
         }
     },
 
     async ackReset() {
-        if (!confirm('⚠️ ATTENTION : TOUTES LES DONNÉES SERONT PERDUES.\n\nÊtes-vous sûr de vouloir repartir de zéro ?')) return;
+        const ok = await UI.confirmDialog(
+            '⚠️ Réinitialiser à zéro ?',
+            'TOUTES LES DONNÉES SERONT PERDUES. Êtes-vous sûr de vouloir repartir de zéro ?',
+            { danger: true, confirmText: 'OUI, TOUT EFFACER' }
+        );
+        if (!ok) return;
 
         try {
             const res = await fetch(`${API}/system/ack-reset`, { method: 'POST' });
             const data = await res.json();
             if (data.success) {
-                alert('Système réinitialisé. Redirection vers le Setup...');
-                window.location.reload();
+                UI.toast('Système réinitialisé. Redirection vers le Setup…', 'info');
+                setTimeout(() => window.location.reload(), 1200);
             }
-        } catch (e) { alert('Erreur: ' + e.message); }
+        } catch (e) { UI.toast('Erreur : ' + e.message, 'error'); }
     },
 
     showSupport() {
-        alert('📞 CONTACT SUPPORT PRO\n\nSociété : RITAJ INFORMATIQUE\nTéléphone : +212 7 08 19 36 05\n\nDisponibilité : 9h00 - 18h00 (Lun-Ven)');
+        UI.confirmDialog(
+            '📞 Support Technique',
+            'RITAJ INFORMATIQUE — +212 7 08 19 36 05<br><span style="color:var(--text-muted)">Disponibilité : 9h00 – 18h00 (Lun–Ven)</span>',
+            { icon: '📞', confirmText: 'OK', cancelText: '' }
+        );
     },
 
     goHome() {
@@ -642,10 +651,10 @@ export const APP = {
             const res = await fetch(`${API}/system/restore-latest`, { method: 'POST' }).then(r => r.json());
             if (res.error) throw new Error(res.error);
 
-            alert(`✅ Restauration réussie !\nBackup utilisé : ${res.filename}\n\nL'application va redémarrer.`);
-            window.location.reload();
+            UI.toast(`✅ Restauration réussie — ${res.filename}. Redémarrage…`, 'success');
+            setTimeout(() => window.location.reload(), 1500);
         } catch (e) {
-            alert(`❌ Erreur : ${e.message}`);
+            UI.toast(`❌ Erreur : ${e.message}`, 'error');
             UI.btnLoading(btn, false);
         }
     },
@@ -662,13 +671,17 @@ export const APP = {
 
             window.location.reload();
         } catch (e) {
-            alert(`❌ Erreur : ${e.message}`);
+            UI.toast(`❌ Erreur : ${e.message}`, 'error');
             UI.btnLoading(btn, false);
         }
     },
 
     showSupport() {
-        alert('📞 RITAJ INFORMATIQUE\n\nSupport Technique : +212 7 08 19 36 05');
+        UI.confirmDialog(
+            'Support Technique',
+            'RITAJ INFORMATIQUE<br><strong>+212 7 08 19 36 05</strong><br><span style="color:var(--text-muted)">Disponibilité : 9h00 – 18h00 (Lun–Ven)</span>',
+            { icon: '📞', confirmText: 'OK', cancelText: '' }
+        );
     },
 
     toggleUserMenu() {

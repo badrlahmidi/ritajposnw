@@ -127,7 +127,7 @@ export const CLIENTS = {
             APP.closeModal('clientFormModal');
             this.load();
             if (document.getElementById('view-admin').classList.contains('active')) {
-                const btn = document.querySelector('.tab-btn[onclick*="clients"]');
+                const btn = document.querySelector('.tab-btn[data-param="clients"]');
                 if (btn) btn.click();
             }
         } catch (e) {
