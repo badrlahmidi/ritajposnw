@@ -46,11 +46,18 @@ const displayRoutes = require('./routes/display');
 const app = express();
 const { PORT, BASE_PATH } = config;
 
+// Derrière un reverse-proxy (nginx/Caddy/Electron renderer en prod), faire
+// confiance au premier saut pour récupérer la vraie IP client. Cela impacte
+// directement le rate-limit et les logs d'audit.
+app.set('trust proxy', 1);
+
 // ═══════════════════ MIDDLEWARE ═══════════════════
 
+// CORS : liste blanche stricte. Si aucune origine n'est configurée, on ne
+// laisse passer que les requêtes same-origin (origin: false) et non pas "*".
 const corsOptions = config.CORS_ORIGINS.length > 0
   ? { origin: config.CORS_ORIGINS, credentials: true }
-  : { origin: true, credentials: true };
+  : { origin: false, credentials: false };
 app.use(cors(corsOptions));
 
 app.use(express.json({ limit: '10mb' }));
@@ -58,6 +65,8 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
+      // TODO (Sprint 0.4) : retirer 'unsafe-inline' et basculer sur des
+      // nonces par requête. Broad frontend rewrite hors scope ici.
       scriptSrc: ["'self'", "'unsafe-inline'", 'cdn.jsdelivr.net', 'cdnjs.cloudflare.com'],
       scriptSrcAttr: ["'none'"],
       styleSrc: ["'self'", "'unsafe-inline'", 'cdn.jsdelivr.net', 'fonts.googleapis.com'],
@@ -67,6 +76,13 @@ app.use(helmet({
       workerSrc: ["'self'", 'blob:'],
     },
   },
+  // HSTS : 180 jours, includeSubDomains. Activé uniquement en production car
+  // localhost HTTP ne doit pas forcer HTTPS en dev.
+  hsts: config.IS_PROD ? { maxAge: 15552000, includeSubDomains: true } : false,
+  referrerPolicy: { policy: 'no-referrer' },
+  frameguard: { action: 'deny' },
+  noSniff: true,
+  crossOriginOpenerPolicy: { policy: 'same-origin' },
 }));
 app.use(compression());
 app.use(requestLogger);
@@ -82,7 +98,19 @@ const globalLimiter = rateLimit({
 app.use(`${BASE_PATH}/api`, globalLimiter);
 
 app.use(BASE_PATH, express.static(path.join(__dirname, 'public')));
-app.use(BASE_PATH + '/uploads', express.static(path.join(__dirname, 'public/uploads'))); // Explicitly serve uploads
+// Servir /uploads/ avec une disposition restrictive : les fichiers non-images
+// sont forcés en téléchargement (attachment) pour éviter l'exécution en
+// contexte same-origin (ex. CSV interprété par le navigateur, HTML glissé).
+const { IMAGE_EXTENSIONS } = require('./middleware/upload');
+app.use(BASE_PATH + '/uploads', express.static(path.join(__dirname, 'public/uploads'), {
+    setHeaders: (res, filePath) => {
+        const ext = path.extname(filePath).toLowerCase();
+        if (!IMAGE_EXTENSIONS.has(ext)) {
+            res.setHeader('Content-Disposition', 'attachment');
+        }
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+    },
+}));
 
 // ═══════════════════ ROUTES ═══════════════════
 
@@ -137,6 +165,11 @@ async function start() {
   await getDb(); // Initialize DB (better-sqlite3)
   const setupDone = isSetupCompleted();
 
+  // Démarrer le planificateur (backup auto). Extrait de db.js pour que les
+  // tests Jest puissent sortir proprement sans --forceExit à terme.
+  const { startScheduler } = require('./scheduler');
+  startScheduler();
+
   const httpServer = http.createServer(app);
   attachWebSocket(httpServer);
 
@@ -151,7 +184,7 @@ async function start() {
 
     console.log('');
     console.log('  ╔══════════════════════════════════════════════════════════╗');
-    console.log(`  ║  ☕ ${config.APP_NAME} v5.0 — Café & Restaurant POS     ║`);
+    console.log(`  ║  ☕ ${config.APP_NAME} v${config.APP_VERSION} — Café & Restaurant POS     ║`);
     console.log('  ╠══════════════════════════════════════════════════════════╣');
     console.log(`  ║   URL : http://localhost:${PORT}${BASE_PATH}                      ║`);
     console.log(`  ║   WS  : ws://localhost:${PORT}/ws                         ║`);

@@ -42,16 +42,36 @@ router.get('/:id/pdf', authMiddleware, asyncHandler((req, res) => {
 // Export facture groupée
 router.post('/batch/pdf', authMiddleware, asyncHandler((req, res) => {
     const { ids } = req.body;
-    if (!ids || !ids.length) return res.status(400).json({ error: 'IDs requis' });
+    if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ error: 'IDs requis (tableau non vide)' });
+    }
+    // Limite raisonnable pour éviter les abus (taille requête, timeout PDF).
+    if (ids.length > 500) {
+        return res.status(400).json({ error: 'Trop d\'IDs (max 500 par lot)' });
+    }
+    // Valider strictement : tous les ids doivent être des entiers positifs.
+    const intIds = [];
+    for (const raw of ids) {
+        const n = Number(raw);
+        if (!Number.isInteger(n) || n <= 0) {
+            return res.status(400).json({ error: 'IDs invalides : attendu des entiers positifs' });
+        }
+        intIds.push(n);
+    }
 
-    const idList = ids.join(',');
-    const commandes = queryAll(`SELECT * FROM commandes WHERE id IN (${idList}) ORDER BY date_creation ASC`);
-    const lignes = queryAll(`
-    SELECT cl.*, p.nom as produit_nom 
-    FROM commande_lignes cl 
-    LEFT JOIN produits p ON cl.produit_id = p.id 
-    WHERE cl.commande_id IN (${idList})
-  `);
+    // Utiliser des placeholders paramétrés — jamais d'interpolation string.
+    const placeholders = intIds.map(() => '?').join(',');
+    const commandes = queryAll(
+        `SELECT * FROM commandes WHERE id IN (${placeholders}) ORDER BY date_creation ASC`,
+        intIds
+    );
+    const lignes = queryAll(
+        `SELECT cl.*, p.nom as produit_nom
+         FROM commande_lignes cl
+         LEFT JOIN produits p ON cl.produit_id = p.id
+         WHERE cl.commande_id IN (${placeholders})`,
+        intIds
+    );
 
     const paramsRows = queryAll('SELECT cle, valeur FROM parametres');
     const params = {};

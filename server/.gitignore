@@ -1,7 +1,23 @@
 ﻿node_modules/
-pos.db*
+
+# Runtime SQLite database files — NEVER commit
+pos.db
+pos.db-shm
+pos.db-wal
+pos.db.corrupted.*
 test-pos-DO-NOT-USE*
+*.sqlite
+*.sqlite3
+
+# Environment / secrets — NEVER commit
 .env
+.env.local
+.env.*.local
+
+# Backups and uploads
 backups/
+public/uploads/*
+!public/uploads/.gitkeep
+
 # Native Node.js binaries — must be rebuilt per platform
 *.node

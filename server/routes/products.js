@@ -110,21 +110,8 @@ router.post('/:id/variantes', authMiddleware, adminOnly, asyncHandler((req, res)
 }));
 
 
-// Produits proches de la DLC
-router.get('/dlc/alertes', authMiddleware, asyncHandler((req, res) => {
-    const jours = parseInt(req.query.jours) || 7;
-    const alertes = queryAll(
-        `SELECT p.*, c.nom as categorie_nom,
-        julianday(p.dlc) - julianday('now') as jours_restants
-     FROM produits p
-     LEFT JOIN categories c ON p.categorie_id = c.id
-     WHERE p.dlc IS NOT NULL AND p.dlc != '' AND p.actif = 1
-     AND julianday(p.dlc) - julianday('now') <= ?
-        ORDER BY p.dlc ASC`,
-        [jours]
-    );
-    res.json(alertes);
-}));
+// Note : la route GET /dlc/alertes est définie plus bas (une seule définition
+// active — la version enrichie par la jointure avec la table stock).
 
 const upload = require('../middleware/upload');
 

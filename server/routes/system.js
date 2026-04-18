@@ -7,9 +7,40 @@ const fs = require('fs');
 const config = require('../config');
 const { JWT_SECRET, JWT_EXPIRES } = config;
 const { asyncHandler, authMiddleware, adminStrict, adminOnly } = require('../middleware');
-const { queryAll, queryOne, run, logAudit, createBackup, createArchiveBackup, listBackups, verifyBackupIntegrity, isSetupCompleted, isRecoveryMode, restoreLatestBackup, disableRecoveryMode, applyBusinessProfile } = require('../db');
+const { queryAll, queryOne, run, logAudit, createBackup, createArchiveBackup, listBackups, verifyBackupIntegrity, isSetupCompleted, isRecoveryMode, restoreLatestBackup, disableRecoveryMode, applyBusinessProfile, verifyAndConsumeRecoveryToken } = require('../db');
 const { getProfilesList, getProfile } = require('../business-profiles');
 const v = require('../validators');
+
+/**
+ * Protège les routes de récupération système. Deux voies d'accès valides :
+ *  1. Admin authentifié par JWT (cas normal : la DB est lisible, un admin existe).
+ *  2. Jeton de récupération à usage unique, imprimé dans les logs locaux du serveur
+ *     lors du passage en mode recovery (cas DB corrompue / fraîchement restaurée).
+ *     L'accès physique à la console est donc requis.
+ */
+function recoveryAuth(req, res, next) {
+    const provided = req.get('X-Recovery-Token');
+    if (provided && verifyAndConsumeRecoveryToken(provided)) {
+        req.user = req.user || { id: 0, nom: 'recovery-token', role: 'admin' };
+        return next();
+    }
+    // Sinon exiger une session admin JWT valide.
+    const jwt = require('jsonwebtoken');
+    const header = req.headers.authorization;
+    if (!header || !header.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Authentification admin ou X-Recovery-Token requis' });
+    }
+    try {
+        const decoded = jwt.verify(header.split(' ')[1], require('../config').JWT_SECRET);
+        if (decoded.role !== 'admin') {
+            return res.status(403).json({ error: 'Accès réservé admin' });
+        }
+        req.user = decoded;
+        return next();
+    } catch (_) {
+        return res.status(401).json({ error: 'Token invalide ou expiré' });
+    }
+}
 
 // Check Recovery Status
 router.get('/system/recovery-status', (req, res) => {
@@ -19,8 +50,8 @@ router.get('/system/recovery-status', (req, res) => {
     });
 });
 
-// Restore Latest Backup (Recovery Mode)
-router.post('/system/restore-latest', asyncHandler((req, res) => {
+// Restore Latest Backup (Recovery Mode) — PROTÉGÉE
+router.post('/system/restore-latest', recoveryAuth, asyncHandler((req, res) => {
     if (!isRecoveryMode()) return res.status(400).json({ error: 'Système non en mode récupération' });
     try {
         const result = restoreLatestBackup();
@@ -30,8 +61,8 @@ router.post('/system/restore-latest', asyncHandler((req, res) => {
     }
 }));
 
-// Acknowledge Reset (Factory Reset)
-router.post('/system/ack-reset', asyncHandler((req, res) => {
+// Acknowledge Reset (Factory Reset) — PROTÉGÉE
+router.post('/system/ack-reset', recoveryAuth, asyncHandler((req, res) => {
     if (!isRecoveryMode()) return res.status(400).json({ error: 'Système non en mode récupération' });
     disableRecoveryMode();
     res.json({ success: true, message: 'Système réinitialisé. Redirection vers Setup.' });
