@@ -116,8 +116,8 @@
           </div>
 
           <div class="wizard-nav">
-            <button class="btn btn-secondary" onclick="SETUP.goToStep(1)">← Retour</button>
-            <button class="btn btn-primary" onclick="SETUP.goToStep(3)">Suivant →</button>
+            <button class="btn btn-secondary" data-action="SETUP.goToStep" data-num="1">← Retour</button>
+            <button class="btn btn-primary" data-action="SETUP.goToStep" data-num="3">Suivant →</button>
           </div>
         </div>
 
@@ -131,8 +131,8 @@
           </div>
 
           <div class="wizard-nav">
-            <button class="btn btn-secondary" onclick="SETUP.goToStep(2)">← Retour</button>
-            <button class="btn btn-success btn-lg" onclick="SETUP.complete()" id="setupCompleteBtn">
+            <button class="btn btn-secondary" data-action="SETUP.goToStep" data-num="2">← Retour</button>
+            <button class="btn btn-success btn-lg" data-action="SETUP.complete" id="setupCompleteBtn">
               🚀 Lancer la configuration
             </button>
           </div>
@@ -161,7 +161,7 @@
           Plusieurs sauvegardes sont disponibles.</p>
 
         <div style="display:grid;gap:12px;text-align:left">
-          <button class="btn btn-primary btn-lg" onclick="APP.recoverDatabase()"
+          <button class="btn btn-primary btn-lg" data-action="APP.recoverDatabase"
             style="justify-content:flex-start;text-align:left;height:auto;padding:12px">
             <span style="font-size:24px;margin-right:12px">♻️</span>
             <div>
@@ -170,7 +170,7 @@
             </div>
           </button>
 
-          <button class="btn btn-outline btn-lg" onclick="APP.resetToFactory()"
+          <button class="btn btn-outline btn-lg" data-action="APP.resetToFactory"
             style="justify-content:flex-start;text-align:left;height:auto;padding:12px">
             <span style="font-size:24px;margin-right:12px">🏭</span>
             <div>
@@ -179,7 +179,7 @@
             </div>
           </button>
 
-          <button class="btn btn-secondary btn-lg" onclick="APP.showSupport()"
+          <button class="btn btn-secondary btn-lg" data-action="APP.showSupport"
             style="justify-content:flex-start;text-align:left;height:auto;padding:12px">
             <span style="font-size:24px;margin-right:12px">📞</span>
             <div>
@@ -197,7 +197,7 @@
         <div class="login-logo" id="loginLogo">🍞</div>
         <h1 id="loginTitle">Point de Vente</h1>
         <p class="login-subtitle" id="loginSubtitle">Connexion — v4.1</p>
-        <form onsubmit="return APP.login(event)">
+        <form id="loginForm">
           <div class="form-group">
             <label>Identifiant</label>
             <input type="text" id="loginUser" placeholder="admin" autocomplete="username" required>
@@ -223,7 +223,7 @@
           style="padding:16px 24px;border-bottom:1px solid var(--border);background:var(--bg);display:flex;justify-content:space-between;align-items:center">
           <h2 style="margin:0">💳 Paiement</h2>
           <div style="font-size:1.5rem;font-weight:900;color:var(--primary)" id="pmTotalToPay">0.00 DH</div>
-          <button class="btn-ghost" onclick="APP.closeModal('paymentModal')" style="font-size:1.5rem">✕</button>
+          <button class="btn-ghost" data-action="APP.closeModal" data-param="paymentModal" style="font-size:1.5rem">✕</button>
         </div>
 
         <!-- Body: Split Layout -->
@@ -243,29 +243,29 @@
             <!-- Numpad -->
             <div class="numpad-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;flex:1">
               <button class="btn btn-outline" style="font-size:1.5rem;font-weight:bold"
-                onclick="POS.pmNumpad('1')">1</button>
+                data-action="POS.pmNumpad" data-param="1">1</button>
               <button class="btn btn-outline" style="font-size:1.5rem;font-weight:bold"
-                onclick="POS.pmNumpad('2')">2</button>
+                data-action="POS.pmNumpad" data-param="2">2</button>
               <button class="btn btn-outline" style="font-size:1.5rem;font-weight:bold"
-                onclick="POS.pmNumpad('3')">3</button>
+                data-action="POS.pmNumpad" data-param="3">3</button>
               <button class="btn btn-outline" style="font-size:1.5rem;font-weight:bold"
-                onclick="POS.pmNumpad('4')">4</button>
+                data-action="POS.pmNumpad" data-param="4">4</button>
               <button class="btn btn-outline" style="font-size:1.5rem;font-weight:bold"
-                onclick="POS.pmNumpad('5')">5</button>
+                data-action="POS.pmNumpad" data-param="5">5</button>
               <button class="btn btn-outline" style="font-size:1.5rem;font-weight:bold"
-                onclick="POS.pmNumpad('6')">6</button>
+                data-action="POS.pmNumpad" data-param="6">6</button>
               <button class="btn btn-outline" style="font-size:1.5rem;font-weight:bold"
-                onclick="POS.pmNumpad('7')">7</button>
+                data-action="POS.pmNumpad" data-param="7">7</button>
               <button class="btn btn-outline" style="font-size:1.5rem;font-weight:bold"
-                onclick="POS.pmNumpad('8')">8</button>
+                data-action="POS.pmNumpad" data-param="8">8</button>
               <button class="btn btn-outline" style="font-size:1.5rem;font-weight:bold"
-                onclick="POS.pmNumpad('9')">9</button>
+                data-action="POS.pmNumpad" data-param="9">9</button>
               <button class="btn btn-outline text-danger" style="font-size:1.5rem;font-weight:bold"
-                onclick="POS.pmNumpad('C')">C</button>
+                data-action="POS.pmNumpad" data-param="C">C</button>
               <button class="btn btn-outline" style="font-size:1.5rem;font-weight:bold"
-                onclick="POS.pmNumpad('0')">0</button>
+                data-action="POS.pmNumpad" data-param="0">0</button>
               <button class="btn btn-outline" style="font-size:1.5rem;font-weight:bold"
-                onclick="POS.pmNumpad('.')">.</button>
+                data-action="POS.pmNumpad" data-param=".">.</button>
             </div>
           </div>
 
@@ -275,38 +275,38 @@
 
             <!-- Espèces Rapides (compact) -->
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
-              <img src="assets/200MAD.jpg" onclick="POS.pmFastCash(200)"
+              <img src="assets/200MAD.jpg" data-action="POS.pmFastCash" data-num="200"
                 style="width:100%;cursor:pointer;border-radius:5px;transition:transform 0.1s"
-                onmousedown="this.style.transform='scale(0.93)'" onmouseup="this.style.transform='scale(1)'"
+                class="fast-cash-img"
                 title="200 DH">
-              <img src="assets/100MAD.jpg" onclick="POS.pmFastCash(100)"
+              <img src="assets/100MAD.jpg" data-action="POS.pmFastCash" data-num="100"
                 style="width:100%;cursor:pointer;border-radius:5px;transition:transform 0.1s"
-                onmousedown="this.style.transform='scale(0.93)'" onmouseup="this.style.transform='scale(1)'"
+                class="fast-cash-img"
                 title="100 DH">
-              <img src="assets/50MAD.jpg" onclick="POS.pmFastCash(50)"
+              <img src="assets/50MAD.jpg" data-action="POS.pmFastCash" data-num="50"
                 style="width:100%;cursor:pointer;border-radius:5px;transition:transform 0.1s"
-                onmousedown="this.style.transform='scale(0.93)'" onmouseup="this.style.transform='scale(1)'"
+                class="fast-cash-img"
                 title="50 DH">
-              <img src="assets/20MAD.jpg" onclick="POS.pmFastCash(20)"
+              <img src="assets/20MAD.jpg" data-action="POS.pmFastCash" data-num="20"
                 style="width:100%;cursor:pointer;border-radius:5px;transition:transform 0.1s"
-                onmousedown="this.style.transform='scale(0.93)'" onmouseup="this.style.transform='scale(1)'"
+                class="fast-cash-img"
                 title="20 DH">
             </div>
             <div style="display:flex;gap:8px">
               <button class="btn btn-white"
                 style="flex:1;height:34px;font-weight:bold;border:1px solid #ddd;color:#f39c12;font-size:0.85rem"
-                onclick="POS.pmFastCash(10)">10 DH</button>
+                data-action="POS.pmFastCash" data-num="10">10 DH</button>
               <button class="btn btn-white"
                 style="flex:1;height:34px;font-weight:bold;border:1px solid #ddd;color:#7f8c8d;font-size:0.85rem"
-                onclick="POS.pmFastCash(5)">5 DH</button>
+                data-action="POS.pmFastCash" data-num="5">5 DH</button>
             </div>
 
             <!-- Actions -->
             <div style="display:flex;gap:8px">
               <button class="btn btn-outline" style="flex:1;font-size:0.85rem;padding:8px"
-                onclick="POS.openClientSearch('payment')">👤 Assigner Client</button>
+                data-action="POS.openClientSearch" data-param="payment">👤 Assigner Client</button>
               <button class="btn btn-outline" style="flex:1;font-size:0.85rem;padding:8px"
-                onclick="POS.openDiscountModal()">🏷️ Remise</button>
+                data-action="POS.openDiscountModal">🏷️ Remise</button>
             </div>
 
             <!-- Facture -->
@@ -326,25 +326,25 @@
             <!-- Grille de paiement (compacte) -->
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
               <button class="btn btn-success" id="btnPmEspeces"
-                style="padding:14px 6px;font-size:1.1rem;font-weight:700" onclick="POS.pmValidate('especes')">💵
+                style="padding:14px 6px;font-size:1.1rem;font-weight:700" data-action="POS.pmValidate" data-param="especes">💵
                 ESPÈCES</button>
               <button class="btn btn-info" id="btnPmCarte" style="padding:14px 6px;font-size:1.1rem;font-weight:700"
-                onclick="POS.pmValidate('carte')">💳 CARTE</button>
+                data-action="POS.pmValidate" data-param="carte">💳 CARTE</button>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
               <button class="btn btn-outline" id="btnPmVirement"
-                style="padding:10px 6px;font-size:0.95rem;font-weight:600" onclick="POS.pmValidate('virement')">📲
+                style="padding:10px 6px;font-size:0.95rem;font-weight:600" data-action="POS.pmValidate" data-param="virement">📲
                 VIREMENT</button>
               <button class="btn btn-outline" id="btnPmCheque"
-                style="padding:10px 6px;font-size:0.95rem;font-weight:600" onclick="POS.pmValidate('cheque')">🏦
+                style="padding:10px 6px;font-size:0.95rem;font-weight:600" data-action="POS.pmValidate" data-param="cheque">🏦
                 CHÈQUE</button>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
               <button class="btn btn-warning" id="btnPmCredit"
                 style="padding:10px 6px;font-size:0.95rem;font-weight:600;color:#fff;display:none"
-                onclick="POS.pmValidate('credit')">📒 ARDOISE</button>
+                data-action="POS.pmValidate" data-param="credit">📒 ARDOISE</button>
               <button class="btn btn-outline" id="btnPmMixte" style="padding:10px 6px;font-size:0.95rem;font-weight:600"
-                onclick="POS.openMixtePanel()">🔀 MIXTE</button>
+                data-action="POS.openMixtePanel">🔀 MIXTE</button>
             </div>
 
             <!-- Panel Paiement Mixte -->
@@ -356,21 +356,19 @@
                 <div>
                   <label style="font-size:0.75rem;font-weight:600">💵 Espèces (DH)</label>
                   <input type="number" id="pmMixteEspeces" step="0.5" min="0" value="0" placeholder="0.00"
-                    style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:1rem;margin-top:4px"
-                    oninput="POS.updateMixteRest()">
+                    style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:1rem;margin-top:4px">
                 </div>
                 <div>
                   <label style="font-size:0.75rem;font-weight:600">💳 Carte (DH)</label>
                   <input type="number" id="pmMixteCarte" step="0.5" min="0" value="0" placeholder="0.00"
-                    style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:1rem;margin-top:4px"
-                    oninput="POS.updateMixteRest()">
+                    style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:1rem;margin-top:4px">
                 </div>
               </div>
               <div id="pmMixteRest"
                 style="text-align:center;font-size:0.85rem;color:var(--text-muted);margin-bottom:8px">Reste: 0.00 DH
               </div>
               <button class="btn btn-primary btn-block" style="padding:10px;font-size:0.95rem;font-weight:700"
-                onclick="POS.pmValidate('mixte')">✅ Valider Paiement Mixte</button>
+                data-action="POS.pmValidate" data-param="mixte">✅ Valider Paiement Mixte</button>
             </div>
 
             <!-- Info Ardoise Client -->
@@ -394,9 +392,9 @@
             <span class="dash-subtitle">Bienvenue, <strong id="dashUserName">—</strong></span>
           </div>
           <div class="dash-actions">
-            <button class="btn btn-outline btn-sm" onclick="LAUNCHER.open()" title="Tous les modules">🧭 Modules</button>
-            <button class="btn btn-outline btn-sm" onclick="APP.toggleTheme()">🌙 Thème</button>
-            <button class="btn btn-ghost btn-sm text-danger" onclick="APP.logout()">🚪 Déconnexion</button>
+            <button class="btn btn-outline btn-sm" data-action="LAUNCHER.open" title="Tous les modules">🧭 Modules</button>
+            <button class="btn btn-outline btn-sm" data-action="APP.toggleTheme">🌙 Thème</button>
+            <button class="btn btn-ghost btn-sm text-danger" data-action="APP.logout">🚪 Déconnexion</button>
           </div>
         </div>
 
@@ -405,7 +403,7 @@
           <h2 class="dash-section-title">⚡ Accès rapide</h2>
           <div class="cards-grid">
             <!-- Carte 1: Nouvelle vente -->
-            <div class="dash-card card-primary" onclick="DASHBOARD.goToPOS()">
+            <div class="dash-card card-primary" data-action="DASHBOARD.goToPOS">
               <div class="card-icon">🧾</div>
               <div class="card-content">
                 <div class="card-title">Caisse</div>
@@ -413,7 +411,7 @@
               </div>
             </div>
             <!-- Carte 2: Historique -->
-            <div class="dash-card card-secondary" onclick="DASHBOARD.goToHistory()">
+            <div class="dash-card card-secondary" data-action="DASHBOARD.goToHistory">
               <div class="card-icon">📜</div>
               <div class="card-content">
                 <div class="card-title">Commandes</div>
@@ -421,7 +419,7 @@
               </div>
             </div>
             <!-- Carte 3: Produits (Admin/Manager) -->
-            <div class="dash-card card-info admin-only" onclick="DASHBOARD.goToProducts()">
+            <div class="dash-card card-info admin-only" data-action="DASHBOARD.goToProducts">
               <div class="card-icon">📦</div>
               <div class="card-content">
                 <div class="card-title">Produits</div>
@@ -429,7 +427,7 @@
               </div>
             </div>
             <!-- Carte 4: Stock (Admin/Manager) -->
-            <div class="dash-card card-warning admin-only" onclick="DASHBOARD.goToStock()">
+            <div class="dash-card card-warning admin-only" data-action="DASHBOARD.goToStock">
               <div class="card-icon">📊</div>
               <div class="card-content">
                 <div class="card-title">Stock</div>
@@ -437,7 +435,7 @@
               </div>
             </div>
             <!-- Carte 5: Clients -->
-            <div class="dash-card card-success" onclick="DASHBOARD.goToClients()">
+            <div class="dash-card card-success" data-action="DASHBOARD.goToClients">
               <div class="card-icon">👥</div>
               <div class="card-content">
                 <div class="card-title">Clients</div>
@@ -445,7 +443,7 @@
               </div>
             </div>
             <!-- Carte 6: Stats (Admin/Manager) -->
-            <div class="dash-card card-purple admin-only" onclick="DASHBOARD.goToStats()">
+            <div class="dash-card card-purple admin-only" data-action="DASHBOARD.goToStats">
               <div class="card-icon">📈</div>
               <div class="card-content">
                 <div class="card-title">Statistiques</div>
@@ -453,7 +451,7 @@
               </div>
             </div>
             <!-- Carte 7: Caisse (ouvrir/fermer) -->
-            <div class="dash-card card-info" onclick="DASHBOARD.openCaisseModal()">
+            <div class="dash-card card-info" data-action="DASHBOARD.openCaisseModal">
               <div class="card-icon">💰</div>
               <div class="card-content">
                 <div class="card-title">Gestion Caisse</div>
@@ -461,7 +459,7 @@
               </div>
             </div>
             <!-- Carte 8: Admin/Paramètres -->
-            <div class="dash-card card-dark admin-only" onclick="DASHBOARD.goToAdmin()">
+            <div class="dash-card card-dark admin-only" data-action="DASHBOARD.goToAdmin">
               <div class="card-icon">⚙️</div>
               <div class="card-content">
                 <div class="card-title">Administration</div>
@@ -494,46 +492,46 @@
       <!-- HEADER -->
       <header class="pos-header">
         <div class="header-left">
-          <button class="btn-launcher" onclick="LAUNCHER.open()" title="Tous les modules" aria-label="Ouvrir le menu des modules">
+          <button class="btn-launcher" data-action="LAUNCHER.open" title="Tous les modules" aria-label="Ouvrir le menu des modules">
             <span class="launcher-grid-icon" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>
             <span class="btn-launcher-label">Modules</span>
           </button>
-          <button class="btn-home" onclick="APP.goHome()" title="Retour à l'accueil"><i data-lucide="home"></i>
+          <button class="btn-home" data-action="APP.goHome" title="Retour à l'accueil"><i data-lucide="home"></i>
             Accueil</button>
           <h1><i data-lucide="store" style="margin-right:8px; display:inline-block;"></i> RITAJ SMART POS</h1>
           <span class="header-subtitle">POS v4.1</span>
         </div>
         <div class="header-center">
           <nav class="main-nav">
-            <button class="nav-btn active" data-view="pos" onclick="APP.switchView('pos')"><i data-lucide="calculator"
+            <button class="nav-btn active" data-view="pos" data-action="APP.switchView" data-param="pos"><i data-lucide="calculator"
                 style="margin-right:6px"></i> Caisse</button>
-            <button class="nav-btn" data-view="history" onclick="APP.switchView('history')"><i data-lucide="history"
+            <button class="nav-btn" data-view="history" data-action="APP.switchView" data-param="history"><i data-lucide="history"
                 style="margin-right:6px"></i> Commandes</button>
-            <button class="nav-btn" data-view="clients" onclick="APP.switchView('clients')"><i data-lucide="users"
+            <button class="nav-btn" data-view="clients" data-action="APP.switchView" data-param="clients"><i data-lucide="users"
                 style="margin-right:6px"></i> Clients</button>
-            <button class="nav-btn admin-only" data-view="stock" onclick="APP.switchView('stock')"><i
+            <button class="nav-btn admin-only" data-view="stock" data-action="APP.switchView" data-param="stock"><i
                 data-lucide="package" style="margin-right:6px"></i> Stock</button>
-            <button class="nav-btn admin-only" data-view="stats" onclick="APP.switchView('stats')"><i
+            <button class="nav-btn admin-only" data-view="stats" data-action="APP.switchView" data-param="stats"><i
                 data-lucide="bar-chart-2" style="margin-right:6px"></i> Rapports</button>
-            <button class="nav-btn admin-only" data-view="admin" onclick="APP.switchView('admin')"><i
+            <button class="nav-btn admin-only" data-view="admin" data-action="APP.switchView" data-param="admin"><i
                 data-lucide="settings" style="margin-right:6px"></i> Admin</button>
 
-            <button class="nav-btn feature-livraison" data-view="livraison" onclick="APP.switchView('livraison')"
+            <button class="nav-btn feature-livraison" data-view="livraison" data-action="APP.switchView" data-param="livraison"
               style="display:none"><i data-lucide="truck" style="margin-right:6px"></i> Livraison</button>
-            <button class="nav-btn feature-tables" data-view="tables" onclick="APP.switchView('tables')"
+            <button class="nav-btn feature-tables" data-view="tables" data-action="APP.switchView" data-param="tables"
               style="display:none"><i data-lucide="layout-grid" style="margin-right:6px"></i> Tables</button>
-            <button class="nav-btn admin-only feature-kds" data-view="kds" onclick="APP.switchView('kds')"
+            <button class="nav-btn admin-only feature-kds" data-view="kds" data-action="APP.switchView" data-param="kds"
               style="display:none"><i data-lucide="monitor" style="margin-right:6px"></i> Cuisine</button>
           </nav>
         </div>
         <div class="header-right">
           <span id="clock" class="clock"></span>
-          <button class="btn btn-kbd" onclick="APP.toggleFullscreen()" title="Plein écran"><i
+          <button class="btn btn-kbd" data-action="APP.toggleFullscreen" title="Plein écran"><i
               data-lucide="maximize"></i></button>
-          <button class="btn btn-kbd" onclick="showShortcutsModal()" title="Raccourcis clavier (F1)"><i
+          <button class="btn btn-kbd" data-action="SHORTCUTS.showHelp" title="Raccourcis clavier (F1)"><i
               data-lucide="keyboard"></i></button>
           <div class="user-menu">
-            <button class="btn btn-icon" onclick="APP.toggleUserMenu()" id="userMenuBtn">
+            <button class="btn btn-icon" data-action="APP.toggleUserMenu" id="userMenuBtn">
               <span id="userAvatar"><i data-lucide="user"></i></span>
             </button>
             <div class="user-dropdown" id="userDropdown" style="display:none;">
@@ -542,11 +540,11 @@
                 <span id="userRole" class="badge">—</span>
               </div>
               <hr>
-              <button onclick="APP.openCaisseModal()">💰 Caisse</button>
-              <button onclick="APP.manualBackup()" class="admin-only">💾 Backup</button>
-              <button onclick="APP.toggleTheme()">🌙 Thème sombre</button>
+              <button data-action="APP.openCaisseModal">💰 Caisse</button>
+              <button data-action="APP.manualBackup" class="admin-only">💾 Backup</button>
+              <button data-action="APP.toggleTheme">🌙 Thème sombre</button>
               <hr>
-              <button onclick="APP.logout()" class="text-danger">🚪 Déconnexion</button>
+              <button data-action="APP.logout" class="text-danger">🚪 Déconnexion</button>
             </div>
           </div>
         </div>
@@ -555,9 +553,9 @@
       <!-- ═══════ ALERTE STOCK ═══════ -->
       <div id="stockAlert" class="stock-alert" style="display:none;">
         <span>⚠️ <strong id="stockAlertCount">0</strong> produit(s) en stock bas !</span>
-        <button class="btn btn-sm btn-warning" onclick="APP.switchView('stock')">Voir</button>
+        <button class="btn btn-sm btn-warning" data-action="APP.switchView" data-param="stock">Voir</button>
         <button class="btn btn-sm btn-ghost"
-          onclick="document.getElementById('stockAlert').style.display='none'">✕</button>
+          id="btnDismissStockAlert">✕</button>
       </div>
 
       <!-- ═══════ VIEW: POS (CAISSE) ═══════ -->
@@ -573,7 +571,7 @@
             <div class="categories-bar" id="categoriesBar"></div>
             <div class="search-bar" style="display:flex;gap:6px;">
               <input type="text" id="searchInput" placeholder="🔍 Rechercher ou Scanner (Entrée)..."
-                oninput="POS.searchProducts(this.value)" onkeydown="POS.handleSearchKey(event, this.value)"
+                data-input-action="POS.searchProducts"
                 style="flex:1" autofocus>
             </div>
             <div class="products-grid" id="productsGrid"></div>
@@ -583,12 +581,12 @@
           <div class="pos-cart">
             <div class="cart-tariffs" style="display:flex;padding:10px 12px 5px;gap:5px;background:var(--bg)">
               <button class="btn btn-sm btn-outline tariff-btn active" data-tarif="particulier"
-                onclick="POS.setTarif('particulier')" style="flex:1">👤 Détail</button>
+                data-action="POS.setTarif" data-param="particulier" style="flex:1">👤 Détail</button>
               <button class="btn btn-sm btn-outline tariff-btn" data-tarif="semi_gros"
-                onclick="POS.setTarif('semi_gros')" style="flex:1">🏢 Semi</button>
-              <button class="btn btn-sm btn-outline tariff-btn" data-tarif="gros" onclick="POS.setTarif('gros')"
+                data-action="POS.setTarif" data-param="semi_gros" style="flex:1">🏢 Semi</button>
+              <button class="btn btn-sm btn-outline tariff-btn" data-tarif="gros" data-action="POS.setTarif" data-param="gros"
                 style="flex:1">🏭 Gros</button>
-              <button class="btn btn-sm btn-outline" id="btnModeRetour" onclick="POS.toggleModeRetour()"
+              <button class="btn btn-sm btn-outline" id="btnModeRetour" data-action="POS.toggleModeRetour"
                 style="flex:1; border-color: var(--danger); color: var(--danger);"
                 title="Passer en mode remboursement">↩️
                 Retour</button>
@@ -597,15 +595,15 @@
             <div class="cart-header">
               <h2>🧾 Ticket</h2>
               <div class="cart-header-actions">
-                <select id="orderType" class="select-sm" onchange="POS.setOrderType(this.value)">
+                <select id="orderType" class="select-sm" data-change-action="POS.setOrderType">
                   <option value="sur_place">🏠 Sur place</option>
                   <option value="emporter" selected>🛍️ Emporter</option>
                   <option value="livraison">🚗 Livraison</option>
                   <option value="retour">↩️ Retour</option>
                 </select>
-                <button class="btn btn-sm btn-outline" onclick="POS.printLastTicket()" title="Réimprimer"
+                <button class="btn btn-sm btn-outline" data-action="POS.printLastTicket" title="Réimprimer"
                   id="btnReprint" style="display:none">🖨️</button>
-                <button class="btn btn-danger btn-sm" onclick="POS.clearCart()" title="Vider">🗑️</button>
+                <button class="btn btn-danger btn-sm" data-action="POS.clearCart" title="Vider">🗑️</button>
               </div>
             </div>
 
@@ -613,9 +611,9 @@
             <div class="cart-client" id="cartClient" style="display:none; flex-wrap:wrap; align-items:center; gap:6px;">
               <span>👤 <strong id="cartClientName">—</strong></span>
               <span class="badge badge-info" id="cartClientPoints">0 pts</span>
-              <button class="btn btn-sm btn-outline" onclick="POS.repeatLastOrder(POS.selectedClient.id)"
+              <button class="btn btn-sm btn-outline" data-action="POS.repeatLastOrderForSelected"
                 style="margin-left:auto" title="Refaire sa dernière commande">🔄 Refaire</button>
-              <button class="btn-ghost-sm" onclick="POS.removeClient()">✕</button>
+              <button class="btn-ghost-sm" data-action="POS.removeClient">✕</button>
             </div>
 
             <!-- Lignes du panier -->
@@ -631,7 +629,7 @@
               <div class="total-row"><span>Sous-total HT</span><span id="subtotalHT">0.00 DH</span></div>
               <div class="total-row"><span>TVA</span><span id="totalTVA">0.00 DH</span></div>
               <div class="total-row" id="remiseRow" style="display:none;">
-                <span>Remise <button class="btn-ghost-sm" onclick="POS.removeDiscount()">✕</button></span>
+                <span>Remise <button class="btn-ghost-sm" data-action="POS.removeDiscount">✕</button></span>
                 <span id="remiseAmount">-0.00 DH</span>
               </div>
               <div class="total-row total-final">
@@ -643,15 +641,15 @@
             <!-- Actions -->
             <div class="cart-actions"
               style="display:grid;grid-template-columns:repeat(3, 1fr);gap:6px;padding: 0 12px 12px;">
-              <button class="btn btn-sm btn-outline" onclick="POS.openClientSearch()" title="Associer un client">👤
+              <button class="btn btn-sm btn-outline" data-action="POS.openClientSearch" title="Associer un client">👤
                 Client</button>
-              <button class="btn btn-sm btn-outline" onclick="POS.showRecentOrders()" title="5 dernières commandes">🕒
+              <button class="btn btn-sm btn-outline" data-action="POS.showRecentOrders" title="5 dernières commandes">🕒
                 Récents</button>
-              <button class="btn btn-sm btn-outline" onclick="POS.openDiscountModal()" title="Appliquer une remise">🏷️
+              <button class="btn btn-sm btn-outline" data-action="POS.openDiscountModal" title="Appliquer une remise">🏷️
                 Remise</button>
-              <button class="btn btn-sm btn-warning" onclick="POS.parkOrder()" style="grid-column: span 1"
+              <button class="btn btn-sm btn-warning" data-action="POS.parkOrder" style="grid-column: span 1"
                 title="Mettre en attente">⏳ Attente</button>
-              <button class="btn btn-sm btn-info" onclick="POS.showParkedOrders()" style="grid-column: span 2"
+              <button class="btn btn-sm btn-info" data-action="POS.showParkedOrders" style="grid-column: span 2"
                 title="Reprendre attente">📂 Reprendre attente</button>
             </div>
 
@@ -663,49 +661,49 @@
               </div>
               <button class="btn btn-outline"
                 style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                onclick="POS.numpadAction(1)">1</button>
+                data-action="POS.numpadAction" data-param="1">1</button>
               <button class="btn btn-outline"
                 style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                onclick="POS.numpadAction(2)">2</button>
+                data-action="POS.numpadAction" data-param="2">2</button>
               <button class="btn btn-outline"
                 style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                onclick="POS.numpadAction(3)">3</button>
+                data-action="POS.numpadAction" data-param="3">3</button>
               <button class="btn btn-outline"
                 style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                onclick="POS.numpadAction(4)">4</button>
+                data-action="POS.numpadAction" data-param="4">4</button>
               <button class="btn btn-outline"
                 style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                onclick="POS.numpadAction(5)">5</button>
+                data-action="POS.numpadAction" data-param="5">5</button>
               <button class="btn btn-outline"
                 style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                onclick="POS.numpadAction(6)">6</button>
+                data-action="POS.numpadAction" data-param="6">6</button>
               <button class="btn btn-outline"
                 style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                onclick="POS.numpadAction(7)">7</button>
+                data-action="POS.numpadAction" data-param="7">7</button>
               <button class="btn btn-outline"
                 style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                onclick="POS.numpadAction(8)">8</button>
+                data-action="POS.numpadAction" data-param="8">8</button>
               <button class="btn btn-outline"
                 style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                onclick="POS.numpadAction(9)">9</button>
+                data-action="POS.numpadAction" data-param="9">9</button>
               <button class="btn btn-outline"
                 style="font-size:1.2rem;padding:10px;font-weight:800;color:var(--danger);background:var(--bg-card);border-color:var(--border)"
-                onclick="POS.numpadAction('C')">C</button>
+                data-action="POS.numpadAction" data-param="C">C</button>
               <button class="btn btn-outline"
                 style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                onclick="POS.numpadAction(0)">0</button>
+                data-action="POS.numpadAction" data-param="0">0</button>
               <button class="btn btn-primary" style="font-size:1.2rem;padding:10px;font-weight:700;"
-                onclick="POS.numpadAction('QTY')">Qté</button>
+                data-action="POS.numpadAction" data-param="QTY">Qté</button>
             </div>
 
             <!-- Bouton de paiement Global -->
             <div class="cart-pay-actions" style="display: flex; flex-direction: column; gap: 6px;">
-              <button class="btn btn-primary" onclick="POS.openPaymentModal()" id="btnGlobalPay"
+              <button class="btn btn-primary" data-action="POS.openPaymentModal" id="btnGlobalPay"
                 style="width:100%;font-size:1.5rem;padding:20px;font-weight:800;background:var(--success);border:none"
                 disabled>
                 💵 PAYER <span id="payBtnAmount" style="font-weight:400;margin-left:8px">0.00 DH</span>
               </button>
-              <button class="btn" onclick="POS.expressCash()" id="btnExpressCash"
+              <button class="btn" data-action="POS.expressCash" id="btnExpressCash"
                 style="width:100%;padding:10px;font-weight:700;background:var(--warning);border:none;color:#fff;font-size:0.9rem"
                 disabled>
                 ⚡ Express Espèces
@@ -723,20 +721,20 @@
             <div class="view-filters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
               <div style="display:flex;align-items:center;gap:5px">
                 <label style="font-size:0.8rem">De</label>
-                <input type="date" id="historyDate" onchange="HISTORY.load()">
+                <input type="date" id="historyDate" data-change-action="HISTORY.load">
               </div>
               <div style="display:flex;align-items:center;gap:5px">
                 <label style="font-size:0.8rem">À</label>
-                <input type="date" id="historyDateFin" onchange="HISTORY.load()">
+                <input type="date" id="historyDateFin" data-change-action="HISTORY.load">
               </div>
-              <select id="historyStatut" onchange="HISTORY.load()">
+              <select id="historyStatut" data-change-action="HISTORY.load">
                 <option value="">Tous statuts</option>
                 <option value="payee">Payée</option>
                 <option value="annulee">Annulée</option>
               </select>
-              <input type="text" id="historySearch" placeholder="🔍 CMD / Client..." oninput="HISTORY.load()"
+              <input type="text" id="historySearch" placeholder="🔍 CMD / Client..." data-input-action="HISTORY.load"
                 style="flex:1;min-width:150px">
-              <button class="btn btn-info btn-sm" id="btnBatchInvoice" onclick="HISTORY.generateBatchInvoice()"
+              <button class="btn btn-info btn-sm" id="btnBatchInvoice" data-action="HISTORY.generateBatchInvoice"
                 style="display:none">📄 Facture Groupée (<span id="selectedCount">0</span>)</button>
             </div>
           </div>
@@ -750,10 +748,10 @@
           <div class="view-header">
             <h2>👥 Gestion Clients & Fidélité</h2>
             <div class="view-actions">
-              <input type="text" id="clientSearch" placeholder="🔍 Rechercher..." oninput="CLIENTS.search(this.value)">
-              <button class="btn btn-sm" onclick="CLIENTS.showAddCredit()" id="btnCreditClient" style="display:none">💳
+              <input type="text" id="clientSearch" placeholder="🔍 Rechercher..." data-input-action="CLIENTS.search">
+              <button class="btn btn-sm" data-action="CLIENTS.showAddCredit" id="btnCreditClient" style="display:none">💳
                 Ajouter Crédit</button>
-              <button class="btn btn-primary btn-sm" onclick="CLIENTS.openForm()">+ Nouveau Client</button>
+              <button class="btn btn-primary btn-sm" data-action="CLIENTS.openForm">+ Nouveau Client</button>
             </div>
           </div>
           <div id="clientsBody" class="view-body"></div>
@@ -766,12 +764,12 @@
           <div class="view-header">
             <h2>📦 Gestion du Stock</h2>
             <div class="view-actions">
-              <button class="btn btn-sm btn-outline" onclick="STOCK.openQuickInventory()">⚡ Inventaire Rapide</button>
-              <button class="btn btn-sm" onclick="STOCK.showAlertes()" id="btnAlertesStock">Alertes</button>
-              <button class="btn btn-sm" onclick="STOCK.showAlertesDLC()" id="btnDlcAlertes"
+              <button class="btn btn-sm btn-outline" data-action="STOCK.openQuickInventory">⚡ Inventaire Rapide</button>
+              <button class="btn btn-sm" data-action="STOCK.showAlertes" id="btnAlertesStock">Alertes</button>
+              <button class="btn btn-sm" data-action="STOCK.showAlertesDLC" id="btnDlcAlertes"
                 title="Dates Limites de Consommation">Alertes DLC</button>
-              <button class="btn btn-sm" onclick="STOCK.showMouvements()">Mouvements</button>
-              <button class="btn btn-primary btn-sm" onclick="STOCK.openAchatForm()">+ Achat fournisseur</button>
+              <button class="btn btn-sm" data-action="STOCK.showMouvements">Mouvements</button>
+              <button class="btn btn-primary btn-sm" data-action="STOCK.openAchatForm">+ Achat fournisseur</button>
             </div>
           </div>
           <div id="stockBody" class="view-body"></div>
@@ -784,20 +782,20 @@
           <div class="view-header" style="flex-shrink:0;">
             <h2>📊 Rapports Professionnels</h2>
             <div class="view-filters" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-              <input type="date" id="statsDate" onchange="STATS.load()">
-              <input type="date" id="statsDateFin" onchange="STATS.load()" style="display:none;">
-              <select id="statsUser" onchange="STATS.load()" style="max-width:150px">
+              <input type="date" id="statsDate" data-change-action="STATS.load">
+              <input type="date" id="statsDateFin" data-change-action="STATS.load" style="display:none;">
+              <select id="statsUser" data-change-action="STATS.load" style="max-width:150px">
                 <option value="">Tous les caissiers</option>
               </select>
-              <select id="statsCat" onchange="STATS.load()" style="max-width:150px">
+              <select id="statsCat" data-change-action="STATS.load" style="max-width:150px">
                 <option value="">Toutes les catégories</option>
               </select>
-              <button class="btn btn-outline btn-sm" onclick="STATS.exportCSV()" title="Exporter CSV">📥 CSV</button>
-              <button class="btn btn-success btn-sm" onclick="STATS.exportXLSX()" title="Exporter Excel (.xlsx)">📊
+              <button class="btn btn-outline btn-sm" data-action="STATS.exportCSV" title="Exporter CSV">📥 CSV</button>
+              <button class="btn btn-success btn-sm" data-action="STATS.exportXLSX" title="Exporter Excel (.xlsx)">📊
                 Excel</button>
-              <button class="btn btn-outline btn-sm" onclick="STATS.printA4()" title="Imprimer Rapport A4">📄 Imprimer
+              <button class="btn btn-outline btn-sm" data-action="STATS.printA4" title="Imprimer Rapport A4">📄 Imprimer
                 (A4)</button>
-              <button class="btn btn-outline btn-sm" onclick="STATS.print80mm()" title="Format Ticket 80mm">🧾 Ticket
+              <button class="btn btn-outline btn-sm" data-action="STATS.print80mm" title="Format Ticket 80mm">🧾 Ticket
                 (80mm)</button>
             </div>
           </div>
@@ -806,29 +804,29 @@
             <!-- Sidebar -->
             <div class="reports-sidebar" id="reportsSidebar"
               style="width:220px; border-right:1px solid var(--border); overflow-y:auto; padding-right:10px;">
-              <div class="report-menu-item active" onclick="STATS.switchReport('synthese')" data-report="synthese">📋
+              <div class="report-menu-item active" data-action="STATS.switchReport" data-param="synthese" data-report="synthese">📋
                 Synthèse Générale</div>
-              <div class="report-menu-item" onclick="STATS.switchReport('categories')" data-report="categories">📂
+              <div class="report-menu-item" data-action="STATS.switchReport" data-param="categories" data-report="categories">📂
                 Ventes par Catégorie</div>
-              <div class="report-menu-item" onclick="STATS.switchReport('utilisateurs')" data-report="utilisateurs">👤
+              <div class="report-menu-item" data-action="STATS.switchReport" data-param="utilisateurs" data-report="utilisateurs">👤
                 Performance Caissiers</div>
-              <div class="report-menu-item" onclick="STATS.switchReport('paiements')" data-report="paiements">💳 Journal
+              <div class="report-menu-item" data-action="STATS.switchReport" data-param="paiements" data-report="paiements">💳 Journal
                 des Paiements</div>
-              <div class="report-menu-item" onclick="STATS.switchReport('marges')" data-report="marges">📈 Marges &
+              <div class="report-menu-item" data-action="STATS.switchReport" data-param="marges" data-report="marges">📈 Marges &
                 Profit</div>
-              <div class="report-menu-item" onclick="STATS.switchReport('credits')" data-report="credits">🏧 Crédits &
+              <div class="report-menu-item" data-action="STATS.switchReport" data-param="credits" data-report="credits">🏧 Crédits &
                 Dettes</div>
-              <div class="report-menu-item" onclick="STATS.switchReport('tva')" data-report="tva">🧾 Rapport TVA</div>
-              <div class="report-menu-item" onclick="STATS.switchReport('stock-valorisation')"
+              <div class="report-menu-item" data-action="STATS.switchReport" data-param="tva" data-report="tva">🧾 Rapport TVA</div>
+              <div class="report-menu-item" data-action="STATS.switchReport" data-param="stock-valorisation"
                 data-report="stock-valorisation">💰 Valorisation Stock</div>
-              <div class="report-menu-item" onclick="STATS.switchReport('stock-alertes')" data-report="stock-alertes">⚠️
+              <div class="report-menu-item" data-action="STATS.switchReport" data-param="stock-alertes" data-report="stock-alertes">⚠️
                 Alertes Stock</div>
-              <div class="report-menu-item" onclick="STATS.switchReport('audit')" data-report="audit">🔍 Journal d'Audit
+              <div class="report-menu-item" data-action="STATS.switchReport" data-param="audit" data-report="audit">🔍 Journal d'Audit
               </div>
-              <div class="report-menu-item" onclick="STATS.switchReport('achats')" data-report="achats">🏭 Achats
+              <div class="report-menu-item" data-action="STATS.switchReport" data-param="achats" data-report="achats">🏭 Achats
                 Fournisseurs
               </div>
-              <div class="report-menu-item" onclick="STATS.switchReport('pertes')" data-report="pertes">💥 Pertes &
+              <div class="report-menu-item" data-action="STATS.switchReport" data-param="pertes" data-report="pertes">💥 Pertes &
                 Casses
               </div>
             </div>
@@ -848,7 +846,7 @@
         <div class="view-header">
           <h2>🚚 Livraisons</h2>
           <div style="display:flex;gap:8px;">
-            <select id="livraisonStatut" onchange="LIVRAISON.load()"
+            <select id="livraisonStatut" data-change-action="LIVRAISON.load"
               style="padding:6px;border-radius:6px;border:1px solid var(--border)">
               <option value="">Tous statuts</option>
               <option value="en_preparation">En préparation</option>
@@ -877,19 +875,19 @@
           <div class="view-header">
             <h2>⚙️ Administration</h2>
             <div class="admin-tabs">
-              <button class="tab-btn active" onclick="ADMIN.switchTab('produits')">🍞 Produits</button>
-              <button class="tab-btn" onclick="ADMIN.switchTab('categories')">📂 Catégories</button>
-              <button class="tab-btn" onclick="ADMIN.switchTab('utilisateurs')">👤 Utilisateurs</button>
-              <button class="tab-btn" onclick="ADMIN.switchTab('remises')">🏷️ Remises</button>
-              <button class="tab-btn" onclick="ADMIN.switchTab('depenses')">💸 Dépenses</button>
-              <button class="tab-btn" onclick="ADMIN.switchTab('fournisseurs')">🚚 Fournisseurs</button>
-              <button class="tab-btn" onclick="ADMIN.switchTab('clients')">👥 Clients</button>
-              <button class="tab-btn" onclick="ADMIN.switchTab('parametres')">🔧 Paramètres</button>
-              <button class="tab-btn" onclick="ADMIN.switchTab('succursales')">🏢 Succursales</button>
-              <button class="tab-btn" onclick="ADMIN.switchTab('backups')">💾 Sauvegardes</button>
-              <button class="tab-btn" onclick="ADMIN.switchTab('imprimantes')">🖨️ Imprimantes</button>
-              <button class="tab-btn" onclick="ADMIN.switchTab('cmi')">💳 Paiement CMI</button>
-              <button class="tab-btn" onclick="ADMIN.switchTab('balance')">⚖️ Balance</button>
+              <button class="tab-btn active" data-action="ADMIN.switchTab" data-param="produits">🍞 Produits</button>
+              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="categories">📂 Catégories</button>
+              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="utilisateurs">👤 Utilisateurs</button>
+              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="remises">🏷️ Remises</button>
+              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="depenses">💸 Dépenses</button>
+              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="fournisseurs">🚚 Fournisseurs</button>
+              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="clients">👥 Clients</button>
+              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="parametres">🔧 Paramètres</button>
+              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="succursales">🏢 Succursales</button>
+              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="backups">💾 Sauvegardes</button>
+              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="imprimantes">🖨️ Imprimantes</button>
+              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="cmi">💳 Paiement CMI</button>
+              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="balance">⚖️ Balance</button>
             </div>
           </div>
           <div id="adminBody" class="view-body"></div>
@@ -905,7 +903,7 @@
         <div class="modal-header"
           style="justify-content:space-between;align-items:center;display:flex;margin-bottom:1rem;border-bottom:1px solid var(--border);padding-bottom:10px">
           <h3 id="promptTitle" style="margin:0;font-size:1.4rem">Saisie</h3>
-          <button class="btn-ghost" onclick="APP.cancelPrompt()" style="font-size:1.2rem">✕</button>
+          <button class="btn-ghost" data-action="APP.cancelPrompt" style="font-size:1.2rem">✕</button>
         </div>
 
         <div class="modal-body" style="overflow-y:auto;flex:1">
@@ -916,7 +914,7 @@
               style="width:100%;font-size:1.5rem;padding:12px;text-align:center;font-weight:bold;border:2px solid var(--primary);border-radius:var(--radius)"
               autocomplete="off" placeholder="...">
             <button class="btn-ghost"
-              onclick="document.getElementById('promptInput').value='';document.getElementById('promptInput').focus()"
+              id="btnClearPromptInput"
               style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--text-muted)">✕</button>
           </div>
 
@@ -924,80 +922,80 @@
           <div id="promptNumpad" class="numpad-grid"
             style="display:none;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:15px">
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px"
-              onclick="APP.promptKeyPress('1')">1</button>
+              data-action="APP.promptKeyPress" data-param="1">1</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px"
-              onclick="APP.promptKeyPress('2')">2</button>
+              data-action="APP.promptKeyPress" data-param="2">2</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px"
-              onclick="APP.promptKeyPress('3')">3</button>
+              data-action="APP.promptKeyPress" data-param="3">3</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px"
-              onclick="APP.promptKeyPress('4')">4</button>
+              data-action="APP.promptKeyPress" data-param="4">4</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px"
-              onclick="APP.promptKeyPress('5')">5</button>
+              data-action="APP.promptKeyPress" data-param="5">5</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px"
-              onclick="APP.promptKeyPress('6')">6</button>
+              data-action="APP.promptKeyPress" data-param="6">6</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px"
-              onclick="APP.promptKeyPress('7')">7</button>
+              data-action="APP.promptKeyPress" data-param="7">7</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px"
-              onclick="APP.promptKeyPress('8')">8</button>
+              data-action="APP.promptKeyPress" data-param="8">8</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px"
-              onclick="APP.promptKeyPress('9')">9</button>
+              data-action="APP.promptKeyPress" data-param="9">9</button>
             <button class="btn btn-outline text-danger" style="font-size:1.5rem;padding:15px"
-              onclick="APP.promptKeyPress('BACKSPACE')">⌫</button>
+              data-action="APP.promptKeyPress" data-param="BACKSPACE">⌫</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px"
-              onclick="APP.promptKeyPress('0')">0</button>
+              data-action="APP.promptKeyPress" data-param="0">0</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px"
-              onclick="APP.promptKeyPress('.')">.</button>
+              data-action="APP.promptKeyPress" data-param=".">.</button>
           </div>
 
           <!-- Keyboard (Simple A-Z) -->
           <div id="promptKeyboard" style="display:none;flex-direction:column;gap:6px;margin-bottom:15px">
             <!-- Row 1 -->
             <div style="display:flex;width:100%;gap:4px">
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('A')">A</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('Z')">Z</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('E')">E</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('R')">R</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('T')">T</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('Y')">Y</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('U')">U</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('I')">I</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('O')">O</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('P')">P</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="A">A</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="Z">Z</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="E">E</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="R">R</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="T">T</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="Y">Y</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="U">U</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="I">I</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="O">O</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="P">P</button>
             </div>
             <!-- Row 2 -->
             <div style="display:flex;width:100%;gap:4px;padding:0 10px">
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('Q')">Q</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('S')">S</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('D')">D</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('F')">F</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('G')">G</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('H')">H</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('J')">J</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('K')">K</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('L')">L</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('M')">M</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="Q">Q</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="S">S</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="D">D</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="F">F</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="G">G</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="H">H</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="J">J</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="K">K</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="L">L</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="M">M</button>
             </div>
             <!-- Row 3 -->
             <div style="display:flex;width:100%;gap:4px;padding:0 20px">
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('W')">W</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('X')">X</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('C')">C</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('V')">V</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('B')">B</button>
-              <button class="btn btn-outline" style="flex:1;padding:12px" onclick="APP.promptKeyPress('N')">N</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="W">W</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="X">X</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="C">C</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="V">V</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="B">B</button>
+              <button class="btn btn-outline" style="flex:1;padding:12px" data-action="APP.promptKeyPress" data-param="N">N</button>
               <button class="btn btn-outline" style="flex:1;padding:12px"
-                onclick="APP.promptKeyPress('BACKSPACE')">⌫</button>
+                data-action="APP.promptKeyPress" data-param="BACKSPACE">⌫</button>
             </div>
             <!-- Space -->
             <div style="display:flex;width:100%;gap:4px;margin-top:4px">
               <button class="btn btn-outline" style="flex:1;padding:12px"
-                onclick="APP.promptKeyPress('SPACE')">ESPACE</button>
+                data-action="APP.promptKeyPress" data-param="SPACE">ESPACE</button>
             </div>
           </div>
 
           <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px">
-            <button class="btn btn-secondary btn-lg" onclick="APP.cancelPrompt()" style="flex:1">Annuler</button>
-            <button class="btn btn-primary btn-lg" onclick="APP.confirmPrompt()" style="flex:1">✅ Valider</button>
+            <button class="btn btn-secondary btn-lg" data-action="APP.cancelPrompt" style="flex:1">Annuler</button>
+            <button class="btn btn-primary btn-lg" data-action="APP.confirmPrompt" style="flex:1">✅ Valider</button>
           </div>
         </div>
       </div>
@@ -1010,8 +1008,8 @@
         <h2>Paiement réussi !</h2>
         <div id="successDetails"></div>
         <div class="success-actions">
-          <button class="btn btn-primary" onclick="APP.closeModal('successModal')">OK</button>
-          <button class="btn btn-outline" onclick="POS.printLastTicket()">🖨️ Imprimer</button>
+          <button class="btn btn-primary" data-action="APP.closeModal" data-param="successModal">OK</button>
+          <button class="btn btn-outline" data-action="POS.printLastTicket">🖨️ Imprimer</button>
         </div>
       </div>
     </div>
@@ -1021,7 +1019,7 @@
       <div class="modal">
         <div class="modal-header">
           <h2>💰 Gestion de Caisse</h2>
-          <button class="btn btn-icon modal-close" onclick="APP.closeModal('caisseModal')">✕</button>
+          <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="caisseModal">✕</button>
         </div>
         <div class="modal-body" id="caisseBody"></div>
       </div>
@@ -1033,20 +1031,19 @@
       <div class="modal modal-sm">
         <div class="modal-header">
           <h2 id="deliveryModalTitle">🛍️ Infos Commande</h2>
-          <button class="btn btn-icon modal-close" onclick="APP.closeModal('deliveryModal')">✕</button>
+          <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="deliveryModal">✕</button>
         </div>
         <div class="modal-body">
           <div class="form-group">
             <label>Client</label>
             <div style="display:flex;gap:4px">
               <input type="text" id="deliveryClientName" placeholder="Nom du client" class="input-full">
-              <button class="btn btn-outline" onclick="POS.openClientSearch('delivery')">🔍</button>
+              <button class="btn btn-outline" data-action="POS.openClientSearch" data-param="delivery">🔍</button>
             </div>
           </div>
           <div class="form-group">
             <label>Téléphone</label>
-            <input type="tel" id="deliveryPhone" placeholder="06..." class="input-full"
-              oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            <input type="tel" id="deliveryPhone" placeholder="06..." class="input-full">
           </div>
           <div class="form-group" id="deliveryAddressGroup">
             <label>Adresse de livraison</label>
@@ -1057,7 +1054,7 @@
             <input type="number" id="deliveryFee" step="0.5" min="0" value="0" class="input-full">
           </div>
           <div class="form-actions">
-            <button id="btnSaveDelivery" class="btn btn-primary" onclick="POS.saveDeliveryInfo()">Valider</button>
+            <button id="btnSaveDelivery" class="btn btn-primary" data-action="POS.saveDeliveryInfo">Valider</button>
           </div>
         </div>
       </div>
@@ -1068,13 +1065,13 @@
       <div class="modal">
         <div class="modal-header">
           <h2>👤 Sélectionner un Client</h2>
-          <button class="btn btn-icon modal-close" onclick="APP.closeModal('clientSearchModal')">✕</button>
+          <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="clientSearchModal">✕</button>
         </div>
         <div class="modal-body">
           <div style="display:flex;gap:8px">
             <input type="text" id="posClientSearch" placeholder="🔍 Nom ou téléphone..."
-              oninput="POS.searchClient(this.value)" class="input-full">
-            <button class="btn btn-success" onclick="CLIENTS.openForm()">+</button>
+              data-input-action="POS.searchClient" class="input-full">
+            <button class="btn btn-success" data-action="CLIENTS.openForm">+</button>
           </div>
           <div id="posClientResults" style="margin-top:12px;max-height:300px;overflow-y:auto;"></div>
         </div>
@@ -1086,7 +1083,7 @@
       <div class="modal modal-sm">
         <div class="modal-header">
           <h2>🕒 Historique Rapide</h2>
-          <button class="btn btn-icon modal-close" onclick="APP.closeModal('recentOrdersModal')">✕</button>
+          <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="recentOrdersModal">✕</button>
         </div>
         <div class="modal-body" id="recentOrdersList" style="max-height:60vh;overflow-y:auto;">
         </div>
@@ -1098,7 +1095,7 @@
       <div class="modal">
         <div class="modal-header">
           <h2 id="clientFormTitle">👤 Nouveau Client</h2>
-          <button class="btn btn-icon modal-close" onclick="APP.closeModal('clientFormModal')">✕</button>
+          <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="clientFormModal">✕</button>
         </div>
         <div class="modal-body">
           <input type="hidden" id="clientFormId">
@@ -1118,8 +1115,8 @@
           <div class="form-group"><label>Adresse</label><input type="text" id="clientFormAdresse"></div>
           <div class="form-group"><label>Notes</label><textarea id="clientFormNotes" rows="2"></textarea></div>
           <div class="form-actions">
-            <button id="btnSaveClient" class="btn btn-primary" onclick="CLIENTS.save()">💾 Enregistrer</button>
-            <button class="btn btn-secondary" onclick="APP.closeModal('clientFormModal')">Annuler</button>
+            <button id="btnSaveClient" class="btn btn-primary" data-action="CLIENTS.save">💾 Enregistrer</button>
+            <button class="btn btn-secondary" data-action="APP.closeModal" data-param="clientFormModal">Annuler</button>
           </div>
         </div>
       </div>
@@ -1130,7 +1127,7 @@
       <div class="modal modal-sm">
         <div class="modal-header">
           <h2>🏷️ Appliquer une Remise</h2>
-          <button class="btn btn-icon modal-close" onclick="APP.closeModal('discountModal')">✕</button>
+          <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="discountModal">✕</button>
         </div>
         <div class="modal-body">
           <div class="form-group">
@@ -1146,7 +1143,7 @@
           </div>
           <div id="activePromotions" style="margin-top:12px;"></div>
           <div class="form-actions">
-            <button class="btn btn-primary" onclick="POS.applyDiscount()">✅ Appliquer</button>
+            <button class="btn btn-primary" data-action="POS.applyDiscount">✅ Appliquer</button>
           </div>
         </div>
       </div>
@@ -1157,7 +1154,7 @@
       <div class="modal modal-sm" style="max-width:320px">
         <div class="modal-header">
           <h2 id="numpadTitle">🔢 Quantité</h2>
-          <button class="btn btn-icon modal-close" onclick="APP.closeModal('numpadModal')">✕</button>
+          <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="numpadModal">✕</button>
         </div>
         <div class="modal-body">
           <div id="numpadValueDisplay"
@@ -1166,37 +1163,37 @@
 
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px;"
-              onclick="POS.numpadModalAction(7)">7</button>
+              data-action="POS.numpadModalAction" data-param="7">7</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px;"
-              onclick="POS.numpadModalAction(8)">8</button>
+              data-action="POS.numpadModalAction" data-param="8">8</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px;"
-              onclick="POS.numpadModalAction(9)">9</button>
+              data-action="POS.numpadModalAction" data-param="9">9</button>
 
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px;"
-              onclick="POS.numpadModalAction(4)">4</button>
+              data-action="POS.numpadModalAction" data-param="4">4</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px;"
-              onclick="POS.numpadModalAction(5)">5</button>
+              data-action="POS.numpadModalAction" data-param="5">5</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px;"
-              onclick="POS.numpadModalAction(6)">6</button>
+              data-action="POS.numpadModalAction" data-param="6">6</button>
 
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px;"
-              onclick="POS.numpadModalAction(1)">1</button>
+              data-action="POS.numpadModalAction" data-param="1">1</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px;"
-              onclick="POS.numpadModalAction(2)">2</button>
+              data-action="POS.numpadModalAction" data-param="2">2</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px;"
-              onclick="POS.numpadModalAction(3)">3</button>
+              data-action="POS.numpadModalAction" data-param="3">3</button>
 
             <button class="btn btn-outline text-danger" style="font-size:1.5rem;padding:15px;font-weight:bold"
-              onclick="POS.numpadModalAction('C')">C</button>
+              data-action="POS.numpadModalAction" data-param="C">C</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px;"
-              onclick="POS.numpadModalAction(0)">0</button>
+              data-action="POS.numpadModalAction" data-param="0">0</button>
             <button class="btn btn-outline" style="font-size:1.5rem;padding:15px;"
-              onclick="POS.numpadModalAction('.')">.</button>
+              data-action="POS.numpadModalAction" data-param=".">.</button>
           </div>
 
           <div class="form-actions" style="margin-top:20px;">
             <button class="btn btn-primary btn-block" style="padding:15px;font-size:1.2rem;"
-              onclick="POS.numpadModalConfirm()">✅ Valider</button>
+              data-action="POS.numpadModalConfirm">✅ Valider</button>
           </div>
         </div>
       </div>
@@ -1207,7 +1204,7 @@
       <div class="modal">
         <div class="modal-header">
           <h2 id="produitFormTitle">🍞 Nouveau Produit</h2>
-          <button class="btn btn-icon modal-close" onclick="APP.closeModal('produitFormModal')">✕</button>
+          <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="produitFormModal">✕</button>
         </div>
         <div class="modal-body">
           <input type="hidden" id="produitFormId">
@@ -1255,10 +1252,9 @@
           <div class="form-group"><label>Description</label><textarea id="produitFormDesc" rows="2"></textarea></div>
           <div class="form-actions">
             <button id="btnCreateVariant" class="btn btn-info"
-              onclick="ADMIN.createVariant(document.getElementById('produitFormId').value)"
               style="display:none;margin-right:auto">➕ Créer Variante</button>
-            <button id="btnSaveProduit" class="btn btn-primary" onclick="ADMIN.saveProduit()">💾 Enregistrer</button>
-            <button class="btn btn-secondary" onclick="APP.closeModal('produitFormModal')">Annuler</button>
+            <button id="btnSaveProduit" class="btn btn-primary" data-action="ADMIN.saveProduit">💾 Enregistrer</button>
+            <button class="btn btn-secondary" data-action="APP.closeModal" data-param="produitFormModal">Annuler</button>
           </div>
         </div>
       </div>
@@ -1269,7 +1265,7 @@
       <div class="modal">
         <div class="modal-header">
           <h2 id="userFormTitle">👤 Nouvel Utilisateur</h2>
-          <button class="btn btn-icon modal-close" onclick="APP.closeModal('userFormModal')">✕</button>
+          <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="userFormModal">✕</button>
         </div>
         <div class="modal-body">
           <input type="hidden" id="userFormId">
@@ -1292,8 +1288,8 @@
             <div class="form-group"><label>Email</label><input type="email" id="userFormEmail"></div>
           </div>
           <div class="form-actions">
-            <button id="btnSaveUser" class="btn btn-primary" onclick="ADMIN.saveUser()">💾 Enregistrer</button>
-            <button class="btn btn-secondary" onclick="APP.closeModal('userFormModal')">Annuler</button>
+            <button id="btnSaveUser" class="btn btn-primary" data-action="ADMIN.saveUser">💾 Enregistrer</button>
+            <button class="btn btn-secondary" data-action="APP.closeModal" data-param="userFormModal">Annuler</button>
           </div>
         </div>
       </div>
@@ -1304,7 +1300,7 @@
       <div class="modal">
         <div class="modal-header">
           <h2 id="fournisseurFormTitle">🚚 Nouveau Fournisseur</h2>
-          <button class="btn btn-icon modal-close" onclick="APP.closeModal('fournisseurFormModal')">✕</button>
+          <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="fournisseurFormModal">✕</button>
         </div>
         <div class="modal-body">
           <input type="hidden" id="fournisseurFormId">
@@ -1327,9 +1323,9 @@
             <textarea id="fournisseurFormNotes" rows="2"></textarea>
           </div>
           <div class="form-actions">
-            <button id="btnSaveFournisseur" class="btn btn-primary" onclick="ADMIN.saveFournisseur()">💾
+            <button id="btnSaveFournisseur" class="btn btn-primary" data-action="ADMIN.saveFournisseur">💾
               Enregistrer</button>
-            <button class="btn btn-secondary" onclick="APP.closeModal('fournisseurFormModal')">Annuler</button>
+            <button class="btn btn-secondary" data-action="APP.closeModal" data-param="fournisseurFormModal">Annuler</button>
           </div>
         </div>
       </div>
@@ -1340,7 +1336,7 @@
       <div class="modal modal-lg">
         <div class="modal-header">
           <h2>🧾 Détail Commande</h2>
-          <button class="btn btn-icon modal-close" onclick="APP.closeModal('orderDetailModal')">✕</button>
+          <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="orderDetailModal">✕</button>
         </div>
         <div class="modal-body" id="orderDetailBody"></div>
       </div>
@@ -1351,7 +1347,7 @@
       <div class="modal modal-sm">
         <div class="modal-header">
           <h2>📦 Ajuster le Stock</h2>
-          <button class="btn btn-icon modal-close" onclick="APP.closeModal('stockAdjustModal')">✕</button>
+          <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="stockAdjustModal">✕</button>
         </div>
         <div class="modal-body">
           <p><strong id="stockAdjustName">—</strong></p>
@@ -1362,7 +1358,7 @@
           <div class="form-group"><label>Motif</label><input type="text" id="stockAdjustMotif"
               placeholder="Réapprovisionnement, inventaire..."></div>
           <div class="form-actions">
-            <button id="btnSaveAdjust" class="btn btn-primary" onclick="STOCK.saveAdjust()">✅ Valider</button>
+            <button id="btnSaveAdjust" class="btn btn-primary" data-action="STOCK.saveAdjust">✅ Valider</button>
           </div>
         </div>
       </div>
@@ -1373,7 +1369,7 @@
       <div class="modal modal-sm">
         <div class="modal-header">
           <h2 style="color:var(--danger)">💥 Déclarer une Perte</h2>
-          <button class="btn btn-icon modal-close" onclick="APP.closeModal('perteModal')">✕</button>
+          <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="perteModal">✕</button>
         </div>
         <div class="modal-body">
           <p><strong id="perteName">—</strong></p>
@@ -1400,8 +1396,8 @@
           </div>
           <div class="form-actions" style="margin-top:24px">
             <button class="btn" style="background:#f1f3f5;color:var(--text)"
-              onclick="APP.closeModal('perteModal')">Annuler</button>
-            <button id="btnSavePerte" class="btn btn-danger" onclick="STOCK.savePerte()">🗑️ Confirmer Perte</button>
+              data-action="APP.closeModal" data-param="perteModal">Annuler</button>
+            <button id="btnSavePerte" class="btn btn-danger" data-action="STOCK.savePerte">🗑️ Confirmer Perte</button>
           </div>
         </div>
       </div>
@@ -1413,13 +1409,13 @@
       <div class="modal modal-lg">
         <div class="modal-header">
           <h2>⏳ Commandes en Attente</h2>
-          <button class="btn btn-icon modal-close" onclick="APP.closeModal('parkedOrdersModal')">✕</button>
+          <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="parkedOrdersModal">✕</button>
         </div>
         <div class="modal-body">
           <div id="parkedOrdersList" style="display:grid;gap:10px;max-height:60vh;overflow-y:auto"></div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" onclick="APP.closeModal('parkedOrdersModal')">Fermer</button>
+          <button class="btn btn-secondary" data-action="APP.closeModal" data-param="parkedOrdersModal">Fermer</button>
         </div>
       </div>
     </div>
@@ -1438,7 +1434,7 @@
               style="font-size:1.5rem;text-align:center">
           </div>
           <button class="btn btn-primary btn-block" style="padding:15px;font-size:1.2rem"
-            onclick="POS.openRegister()">Ouvrir la session</button>
+            data-action="POS.openRegister">Ouvrir la session</button>
         </div>
       </div>
     </div>
@@ -1448,7 +1444,7 @@
       <div class="modal">
         <div class="modal-header">
           <h2>🔒 Clôture de Caisse</h2>
-          <button class="btn btn-icon modal-close" onclick="APP.closeModal('closeRegisterModal')">✕</button>
+          <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="closeRegisterModal">✕</button>
         </div>
         <div class="modal-body">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px;text-align:center">
@@ -1476,7 +1472,7 @@
 
           <div class="form-group">
             <label>Montant Réel (Compté)</label>
-            <input type="number" id="closeRegReal" class="form-control" step="0.5" oninput="POS.calcCloseDiff()"
+            <input type="number" id="closeRegReal" class="form-control" step="0.5"
               style="font-size:1.5rem;text-align:center">
           </div>
 
@@ -1489,11 +1485,11 @@
           </div>
 
           <div class="form-actions" style="margin-top:20px;display:flex;gap:10px">
-            <button class="btn btn-outline" style="margin-right:auto" onclick="POS.openCashMovementModal()">💸 Mouvement
+            <button class="btn btn-outline" style="margin-right:auto" data-action="POS.openCashMovementModal">💸 Mouvement
               Espèces</button>
-            <button class="btn btn-outline" onclick="POS.printXReport()">📊 Imprimer X</button>
-            <button class="btn btn-warning" onclick="POS.printZReport()">🖨️ Imprimer Z</button>
-            <button class="btn btn-danger" onclick="POS.closeRegisterConfirm()">🔒 Clôturer définitivement</button>
+            <button class="btn btn-outline" data-action="POS.printXReport">📊 Imprimer X</button>
+            <button class="btn btn-warning" data-action="POS.printZReport">🖨️ Imprimer Z</button>
+            <button class="btn btn-danger" data-action="POS.closeRegisterConfirm">🔒 Clôturer définitivement</button>
           </div>
         </div>
       </div>
@@ -1504,13 +1500,12 @@
       <div class="modal modal-sm">
         <div class="modal-header">
           <h2>💸 Mouvement d'Espèces</h2>
-          <button class="btn btn-icon modal-close" onclick="APP.closeModal('cashMovementModal')">✕</button>
+          <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="cashMovementModal">✕</button>
         </div>
         <div class="modal-body">
           <div class="form-group">
             <label>Type de mouvement</label>
-            <select id="cashMvtType" class="form-control"
-              onchange="document.getElementById('expenseLinkGroup').style.display = this.value === 'retrait' ? 'block' : 'none'">
+            <select id="cashMvtType" class="form-control">
               <option value="depot">📥 Dépôt (Entrée)</option>
               <option value="retrait">📤 Retrait (Sortie)</option>
             </select>
@@ -1532,7 +1527,7 @@
             <input type="text" id="cashMvtReason" class="form-control" placeholder="Ex: Achat fournitures...">
           </div>
           <button id="btnSaveCashMvt" class="btn btn-primary btn-block"
-            onclick="POS.saveCashMovement()">Valider</button>
+            data-action="POS.saveCashMovement">Valider</button>
         </div>
       </div>
     </div>
@@ -1559,6 +1554,7 @@
       }
     });
   </script>
+  <script type="module" src="js/event-handlers.js"></script>
 </body>
 
 </html>

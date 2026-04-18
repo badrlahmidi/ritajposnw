@@ -35,7 +35,7 @@ export const STOCK = {
               <option value="">-- Choisir un fournisseur --</option>
               ${this.achatFournisseurs.map(f => `<option value="${f.id}">${f.nom}</option>`).join('')}
             </select>
-            <small style="display:block;margin-top:4px"><a href="#" onclick="DASHBOARD.goToAdmin(); setInterval(()=>ADMIN.switchTab('parametres'), 500)">+ Créer un fournisseur dans Admin</a></small>
+            <small style="display:block;margin-top:4px"><a href="#" data-action="STOCK.goToAdminParams">+ Créer un fournisseur dans Admin</a></small>
           </div>
           <div class="form-group">
             <label>Référence Facture / BL</label>
@@ -62,8 +62,8 @@ export const STOCK = {
         <div class="form-group" style="background:#f8f9fa; padding:15px; border-radius:6px; border:1px solid #ddd">
           <label style="font-weight:bold; color:var(--primary)">Scanner / Chercher produit à ajouter au stock:</label>
           <div style="display:flex; gap:10px; margin-top:8px;">
-            <input type="text" id="achatSearchProd" class="input-full" placeholder="Code-barres ou nom court..." onkeydown="if(event.key==='Enter') STOCK.searchAchatProd()">
-            <button class="btn btn-outline" onclick="STOCK.searchAchatProd()">Ajouter</button>
+            <input type="text" id="achatSearchProd" class="input-full" placeholder="Code-barres ou nom court..." data-keydown-enter-action="STOCK.searchAchatProd">
+            <button class="btn btn-outline" data-action="STOCK.searchAchatProd">Ajouter</button>
           </div>
         </div>
 
@@ -84,8 +84,8 @@ export const STOCK = {
         </div>
 
         <div style="display:flex; justify-content:space-between; margin-top:10px;">
-          <button class="btn btn-secondary" onclick="STOCK.load()">Annuler</button>
-          <button class="btn btn-primary" onclick="STOCK.submitAchat(event)">✅ Valider Réception & Dépense</button>
+          <button class="btn btn-secondary" data-action="STOCK.load">Annuler</button>
+          <button class="btn btn-primary" data-click-event-action="STOCK.submitAchat">✅ Valider Réception & Dépense</button>
         </div>
       </div>
     `;
@@ -141,14 +141,14 @@ export const STOCK = {
       <tr>
         <td><strong>${l.nom}</strong></td>
         <td>
-          <input type="number" class="input-full text-center" style="font-weight:bold" value="${l.prix_achat}" min="0" step="0.01" onchange="STOCK.changeAchatPrice(${i}, this.value)">
+          <input type="number" class="input-full text-center" style="font-weight:bold" value="${l.prix_achat}" min="0" step="0.01" data-change-param-action="STOCK.changeAchatPrice" data-param="${i}">
         </td>
         <td>
-          <input type="number" class="input-full text-center" style="font-weight:bold" value="${l.quantite}" min="1" step="0.1" onchange="STOCK.changeAchatQty(${i}, this.value)">
+          <input type="number" class="input-full text-center" style="font-weight:bold" value="${l.quantite}" min="1" step="0.1" data-change-param-action="STOCK.changeAchatQty" data-param="${i}">
         </td>
         <td class="text-right" style="font-weight:bold;">${l.sous_total.toFixed(2)} DH</td>
         <td class="actions">
-          <button class="btn btn-sm btn-danger" onclick="STOCK.removeAchatLine(${i})">✕</button>
+          <button class="btn btn-sm btn-danger" data-action="STOCK.removeAchatLine" data-param="${i}">✕</button>
         </td>
       </tr>
     `}).join('');
@@ -236,7 +236,7 @@ export const STOCK = {
       < div class= "modal modal-lg" style = "height:90vh;display:flex;flex-direction:column" >
         <div class="modal-header">
           <h2>📦 Session Inventaire #${session.id}</h2>
-          <button class="btn btn-icon modal-close" onclick="document.getElementById('inventoryModal').remove()">✕</button>
+          <button class="btn btn-icon modal-close" data-action="STOCK.closeInventoryModal">✕</button>
         </div>
         <div class="modal-body" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
           <div class="form-group" style="display:flex;gap:10px">
@@ -255,7 +255,7 @@ export const STOCK = {
         </div>
         <div class="modal-footer" style="justify-content:space-between">
             <span class="text-muted">Session active - Modifications non appliquées</span>
-            <button class="btn btn-success" onclick="STOCK.commitInventory(${session.id})">✅ Clôturer & Appliquer</button>
+            <button class="btn btn-success" data-action="STOCK.commitInventory" data-param="${session.id}">✅ Clôturer & Appliquer</button>
         </div>
       </div>`;
     document.body.appendChild(overlay);
@@ -341,8 +341,8 @@ export const STOCK = {
           <td>${s.seuil_alerte}</td>
           <td>${isLow ? '<span class="badge badge-danger">⚠️ Bas</span>' : '<span class="badge badge-success">✅ OK</span>'}</td>
           <td>
-            <button class="btn btn-sm btn-outline" onclick="STOCK.openAdjust(${s.produit_id}, '${s.produit_nom.replace(/'/g, "\\'")}', ${s.quantite})" style="margin-right:2px">Ajuster</button>
-            <button class="btn btn-sm btn-danger" onclick="STOCK.openPerte(${s.produit_id}, '${s.produit_nom.replace(/'/g, "\\'")}', ${s.quantite})" title="Déclarer une perte/casse">💥 Perte</button>
+            <button class="btn btn-sm btn-outline" data-action="STOCK.openAdjust" data-param="${s.produit_id}" data-param2="${s.produit_nom.replace(/"/g, '&quot;')}" data-param3="${s.quantite}" style="margin-right:2px">Ajuster</button>
+            <button class="btn btn-sm btn-danger" data-action="STOCK.openPerte" data-param="${s.produit_id}" data-param2="${s.produit_nom.replace(/"/g, '&quot;')}" data-param3="${s.quantite}" title="Déclarer une perte/casse">💥 Perte</button>
           </td>
         </tr>`;
     }).join('')}</tbody></table></div>`;
@@ -397,7 +397,7 @@ export const STOCK = {
           <td>${m.motif || '—'}</td>
           <td>${m.utilisateur_nom || '—'}</td>
         </tr>`).join('')}</tbody></table>
-        <div class="mt-16"><button class="btn btn-outline btn-sm" onclick="STOCK.load()">← Retour au stock</button></div>`;
+        <div class="mt-16"><button class="btn btn-outline btn-sm" data-action="STOCK.load">← Retour au stock</button></div>`;
     } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }
   },
 

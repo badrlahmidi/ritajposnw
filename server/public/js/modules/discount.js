@@ -54,7 +54,7 @@ export const DiscountModule = {
             const el = document.getElementById('activePromotions');
             if (remises.length) {
                 el.innerHTML = '<h4 class="mb-8">Promotions actives:</h4>' + remises.map(r => `
-          <div class="cart-item" style="cursor:pointer" onclick="POS.applyPromotion(${r.id}, '${r.type}', ${r.valeur})">
+          <div class="cart-item" style="cursor:pointer" data-action="POS.applyPromotion" data-param="${r.id}" data-param2="${r.type}" data-param3="${r.valeur}">
             <div class="cart-item-info">
               <div class="cart-item-name">${r.nom}</div>
               <div class="cart-item-price">${r.type === 'pourcentage' ? r.valeur + '%' : r.valeur + ' DH'}</div>

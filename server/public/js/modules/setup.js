@@ -34,7 +34,7 @@ export const SETUP = {
         if (!grid) return;
 
         grid.innerHTML = this.profiles.map(p => `
-      <div class="profile-card" style="--profile-color:${p.couleur_primaire}" onclick="SETUP.selectProfile('${p.id}')" data-profile="${p.id}">
+      <div class="profile-card" style="--profile-color:${p.couleur_primaire}" data-action="SETUP.selectProfile" data-param="${p.id}" data-profile="${p.id}">
         <div class="profile-check">✓</div>
         <div class="profile-icon">${p.icone}</div>
         <div class="profile-name">${p.nom}</div>

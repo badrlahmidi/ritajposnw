@@ -59,6 +59,7 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'", 'cdn.jsdelivr.net', 'cdnjs.cloudflare.com'],
+      scriptSrcAttr: ["'none'"],
       styleSrc: ["'self'", "'unsafe-inline'", 'cdn.jsdelivr.net', 'fonts.googleapis.com'],
       fontSrc: ["'self'", 'fonts.gstatic.com', 'cdn.jsdelivr.net'],
       imgSrc: ["'self'", 'data:', 'blob:'],

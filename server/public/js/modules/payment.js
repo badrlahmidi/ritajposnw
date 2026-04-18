@@ -76,7 +76,7 @@ export const PaymentModule = {
     },
 
     pmFastCash(amount) {
-        this.pmTendered += amount;
+        this.pmTendered += parseFloat(amount) || 0;
         this.pmBuffer = this.pmTendered.toString();
         this.pmUpdateDisplay();
     },
@@ -295,7 +295,7 @@ export const PaymentModule = {
                     <span>${o.client_nom || 'Client Externe'}</span>
                     <strong>${o.total.toFixed(2)} DH</strong>
                 </div>
-                <button class="btn btn-sm btn-outline btn-block" style="width:100%;margin-top:8px" onclick="POS.printTicket(${o.id})">🖨️ Imprimer</button>
+                <button class="btn btn-sm btn-outline btn-block" style="width:100%;margin-top:8px" data-action="POS.printTicket" data-param="${o.id}">🖨️ Imprimer</button>
             </div>`).join('');
         }
         document.getElementById('recentOrdersModal').style.display = 'flex';
@@ -331,7 +331,7 @@ export const PaymentModule = {
             <span>${o.numero} · ${o.client_nom || 'Client Inconnu'}</span>
             <strong>${o.total.toFixed(2)} DH</strong>
           </div>
-          <button class="btn btn-sm btn-primary btn-block" onclick="POS.resumeOrder(${o.id})">📂 Reprendre</button>
+          <button class="btn btn-sm btn-primary btn-block" data-action="POS.resumeOrder" data-param="${o.id}">📂 Reprendre</button>
         </div>
       `).join('');
         } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); APP.closeModal('parkedOrdersModal'); }

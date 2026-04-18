@@ -25,8 +25,8 @@ export const CatalogModule = {
 
     renderCategories() {
         const bar = document.getElementById('categoriesBar');
-        let html = `<button class="cat-btn ${this.currentCategory === 'all' ? 'active' : ''}" onclick="POS.selectCategory('all')"><span class="cat-icon">📋</span><span class="cat-name">Tout</span></button>`;
-        html += `<button class="cat-btn ${this.currentCategory === 'favorites' ? 'active' : ''}" onclick="POS.selectCategory('favorites')"><span class="cat-icon">⭐</span><span class="cat-name">Favoris</span></button>`;
+        let html = `<button class="cat-btn ${this.currentCategory === 'all' ? 'active' : ''}" data-action="POS.selectCategory" data-param="all"><span class="cat-icon">📋</span><span class="cat-name">Tout</span></button>`;
+        html += `<button class="cat-btn ${this.currentCategory === 'favorites' ? 'active' : ''}" data-action="POS.selectCategory" data-param="favorites"><span class="cat-icon">⭐</span><span class="cat-name">Favoris</span></button>`;
         for (const c of this.categories) {
             const isActive = this.currentCategory == c.id;
             let bgStyle = '';
@@ -35,7 +35,7 @@ export const CatalogModule = {
             } else {
                 bgStyle = isActive ? `background:${c.couleur};border-color:${c.couleur};color:#fff;` : '';
             }
-            html += `<button class="cat-btn ${isActive ? 'active' : ''} ${c.image ? 'has-image' : ''}" onclick="POS.selectCategory(${c.id})"
+            html += `<button class="cat-btn ${isActive ? 'active' : ''} ${c.image ? 'has-image' : ''}" data-action="POS.selectCategory" data-param="${c.id}"
         style="${bgStyle}">
         ${!c.image ? `<span class="cat-icon">${c.icone}</span>` : ''}
         <span class="cat-name" style="${c.image ? 'background:rgba(0,0,0,0.6);color:#fff;width:100%;bottom:0;position:absolute;padding:4px 0;' : ''}">${c.nom}</span>
@@ -78,11 +78,11 @@ export const CatalogModule = {
             // Si le produit a des attributs de variantes en DB ou si un script backend marque ça...
             // Note: On peut interroger has_variants mais sans ça on cherche variante_attributs > {}
             const hasVariants = p.variante_attributs && p.variante_attributs !== '{}' && p.variante_attributs.length > 2;
-            const clickAction = hasVariants ? `POS.openVariantPicker(${p.id}, '${p.nom.replace(/'/g, "\\'")}')` : `POS.addToCart(${p.id})`;
+            const clickAction = hasVariants ? `data-action="POS.openVariantPicker" data-param="${p.id}" data-param2="${p.nom.replace(/"/g, '&quot;')}"` : `data-action="POS.addToCart" data-param="${p.id}"`;
             const variantIndicator = hasVariants ? `<span style="position:absolute;top:5px;right:5px;background:var(--primary);color:#fff;border-radius:10px;padding:2px 6px;font-size:0.7rem;font-weight:700">Options</span>` : '';
 
             return `
-            <div class="product-card" onclick="${clickAction}" style="--cat-color:${p.categorie_couleur || '#e67e22'}">
+            <div class="product-card" ${clickAction} style="--cat-color:${p.categorie_couleur || '#e67e22'}">
                 <div class="product-img" style="${imageStyle}">
                     ${!p.image ? `<span class="no-img-icon">📦</span>` : ''}
                     ${stockBadge}
@@ -176,7 +176,7 @@ export const CatalogModule = {
         bar.style.display = 'flex';
         items.innerHTML = displayList.map(p => {
             const label = p.est_favori ? '⭐ ' + p.nom : p.nom;
-            return `<button class="btn btn-sm ${p.est_favori ? 'btn-warning' : 'btn-outline'}" onclick="POS.addToCart(${p.id})" style="white-space:nowrap;font-size:0.75rem;padding:4px 8px;font-weight:600" title="${p.nom}">${label.substring(0, 18)} · ${p.prix_ttc}DH</button>`;
+            return `<button class="btn btn-sm ${p.est_favori ? 'btn-warning' : 'btn-outline'}" data-action="POS.addToCart" data-param="${p.id}" style="white-space:nowrap;font-size:0.75rem;padding:4px 8px;font-weight:600" title="${p.nom}">${label.substring(0, 18)} · ${p.prix_ttc}DH</button>`;
         }).join('');
     },
 };

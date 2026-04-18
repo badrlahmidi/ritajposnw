@@ -78,7 +78,7 @@ export const SHORTCUTS = {
       <div class="modal-content" style="max-width:400px">
         <div class="modal-header">
           <h2>⌨️ Raccourcis Clavier</h2>
-          <button class="close-modal" onclick="this.parentElement.parentElement.parentElement.remove()">✕</button>
+          <button class="close-modal" data-close-overlay>✕</button>
         </div>
         <div class="modal-body">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:1.1rem">
@@ -91,7 +91,7 @@ export const SHORTCUTS = {
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-primary btn-block" onclick="this.parentElement.parentElement.parentElement.remove()">Fermer</button>
+          <button class="btn btn-primary btn-block" data-close-overlay>Fermer</button>
         </div>
       </div>
     `;

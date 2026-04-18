@@ -8,23 +8,23 @@ export const NUMPAD = {
 
         const el = document.createElement('div');
         el.innerHTML = `
-    <div id="numpadOverlay" class="numpad-overlay" onclick="if(event.target.id === 'numpadOverlay') NUMPAD.close()">
+    <div id="numpadOverlay" class="numpad-overlay" data-action="NUMPAD.close" data-self-only>
       <div class="numpad-container">
         <div id="numpadDisplay" class="numpad-display">0</div>
         <div class="numpad-grid">
-          <button class="numpad-btn" onclick="NUMPAD.tap('7')">7</button>
-          <button class="numpad-btn" onclick="NUMPAD.tap('8')">8</button>
-          <button class="numpad-btn" onclick="NUMPAD.tap('9')">9</button>
-          <button class="numpad-btn" onclick="NUMPAD.tap('4')">4</button>
-          <button class="numpad-btn" onclick="NUMPAD.tap('5')">5</button>
-          <button class="numpad-btn" onclick="NUMPAD.tap('6')">6</button>
-          <button class="numpad-btn" onclick="NUMPAD.tap('1')">1</button>
-          <button class="numpad-btn" onclick="NUMPAD.tap('2')">2</button>
-          <button class="numpad-btn" onclick="NUMPAD.tap('3')">3</button>
-          <button class="numpad-btn" onclick="NUMPAD.tap('.')">.</button>
-          <button class="numpad-btn" onclick="NUMPAD.tap('0')">0</button>
-          <button class="numpad-btn danger" onclick="NUMPAD.clear()">⌫</button>
-          <button class="numpad-btn primary" style="grid-column:1/-1;margin-top:10px" onclick="NUMPAD.confirm()">OK ↵</button>
+          <button class="numpad-btn" data-action="NUMPAD.tap" data-param="7">7</button>
+          <button class="numpad-btn" data-action="NUMPAD.tap" data-param="8">8</button>
+          <button class="numpad-btn" data-action="NUMPAD.tap" data-param="9">9</button>
+          <button class="numpad-btn" data-action="NUMPAD.tap" data-param="4">4</button>
+          <button class="numpad-btn" data-action="NUMPAD.tap" data-param="5">5</button>
+          <button class="numpad-btn" data-action="NUMPAD.tap" data-param="6">6</button>
+          <button class="numpad-btn" data-action="NUMPAD.tap" data-param="1">1</button>
+          <button class="numpad-btn" data-action="NUMPAD.tap" data-param="2">2</button>
+          <button class="numpad-btn" data-action="NUMPAD.tap" data-param="3">3</button>
+          <button class="numpad-btn" data-action="NUMPAD.tap" data-param=".">.</button>
+          <button class="numpad-btn" data-action="NUMPAD.tap" data-param="0">0</button>
+          <button class="numpad-btn danger" data-action="NUMPAD.clear">⌫</button>
+          <button class="numpad-btn primary" style="grid-column:1/-1;margin-top:10px" data-action="NUMPAD.confirm">OK ↵</button>
         </div>
       </div>
     </div>`;

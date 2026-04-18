@@ -51,7 +51,7 @@ export const DASHBOARD = {
                         ${warning > 0 ? `<span style="color:#e67e22;font-weight:600">🟡 ${warning} à surveiller</span>` : ''}
                     </div>
                 </div>
-                <button class="btn btn-sm btn-outline" onclick="APP.navigate('/stock/dlc')" style="white-space:nowrap">Voir →</button>
+                <button class="btn btn-sm btn-outline" data-action="APP.navigate" data-param="/stock/dlc" style="white-space:nowrap">Voir →</button>
             `;
         } catch (e) {
             widget.style.display = 'none';
@@ -82,7 +82,7 @@ export const DASHBOARD = {
                     <div class="dash-alert-title">${nb} client(s) avec ardoise</div>
                     <div class="dash-alert-sub"><span style="color:#e74c3c;font-weight:700">${total.toFixed(2)} DH</span> en encours total</div>
                 </div>
-                <button class="btn btn-sm btn-outline" onclick="APP.navigate('/stats/credits')" style="white-space:nowrap">Voir →</button>
+                <button class="btn btn-sm btn-outline" data-action="APP.navigate" data-param="/stats/credits" style="white-space:nowrap">Voir →</button>
             `;
         } catch (e) {
             widget.style.display = 'none';
