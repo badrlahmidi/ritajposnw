@@ -768,7 +768,8 @@ export const ADMIN = {
 
   openFournisseurForm(f = null) {
     if (typeof f === 'string' || typeof f === 'number') {
-      f = (this._fournisseurs || []).find(x => x.id == f) || null;
+      const id = Number(f);
+      f = (this._fournisseurs || []).find(x => x.id === id) || null;
     }
     document.getElementById('fournisseurFormId').value = f ? f.id : '';
     document.getElementById('fournisseurFormNom').value = f ? f.nom : '';
