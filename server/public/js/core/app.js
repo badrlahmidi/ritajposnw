@@ -12,6 +12,8 @@ import { ADMIN } from '../modules/admin.js';
 import { SETUP } from '../modules/setup.js';
 import { NUMPAD } from '../modules/numpad.js';
 import { SHORTCUTS } from '../modules/shortcuts.js';
+import { KDS } from '../modules/kds.js';
+import { TABLES } from '../modules/tables.js';
 
 // Expose modules to global scope for HTML event handlers
 window.POS = POS;
@@ -25,7 +27,8 @@ window.ADMIN = ADMIN;
 window.SETUP = SETUP;
 window.NUMPAD = NUMPAD;
 window.SHORTCUTS = SHORTCUTS;
-// window.APP = APP; // Moved to end of file
+window.KDS = KDS;
+window.TABLES = TABLES;
 
 export const APP = {
     /* ════════ CUSTOM PROMPT ════════ */
@@ -345,6 +348,8 @@ export const APP = {
         setDisplay('feature-dlc', state.params.feature_dlc === '1');
         setDisplay('feature-fidelite', state.params.feature_fidelite === '1');
         setDisplay('feature-pourboire', state.params.feature_pourboire === '1');
+        setDisplay('feature-tables', state.params.feature_tables === '1');
+        setDisplay('feature-kds', state.params.feature_kds === '1');
 
         const orderTypeSelect = document.getElementById('orderType');
         if (orderTypeSelect) {
@@ -411,6 +416,9 @@ export const APP = {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
+        // Stop KDS auto-refresh when leaving the KDS view
+        if (view !== 'kds' && KDS._refreshTimer) KDS.destroy();
+
         const viewEl = document.getElementById(`view-${view}`);
         if (viewEl) {
             viewEl.classList.add('active');
@@ -433,6 +441,8 @@ export const APP = {
                 else if (view === 'stock') await STOCK.load();
                 else if (view === 'stats') await STATS.init();
                 else if (view === 'admin') await ADMIN.init();
+                else if (view === 'kds') await KDS.load();
+                else if (view === 'tables') await TABLES.load();
 
                 // Refresh SVG icons
                 setTimeout(() => { if (window.lucide) window.lucide.createIcons(); }, 150);

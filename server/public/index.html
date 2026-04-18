@@ -515,6 +515,10 @@
 
             <button class="nav-btn feature-livraison" data-view="livraison" onclick="APP.switchView('livraison')"
               style="display:none"><i data-lucide="truck" style="margin-right:6px"></i> Livraison</button>
+            <button class="nav-btn feature-tables" data-view="tables" onclick="APP.switchView('tables')"
+              style="display:none"><i data-lucide="layout-grid" style="margin-right:6px"></i> Tables</button>
+            <button class="nav-btn admin-only feature-kds" data-view="kds" onclick="APP.switchView('kds')"
+              style="display:none"><i data-lucide="monitor" style="margin-right:6px"></i> Cuisine</button>
           </nav>
         </div>
         <div class="header-right">
@@ -852,6 +856,16 @@
         <div id="livraisonBody" style="padding:16px;overflow-y:auto;flex:1"></div>
       </div>
 
+      <!-- ═══════ VIEW: TABLES ═══════ -->
+      <div id="view-tables" class="view">
+        <div id="tablesBody" style="flex:1;overflow-y:auto;display:flex;flex-direction:column"></div>
+      </div>
+
+      <!-- ═══════ VIEW: KDS ═══════ -->
+      <div id="view-kds" class="view" style="display:flex;flex-direction:column">
+        <div id="kdsBody" style="flex:1;overflow-y:auto;display:flex;flex-direction:column"></div>
+      </div>
+
       <!-- ═══════ VIEW: ADMIN ═══════ -->
       <div id="view-admin" class="view">
         <div class="view-container">
@@ -868,6 +882,9 @@
               <button class="tab-btn" onclick="ADMIN.switchTab('parametres')">🔧 Paramètres</button>
               <button class="tab-btn" onclick="ADMIN.switchTab('succursales')">🏢 Succursales</button>
               <button class="tab-btn" onclick="ADMIN.switchTab('backups')">💾 Sauvegardes</button>
+              <button class="tab-btn" onclick="ADMIN.switchTab('imprimantes')">🖨️ Imprimantes</button>
+              <button class="tab-btn" onclick="ADMIN.switchTab('cmi')">💳 Paiement CMI</button>
+              <button class="tab-btn" onclick="ADMIN.switchTab('balance')">⚖️ Balance</button>
             </div>
           </div>
           <div id="adminBody" class="view-body"></div>
