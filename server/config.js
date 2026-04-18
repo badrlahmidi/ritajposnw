@@ -7,6 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const pkg = require('./package.json');
 
 require('dotenv').config();
 
@@ -110,7 +111,7 @@ const config = {
   // App
   APP_NAME: process.env.APP_NAME || 'RITAJ SMART POS',
   // Source unique de vérité: package.json.
-  APP_VERSION: process.env.APP_VERSION || require('./package.json').version,
+  APP_VERSION: process.env.APP_VERSION || pkg.version,
 };
 
 // Exporter aussi les helpers pour les tests.

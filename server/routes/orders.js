@@ -5,6 +5,10 @@ const { queryAll, queryOne, run, logAudit, saveDb } = require('../db');
 const v = require('../validators');
 const facture = require('../facture');
 
+// Modes de paiement acceptés. Aligné sur validators.createOrderRules.
+// Défini au niveau module pour éviter une réallocation à chaque requête.
+const ALLOWED_PAYMENT_MODES = new Set(['especes', 'carte', 'mixte', 'credit', 'attente', 'cheque', 'virement']);
+
 // Lister les commandes
 router.get('/', authMiddleware, asyncHandler((req, res) => {
     const { statut, date, date_debut, date_fin, client_id, search, limit: lim } = req.query;
@@ -35,9 +39,7 @@ router.post('/', authMiddleware, v.createOrderRules, v.handleValidation, asyncHa
     // Normaliser le mode de paiement en amont pour éviter toute divergence
     // entre la valeur persistée (commandes.mode_paiement) et la mise à jour
     // comptable de la session de caisse (total_especes / total_carte).
-    // Valeurs acceptées : 'especes' | 'carte' | 'mixte' | 'cheque' | 'virement'.
-    const ALLOWED_MODES = new Set(['especes', 'carte', 'mixte', 'credit', 'attente', 'cheque', 'virement']);
-    const modePaiement = ALLOWED_MODES.has(req.body.mode_paiement) ? req.body.mode_paiement : 'especes';
+    const modePaiement = ALLOWED_PAYMENT_MODES.has(req.body.mode_paiement) ? req.body.mode_paiement : 'especes';
     if (!lignes || lignes.length === 0) return res.status(400).json({ error: 'Aucun article dans la commande' });
 
     // Numéro de commande unique
