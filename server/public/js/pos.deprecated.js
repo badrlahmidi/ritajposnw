@@ -1,4 +1,8 @@
 /**
+ * @deprecated — DO NOT EDIT — Fichier hors service depuis v5.0 (Café & Restaurant)
+ * Ce fichier n'est plus chargé en production. Conservé pour référence historique uniquement.
+ */
+/**
  * ═══════════════════════════════════════════════════════════════
  *  RITAJ SMART POS — Application v4.1 (2026)
  *  Setup Wizard + Auth JWT + TVA + Stock + Clients + Fidélité

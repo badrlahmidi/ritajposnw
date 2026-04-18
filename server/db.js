@@ -680,7 +680,7 @@ async function seedInitialData() {
 
   if (hasUsers) {
     db.prepare("INSERT OR IGNORE INTO parametres (cle, valeur, description) VALUES ('setup_completed', '1', 'Setup initial effectué')").run();
-    db.prepare("INSERT OR IGNORE INTO parametres (cle, valeur, description) VALUES ('type_commerce', 'boulangerie', 'Type de commerce')").run();
+    db.prepare("INSERT OR IGNORE INTO parametres (cle, valeur, description) VALUES ('type_commerce', 'cafe', 'Type de commerce')").run();
   } else {
     db.prepare("INSERT OR IGNORE INTO parametres (cle, valeur, description) VALUES ('setup_completed', '0', 'Setup initial effectué')").run();
     db.prepare("INSERT OR IGNORE INTO parametres (cle, valeur, description) VALUES ('type_commerce', '', 'Type de commerce')").run();
@@ -737,7 +737,7 @@ async function seedInitialData() {
     ['theme_couleur_primaire', '#2c3e50', 'Couleur primaire'],
     ['theme_couleur_accent', '#3498db', 'Couleur accent'],
     ['theme_header_gradient', 'linear-gradient(135deg, #2c3e50, #34495e)', 'Gradient header'],
-    ['type_commerce', 'retail', 'Type de commerce'],
+    ['type_commerce', 'cafe', 'Type de commerce'],
     ['types_commande', '["emporter","livraison"]', 'Types de commande actifs'],
     ['paiement_cheque', '1', 'Activer paiement par chèque'],
     ['paiement_virement', '1', 'Activer paiement par virement']
@@ -792,7 +792,7 @@ function applyBusinessProfile(profileId, commerceInfo, adminInfo) {
     );
 
     // 2. Admin
-    const adminHash = bcrypt.hashSync(adminInfo.password || 'admin2026', 10);
+    const adminHash = bcrypt.hashSync(adminInfo.password || 'admin2026', 12);
     db.prepare(`INSERT OR REPLACE INTO utilisateurs (nom, prenom, login, password_hash, role, succursale_id)
               VALUES (?, ?, ?, ?, 'admin', 1)`).run(
       adminInfo.nom || 'Administrateur',
@@ -802,7 +802,7 @@ function applyBusinessProfile(profileId, commerceInfo, adminInfo) {
     );
 
     // Caissier
-    const caissierHash = bcrypt.hashSync('caisse123', 10);
+    const caissierHash = bcrypt.hashSync('caisse123', 12);
     db.prepare(`INSERT OR REPLACE INTO utilisateurs (nom, prenom, login, password_hash, role, succursale_id)
               VALUES ('Caissier', 'Principal', 'caissier', ?, 'caissier', 1)`).run(caissierHash);
 

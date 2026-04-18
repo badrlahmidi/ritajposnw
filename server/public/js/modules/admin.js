@@ -27,6 +27,9 @@ export const ADMIN = {
     else if (tab === 'clients') this.loadClients();
     else if (tab === 'parametres') this.loadParametres();
     else if (tab === 'backups') this.loadBackups();
+    else if (tab === 'imprimantes') this.loadImprimantes();
+    else if (tab === 'cmi') this.loadCMI();
+    else if (tab === 'balance') this.loadBalance();
   },
 
   async loadProduits() {
@@ -1061,7 +1064,9 @@ export const ADMIN = {
         ['feature_pourboire', '💰 Pourboires', 'Gestion des pourboires serveurs'],
         ['feature_dlc', '📅 Dates Péremption', 'Suivi des dates limites (DLC)'],
         ['feature_credit', '📒 Crédit Client', 'Gestion des ardoises / dettes'],
-        ['feature_negative_stock', '📦 Vente en Négatif', 'Autoriser la vente même sans stock']
+        ['feature_negative_stock', '📦 Vente en Négatif', 'Autoriser la vente même sans stock'],
+        ['feature_tables', '🪑 Plan de Salle', 'Gestion des tables et salles (restaurant)'],
+        ['feature_kds', '📺 KDS Cuisine', 'Affichage commandes en cuisine (KDS)'],
       ];
 
       const paymentOptions = [
@@ -1184,8 +1189,8 @@ export const ADMIN = {
       body[key] = el.classList.contains('active') ? '1' : '0';
     });
 
-    body['feature_tables'] = '0';
-    body['feature_kds'] = '0';
+    body['feature_tables'] = document.getElementById('fopt_feature_tables')?.classList.contains('active') ? '1' : '0';
+    body['feature_kds']    = document.getElementById('fopt_feature_kds')?.classList.contains('active') ? '1' : '0';
 
     if (btn) UI.btnLoading(btn, true, 'Enregistrement...');
 
@@ -1322,5 +1327,318 @@ export const ADMIN = {
       UI.toast('Erreur: ' + e.message, 'error');
       this.loadParametres();
     }
+  },
+
+  /* ═══════════════════════════════════════════════════════
+   *  ONGLET IMPRIMANTES
+   * ═══════════════════════════════════════════════════════ */
+  async loadImprimantes() {
+    UI.viewLoading('adminBody');
+    try {
+      const list = await api('/print/imprimantes');
+      const body = document.getElementById('adminBody');
+      const TYPES = { caisse: '🖨️ Caisse', cuisine: '🍳 Cuisine', bar: '🍹 Bar' };
+      body.innerHTML = `
+        <div class="card">
+          <div class="flex-between mb-16">
+            <h3>🖨️ Imprimantes thermiques</h3>
+            <button class="btn btn-primary btn-sm" onclick="ADMIN.openImprimanteForm()">+ Ajouter</button>
+          </div>
+          ${list.length === 0 ? '<p class="text-muted">Aucune imprimante configurée.</p>' : `
+          <table class="data-table">
+            <thead><tr><th>Nom</th><th>Type</th><th>IP</th><th>Port</th><th>Actif</th><th>Actions</th></tr></thead>
+            <tbody>
+              ${list.map(imp => `<tr>
+                <td><strong>${imp.nom}</strong></td>
+                <td><span class="badge">${TYPES[imp.type] || imp.type}</span></td>
+                <td><code>${imp.ip}</code></td>
+                <td>${imp.port}</td>
+                <td>${imp.actif ? '✅' : '⬜'}</td>
+                <td style="display:flex;gap:4px">
+                  <button class="btn btn-sm btn-outline" onclick="ADMIN.testImprimante('${imp.ip}',${imp.port})">🧪 Test</button>
+                  <button class="btn btn-sm btn-outline" onclick="ADMIN.openImprimanteForm(${imp.id})">✏️</button>
+                  <button class="btn btn-sm btn-danger" onclick="ADMIN.deleteImprimante(${imp.id})">🗑️</button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>`}
+        </div>
+
+        <!-- Formulaire (caché par défaut) -->
+        <div id="formImprimante" class="card" style="margin-top:16px;display:none">
+          <h4 id="impFormTitle" class="mb-12">➕ Nouvelle imprimante</h4>
+          <input type="hidden" id="impId">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-group"><label>Nom</label><input id="impNom" class="input" placeholder="Caisse 1"></div>
+            <div class="form-group"><label>Type</label>
+              <select id="impType" class="input">
+                <option value="caisse">🖨️ Caisse</option>
+                <option value="cuisine">🍳 Cuisine</option>
+                <option value="bar">🍹 Bar</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Adresse IP</label><input id="impIp" class="input" placeholder="192.168.1.100"></div>
+            <div class="form-group"><label>Port TCP</label><input id="impPort" class="input" type="number" value="9100"></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-primary" onclick="ADMIN.saveImprimante()">💾 Enregistrer</button>
+            <button class="btn btn-outline" onclick="document.getElementById('formImprimante').style.display='none'">Annuler</button>
+          </div>
+        </div>`;
+    } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }
+  },
+
+  openImprimanteForm(id) {
+    const form = document.getElementById('formImprimante');
+    if (!form) return;
+    form.style.display = 'block';
+    document.getElementById('impId').value = id || '';
+    document.getElementById('impFormTitle').textContent = id ? '✏️ Modifier imprimante' : '➕ Nouvelle imprimante';
+    if (!id) {
+      document.getElementById('impNom').value = '';
+      document.getElementById('impIp').value = '';
+      document.getElementById('impPort').value = '9100';
+      document.getElementById('impType').value = 'caisse';
+    } else {
+      api('/print/imprimantes').then(list => {
+        const imp = list.find(i => i.id === id);
+        if (!imp) return;
+        document.getElementById('impNom').value = imp.nom;
+        document.getElementById('impIp').value = imp.ip;
+        document.getElementById('impPort').value = imp.port;
+        document.getElementById('impType').value = imp.type;
+      });
+    }
+    form.scrollIntoView({ behavior: 'smooth' });
+  },
+
+  async saveImprimante() {
+    const id = document.getElementById('impId').value;
+    const body = {
+      nom: document.getElementById('impNom').value.trim(),
+      type: document.getElementById('impType').value,
+      ip: document.getElementById('impIp').value.trim(),
+      port: parseInt(document.getElementById('impPort').value) || 9100,
+    };
+    if (!body.nom || !body.ip) return UI.toast('Nom et IP requis', 'error');
+    try {
+      if (id) await api(`/print/imprimantes/${id}`, { method: 'PUT', body });
+      else await api('/print/imprimantes', { method: 'POST', body });
+      UI.toast('✅ Imprimante enregistrée', 'success');
+      this.loadImprimantes();
+    } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }
+  },
+
+  async deleteImprimante(id) {
+    if (!await UI.confirmDialog('Supprimer ?', 'Confirmer la suppression de cette imprimante.')) return;
+    try {
+      await api(`/print/imprimantes/${id}`, { method: 'DELETE' });
+      UI.toast('✅ Supprimée', 'success');
+      this.loadImprimantes();
+    } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }
+  },
+
+  async testImprimante(ip, port) {
+    UI.toast('⏳ Test en cours…', 'info');
+    try {
+      await api('/print/test', { method: 'POST', body: { ip, port } });
+      UI.toast('✅ Page de test envoyée', 'success');
+    } catch (e) { UI.toast('❌ Échec impression : ' + e.message, 'error'); }
+  },
+
+  /* ═══════════════════════════════════════════════════════
+   *  ONGLET CMI / TERMINAL DE PAIEMENT
+   * ═══════════════════════════════════════════════════════ */
+  async loadCMI() {
+    UI.viewLoading('adminBody');
+    try {
+      const cfg = await api('/paiement/config');
+      const body = document.getElementById('adminBody');
+      body.innerHTML = `
+        <div class="card">
+          <h3 class="mb-4">💳 Terminal de Paiement CMI</h3>
+          <p class="text-muted mb-16" style="font-size:13px">Centre Monétique Interbancaire (CMI) — Maroc. Configurez les identifiants fournis par votre banque.</p>
+
+          <div class="form-group mb-12">
+            <label>Mode de paiement carte</label>
+            <select id="cmiMode" class="input">
+              <option value="manual" ${cfg.paiement_cmi_mode !== 'cmi' ? 'selected' : ''}>Manuel (saisie caissier)</option>
+              <option value="cmi"    ${cfg.paiement_cmi_mode === 'cmi'  ? 'selected' : ''}>CMI intégré (API)</option>
+            </select>
+          </div>
+
+          <div id="cmiFields" style="${cfg.paiement_cmi_mode === 'cmi' ? '' : 'display:none'}">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+              <div class="form-group">
+                <label>Merchant ID (ClientID)</label>
+                <input id="cmiMerchant" class="input" placeholder="123456789" value="${cfg.paiement_cmi_merchant || ''}">
+              </div>
+              <div class="form-group">
+                <label>Store Key (clé secrète)</label>
+                <input id="cmiKey" class="input" type="password" placeholder="Laissez vide pour conserver l'actuelle" autocomplete="new-password">
+                <small class="text-muted">La clé actuelle est masquée pour des raisons de sécurité.</small>
+              </div>
+            </div>
+            <div class="form-group mb-12">
+              <label>URL endpoint CMI</label>
+              <input id="cmiEndpoint" class="input" placeholder="https://payment.cmi.co.ma/fim/est3Dgate"
+                value="${cfg.paiement_cmi_endpoint || 'https://payment.cmi.co.ma/fim/est3Dgate'}">
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:16px">
+            <button class="btn btn-primary" onclick="ADMIN.saveCMI()">💾 Enregistrer</button>
+          </div>
+
+          <div class="card" style="margin-top:24px;background:#f0f7ff;border:1px solid #c0dcff">
+            <h4 class="mb-8">ℹ️ Procédure d'intégration CMI</h4>
+            <ol style="font-size:13px;line-height:1.8;padding-left:20px">
+              <li>Contacter votre banque partenaire CMI pour obtenir un <strong>Merchant ID</strong> et une <strong>Store Key</strong>.</li>
+              <li>Saisir les identifiants ci-dessus et sélectionner le mode <em>CMI intégré</em>.</li>
+              <li>Configurer l'URL de callback CMI sur : <code>${window.location.origin}/api/paiement/callback</code></li>
+              <li>Effectuer un paiement test depuis l'écran de caisse.</li>
+            </ol>
+          </div>
+        </div>`;
+
+      document.getElementById('cmiMode').addEventListener('change', e => {
+        document.getElementById('cmiFields').style.display = e.target.value === 'cmi' ? '' : 'none';
+      });
+    } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }
+  },
+
+  async saveCMI() {
+    const mode = document.getElementById('cmiMode').value;
+    const body = { mode };
+    if (mode === 'cmi') {
+      const merchant = document.getElementById('cmiMerchant').value.trim();
+      const store_key = document.getElementById('cmiKey').value.trim();
+      const endpoint  = document.getElementById('cmiEndpoint').value.trim();
+      if (merchant) body.merchant = merchant;
+      if (store_key) body.store_key = store_key;
+      if (endpoint)  body.endpoint  = endpoint;
+    }
+    try {
+      await api('/paiement/config', { method: 'PUT', body });
+      UI.toast('✅ Configuration CMI enregistrée', 'success');
+      this.loadCMI();
+    } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }
+  },
+
+  /* ═══════════════════════════════════════════════════════
+   *  ONGLET BALANCE SÉRIE
+   * ═══════════════════════════════════════════════════════ */
+  async loadBalance() {
+    UI.viewLoading('adminBody');
+    try {
+      const [cfg, statut, ports] = await Promise.allSettled([
+        api('/balance/config'),
+        api('/balance/statut'),
+        api('/balance/ports'),
+      ]);
+      const c = cfg.value || {};
+      const s = statut.value || {};
+      const p = (ports.value || []);
+      const body = document.getElementById('adminBody');
+
+      const connected = s.connected === true;
+      body.innerHTML = `
+        <div class="card">
+          <div class="flex-between mb-16">
+            <h3>⚖️ Balance Série</h3>
+            <span class="badge ${connected ? 'badge-success' : 'badge-warning'}" style="font-size:14px;padding:6px 12px">
+              ${connected ? '🟢 Connectée' : '🔴 Déconnectée'}
+            </span>
+          </div>
+          <p class="text-muted mb-16" style="font-size:13px">Balance au poids pour articles en vrac (buffet, épicerie fine). Protocoles supportés : Mettler-Toledo (MT-SICS), Cas.</p>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-group">
+              <label>Port série</label>
+              <select id="balPort" class="input">
+                <option value="">-- Sélectionner --</option>
+                ${p.map(pt => `<option value="${pt}" ${c.balance_port === pt ? 'selected' : ''}>${pt}</option>`).join('')}
+                ${c.balance_port && !p.includes(c.balance_port) ? `<option value="${c.balance_port}" selected>${c.balance_port} (configuré)</option>` : ''}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Vitesse (bauds)</label>
+              <select id="balBaud" class="input">
+                ${[2400, 4800, 9600, 19200, 38400, 57600, 115200].map(b =>
+                  `<option value="${b}" ${String(c.balance_baudrate) === String(b) ? 'selected' : ''}>${b}</option>`
+                ).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Protocole</label>
+              <select id="balProtocole" class="input">
+                <option value="mt-sics" ${c.balance_protocole === 'mt-sics' ? 'selected' : ''}>MT-SICS (Mettler-Toledo)</option>
+                <option value="cas"     ${c.balance_protocole === 'cas'     ? 'selected' : ''}>CAS</option>
+                <option value="generic" ${c.balance_protocole === 'generic' ? 'selected' : ''}>Générique (lecture ligne)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Unité</label>
+              <select id="balUnite" class="input">
+                <option value="kg" ${c.balance_unite !== 'g' ? 'selected' : ''}>kg</option>
+                <option value="g"  ${c.balance_unite === 'g'  ? 'selected' : ''}>g</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="ADMIN.saveBalance()">💾 Enregistrer</button>
+            <button class="btn btn-success" onclick="ADMIN.connectBalance()">🔌 Connecter</button>
+            <button class="btn btn-outline" onclick="ADMIN.disconnectBalance()" ${!connected ? 'disabled' : ''}>⏏️ Déconnecter</button>
+            <button class="btn btn-outline" onclick="ADMIN.readWeight()">⚖️ Lire poids</button>
+          </div>
+
+          ${connected ? `<div class="card" style="margin-top:16px;background:#f0fff4;border:1px solid #a3d9b1">
+            <span style="font-size:1.5rem;font-weight:bold" id="balWeightDisplay">-- --</span>
+            <button class="btn btn-sm btn-outline" style="margin-left:12px" onclick="ADMIN.readWeight()">🔄 Actualiser</button>
+          </div>` : ''}
+        </div>`;
+    } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }
+  },
+
+  async saveBalance() {
+    const body = {
+      port:      document.getElementById('balPort').value,
+      baudrate:  parseInt(document.getElementById('balBaud').value),
+      protocole: document.getElementById('balProtocole').value,
+      unite:     document.getElementById('balUnite').value,
+    };
+    if (!body.port) return UI.toast('Sélectionnez un port série', 'error');
+    try {
+      await api('/balance/config', { method: 'PUT', body });
+      UI.toast('✅ Configuration balance enregistrée', 'success');
+    } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }
+  },
+
+  async connectBalance() {
+    try {
+      await api('/balance/connecter', { method: 'POST', body: {} });
+      UI.toast('✅ Balance connectée', 'success');
+      this.loadBalance();
+    } catch (e) { UI.toast('❌ Connexion échouée : ' + e.message, 'error'); }
+  },
+
+  async disconnectBalance() {
+    try {
+      await api('/balance/deconnecter', { method: 'POST', body: {} });
+      UI.toast('Balance déconnectée', 'info');
+      this.loadBalance();
+    } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }
+  },
+
+  async readWeight() {
+    try {
+      const res = await api('/balance/poids/live');
+      const valeur = res.kg != null ? res.kg : '--';
+      const stable = res.stable ? '⚖️' : '〰️';
+      const el = document.getElementById('balWeightDisplay');
+      if (el) el.textContent = `${stable} ${valeur} kg${res.stable ? ' (stable)' : ''}`;
+      else UI.toast(`⚖️ Poids : ${valeur} kg`, 'info');
+    } catch (e) { UI.toast('Lecture impossible : ' + e.message, 'error'); }
   }
 };

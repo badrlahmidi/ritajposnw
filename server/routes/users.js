@@ -12,7 +12,7 @@ router.get('/', authMiddleware, adminOnly, asyncHandler((req, res) => {
 
 router.post('/', authMiddleware, adminStrict, v.createUserRules, v.handleValidation, asyncHandler((req, res) => {
     const { nom, prenom, login, password, email, role, succursale_id } = req.body;
-    const hash = bcrypt.hashSync(password, 10);
+    const hash = bcrypt.hashSync(password, 12);
     const result = run(
         'INSERT INTO utilisateurs (nom, prenom, login, password_hash, email, role, succursale_id) VALUES (?,?,?,?,?,?,?)',
         [nom, prenom || '', login, hash, email || '', role || 'caissier', succursale_id || 1]
@@ -45,7 +45,7 @@ router.put('/:id', authMiddleware, adminStrict, v.updateUserRules, v.handleValid
 
     if (password) {
         fields.push('password_hash=?');
-        params.push(bcrypt.hashSync(password, 10));
+        params.push(bcrypt.hashSync(password, 12));
     }
 
     if (fields.length === 0) return res.json({ success: true, message: 'Aucune modification' });
