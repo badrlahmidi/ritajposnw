@@ -3172,3 +3172,454 @@ html {
   padding: 0;
 
 }
+/* ═══════════════════════════════════════════════════════════════
+   POLISH v4.2 — NAVIGATION UNIVERSELLE, TACTILE & RESPONSIVE
+   Ajouts pour : App-Launcher drawer, header modules button,
+   optimisations tactiles (48px, touch-action, tap-highlight,
+   :active), poignée cart mobile, safe-area, tables responsives,
+   consolidation media queries.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* --- Safe area (iPad notch, Android gesture bar) --- */
+.pos-header,
+.dash-header {
+  padding-left: calc(16px + env(safe-area-inset-left));
+  padding-right: calc(16px + env(safe-area-inset-right));
+  padding-top: calc(6px + env(safe-area-inset-top));
+}
+
+/* --- Header "Modules" launcher button --- */
+.btn-launcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: background 0.15s ease, transform 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 40px;
+}
+
+.btn-launcher:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.btn-launcher:active {
+  transform: scale(0.97);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.launcher-grid-icon {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 4px);
+  grid-template-rows: repeat(3, 4px);
+  gap: 2px;
+}
+
+.launcher-grid-icon span {
+  width: 4px;
+  height: 4px;
+  background: currentColor;
+  border-radius: 1px;
+}
+
+/* --- Ensure .main-nav never overflows silently (safety net on small screens) --- */
+.main-nav {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.main-nav::-webkit-scrollbar {
+  display: none;
+}
+
+/* --- App-Launcher Drawer (full-screen modal) --- */
+.app-launcher {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 16, 24, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9500;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.app-launcher.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.launcher-panel {
+  width: 100%;
+  max-width: 920px;
+  background: var(--bg, #fff);
+  color: var(--text, #1a1a1a);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+  transform: translateX(-100%);
+  transition: transform 0.22s cubic-bezier(.2, .9, .3, 1);
+  padding-left: env(safe-area-inset-left);
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.app-launcher.open .launcher-panel {
+  transform: translateX(0);
+}
+
+.launcher-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card, #f7f8fa);
+}
+
+.launcher-header h2 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.launcher-sub {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.launcher-close {
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 1.2rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.launcher-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px 24px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.launcher-section {
+  margin-top: 16px;
+}
+
+.launcher-section:first-child {
+  margin-top: 4px;
+}
+
+.launcher-section-title {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 0 4px 8px;
+  font-weight: 700;
+}
+
+.launcher-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.launcher-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-card, #fff);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  min-height: 64px;
+  transition: background 0.15s ease, transform 0.08s ease, border-color 0.15s ease;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.launcher-item:hover {
+  background: var(--bg-hover, rgba(0, 0, 0, 0.03));
+  border-color: var(--primary, #0d6efd);
+}
+
+.launcher-item:active {
+  transform: scale(0.98);
+}
+
+.launcher-item.current {
+  border-color: var(--primary, #0d6efd);
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.15);
+}
+
+.launcher-item.locked,
+.launcher-item.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: var(--bg, #f4f5f7);
+}
+
+.launcher-item.locked:hover,
+.launcher-item.disabled:hover {
+  background: var(--bg, #f4f5f7);
+  border-color: var(--border);
+}
+
+.launcher-icon {
+  font-size: 1.8rem;
+  width: 40px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.launcher-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.launcher-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.launcher-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.launcher-lock {
+  font-size: 1rem;
+  margin-left: auto;
+  color: var(--text-muted);
+}
+
+.launcher-foot {
+  padding: 10px 20px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  background: var(--bg-card, #fafbfc);
+}
+
+.launcher-foot kbd {
+  background: var(--bg, #eee);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: inherit;
+  font-size: 0.78rem;
+}
+
+/* Compact launcher on small / tablet-portrait screens */
+@media (max-width: 900px) {
+  .launcher-panel {
+    max-width: 100%;
+  }
+
+  .launcher-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+  }
+
+  .launcher-item {
+    padding: 10px 12px;
+    min-height: 60px;
+  }
+
+  .btn-launcher-label {
+    display: none;
+  }
+
+  .btn-launcher {
+    padding: 6px 10px;
+  }
+}
+
+/* --- Drag handle for the POS cart bottom-sheet (tablet portrait) --- */
+@media (max-width: 900px) {
+  .pos-cart::before {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: var(--text-muted);
+    opacity: 0.4;
+    border-radius: 2px;
+    margin: 6px auto 0;
+    pointer-events: none;
+  }
+}
+
+/* --- TACTILE : élargir les cibles & éliminer les flous natifs --- */
+@media (hover: none) and (pointer: coarse) {
+
+  .btn,
+  .nav-btn,
+  .cat-btn,
+  .product-card,
+  .tab-btn,
+  .report-menu-item,
+  .dash-card,
+  .launcher-item,
+  .tariff-btn,
+  .user-dropdown button,
+  .cart-item-remove {
+    min-height: 48px;
+    min-width: 44px;
+  }
+
+  .cart-item-qty button {
+    width: 40px;
+    height: 40px;
+    font-size: 1.3rem;
+  }
+
+  /* Tab & report menu items need breathing room for finger taps */
+  .tab-btn,
+  .report-menu-item {
+    padding: 10px 14px;
+    font-size: 0.88rem;
+  }
+
+  /* No hover-only effects on touch devices */
+  .dash-card:hover,
+  .product-card:hover,
+  .launcher-item:hover {
+    transform: none;
+  }
+}
+
+/* Touch behaviour & visual feedback (all devices - harmless on desktop) */
+button,
+.btn,
+.nav-btn,
+.cat-btn,
+.tab-btn,
+.dash-card,
+.product-card,
+.launcher-item,
+.report-menu-item,
+.btn-home,
+.btn-launcher,
+.btn-kbd {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+button:active,
+.btn:active,
+.nav-btn:active,
+.cat-btn:active,
+.tab-btn:active,
+.dash-card:active,
+.product-card:active,
+.report-menu-item:active {
+  transform: scale(0.97);
+}
+
+/* --- Table wrappers : ensure horizontal scroll stays in the table only --- */
+.view-body .data-table,
+#historyBody .data-table,
+#clientsBody .data-table,
+#stockBody .data-table {
+  max-width: 100%;
+}
+
+/* --- Modal width on tablet portrait : prevent side overflow --- */
+@media (max-width: 900px) {
+  .modal {
+    max-width: calc(100vw - 24px) !important;
+    width: calc(100vw - 24px);
+  }
+}
+
+/* --- View body height uses dvh (Electron 41+, Safari 15.4+, Chrome 108+)
+       so the iOS/Android keyboard doesn't clip bottom controls.
+       Falls back to vh on older browsers automatically. --- */
+@supports (height: 100dvh) {
+  .view-body {
+    max-height: calc(100dvh - var(--header-h, 60px));
+  }
+}
+
+/* --- Locked / disabled nav buttons (instead of display:none) for caissiers :
+       kept visible but greyed so users discover what exists. The JS side keeps
+       using `display:none` for now (no visual regression); this rule simply
+       styles any nav-btn[data-locked] we may add later. --- */
+.nav-btn[data-locked],
+.dash-card[data-locked],
+.launcher-item.locked {
+  position: relative;
+}
+
+.nav-btn[data-locked]::after,
+.dash-card[data-locked]::after {
+  content: "🔒";
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+/* --- ScrollIntoView helper: add padding at bottom so the mobile keyboard
+       doesn't hide focused inputs (used by the JS focus listener). --- */
+.modal input:focus,
+.modal textarea:focus,
+.modal-overlay input:focus,
+.modal-overlay textarea:focus {
+  scroll-margin-bottom: 120px;
+}
+
+/* --- Fix: consolidate pos-cart behaviour at <=900px --- */
+/* The two previous @media (max-width:900px) blocks defined conflicting
+   rules for .pos-cart (width:300px vs fixed bottom-sheet). The
+   bottom-sheet wins on truly small screens (max-width:700px), but between
+   700-900 px (tablet portrait) we keep it inline to preserve the two-pane
+   layout when the screen is wide enough. */
+@media (min-width: 701px) and (max-width: 900px) {
+  .pos-cart {
+    position: static;
+    transform: none;
+    width: 320px;
+    min-width: 320px;
+    height: auto;
+    max-height: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .pos-cart::before {
+    display: none;
+  }
+}

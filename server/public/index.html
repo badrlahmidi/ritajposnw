@@ -394,6 +394,7 @@
             <span class="dash-subtitle">Bienvenue, <strong id="dashUserName">—</strong></span>
           </div>
           <div class="dash-actions">
+            <button class="btn btn-outline btn-sm" onclick="LAUNCHER.open()" title="Tous les modules">🧭 Modules</button>
             <button class="btn btn-outline btn-sm" onclick="APP.toggleTheme()">🌙 Thème</button>
             <button class="btn btn-ghost btn-sm text-danger" onclick="APP.logout()">🚪 Déconnexion</button>
           </div>
@@ -493,6 +494,10 @@
       <!-- HEADER -->
       <header class="pos-header">
         <div class="header-left">
+          <button class="btn-launcher" onclick="LAUNCHER.open()" title="Tous les modules" aria-label="Ouvrir le menu des modules">
+            <span class="launcher-grid-icon" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>
+            <span class="btn-launcher-label">Modules</span>
+          </button>
           <button class="btn-home" onclick="APP.goHome()" title="Retour à l'accueil"><i data-lucide="home"></i>
             Accueil</button>
           <h1><i data-lucide="store" style="margin-right:8px; display:inline-block;"></i> RITAJ SMART POS</h1>
