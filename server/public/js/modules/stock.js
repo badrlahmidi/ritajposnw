@@ -35,7 +35,7 @@ export const STOCK = {
               <option value="">-- Choisir un fournisseur --</option>
               ${this.achatFournisseurs.map(f => `<option value="${f.id}">${f.nom}</option>`).join('')}
             </select>
-            <small style="display:block;margin-top:4px"><a href="#" data-action="STOCK.goToAdminParams">+ Créer un fournisseur dans Admin</a></small>
+            <small style="display:block;margin-top:4px"><a href="#" data-action="APP.navigate" data-param="/admin/fournisseurs">+ Créer un fournisseur dans Admin</a></small>
           </div>
           <div class="form-group">
             <label>Référence Facture / BL</label>
