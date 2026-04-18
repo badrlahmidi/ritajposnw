@@ -1634,9 +1634,11 @@ export const ADMIN = {
   async readWeight() {
     try {
       const res = await api('/balance/poids/live');
+      const valeur = res.kg != null ? res.kg : '--';
+      const stable = res.stable ? '⚖️' : '〰️';
       const el = document.getElementById('balWeightDisplay');
-      if (el) el.textContent = `${res.valeur ?? res.weight ?? '--'} ${res.unite || 'kg'}`;
-      else UI.toast(`⚖️ Poids : ${res.valeur ?? res.weight ?? '--'} ${res.unite || 'kg'}`, 'info');
+      if (el) el.textContent = `${stable} ${valeur} kg${res.stable ? ' (stable)' : ''}`;
+      else UI.toast(`⚖️ Poids : ${valeur} kg`, 'info');
     } catch (e) { UI.toast('Lecture impossible : ' + e.message, 'error'); }
   }
 };

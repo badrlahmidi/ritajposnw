@@ -104,7 +104,9 @@ export const TABLES = {
           <h3 style="margin:0">🏠 ${salle.nom || 'Sans salle'}</h3>
           <span class="text-muted" style="font-size:13px">${libres}/${tables.length} libres</span>
           ${salle.id ? `
-            <button class="btn btn-sm btn-outline" style="margin-left:auto" onclick="TABLES.openSalleForm(${salle.id},'${salle.nom.replace(/'/g, "\\'")}',${salle.ordre || 0})">✏️</button>
+            <button class="btn btn-sm btn-outline" style="margin-left:auto"
+              data-salle-id="${salle.id}" data-salle-ordre="${salle.ordre || 0}"
+              onclick="TABLES.openSalleFormById(this)">✏️</button>
             <button class="btn btn-sm btn-danger" onclick="TABLES.deleteSalle(${salle.id})">🗑️</button>` : ''}
         </div>
         ${tables.length === 0 ? '<p class="text-muted" style="font-size:13px">Aucune table dans cette salle.</p>' : ''}
@@ -142,6 +144,14 @@ export const TABLES = {
   },
 
   /* ── Formulaires salle ── */
+  openSalleFormById(btn) {
+    const id    = parseInt(btn.dataset.salleId);
+    const ordre = parseInt(btn.dataset.salleOrdre) || 0;
+    // Find the nom from already-loaded data to avoid any injection path
+    const salle = this._salles.find(s => s.id === id);
+    this.openSalleForm(id, salle ? salle.nom : '', ordre);
+  },
+
   openSalleForm(id, nom = '', ordre = 0) {
     document.getElementById('salleId').value = id || '';
     document.getElementById('salleNom').value = nom;
