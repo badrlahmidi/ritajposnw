@@ -626,7 +626,9 @@ export const APP = {
         // Refresh SVG icons immediately (requestAnimationFrame) rather than
         // setTimeout(150) which causes a visible flash on tactile hardware.
         if (window.lucide) {
-            requestAnimationFrame(() => { try { window.lucide.createIcons(); } catch (e) { } });
+            requestAnimationFrame(() => {
+                try { window.lucide.createIcons(); } catch (e) { console.warn('Lucide icon refresh failed:', e); }
+            });
         }
     },
 

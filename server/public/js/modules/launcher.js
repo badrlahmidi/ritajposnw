@@ -148,7 +148,6 @@ export const LAUNCHER = {
     },
 
     _render() {
-        const currentPath = (window.APP && APP.currentPath) || ('#' + (location.hash.slice(1) || '/dashboard'));
         const body = SECTIONS.map(section => {
             const items = section.items.map(item => {
                 const allowed = hasRole(item.roles);
