@@ -1,6 +1,7 @@
 import { API, api } from './api.js';
 import { state, setUser, clearAuth } from './state.js';
 import * as UI from './ui.js';
+import { WS } from './ws.js';
 import { POS } from '../modules/pos.js';
 import { DASHBOARD } from '../modules/dashboard.js';
 import { HISTORY } from '../modules/history.js';
@@ -251,6 +252,7 @@ export const APP = {
         this.setupTheme();
         this.setupVirtualNumpad();
         this._setupModalKeyboardFix();
+        this._setupOfflinePill();
         SHORTCUTS.init();
 
         // 1. SETUP STATUS
@@ -485,6 +487,24 @@ export const APP = {
                 try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) { /* older browsers */ }
             }, 150);
         });
+    },
+
+    _setupOfflinePill() {
+        if (this._offlinePillInstalled) return;
+        this._offlinePillInstalled = true;
+        const update = () => {
+            const pill = document.getElementById('ws-pill');
+            if (!pill) return;
+            const online = WS && WS.isConnected && WS.isConnected();
+            pill.style.display = online ? 'none' : 'inline-flex';
+            pill.className = 'ws-pill ' + (online ? 'online' : 'offline');
+            pill.textContent = online ? '🟢 En ligne' : '🔌 Hors-ligne';
+        };
+        window.addEventListener('ws:connected', update);
+        window.addEventListener('ws:disconnected', update);
+        window.addEventListener('online', update);
+        window.addEventListener('offline', update);
+        setTimeout(update, 500);
     },
 
     applyBusinessTheme() {

@@ -470,6 +470,11 @@
           </div>
         </div>
 
+        <!-- ═══ KPI : Aujourd'hui en un coup d'œil (admin/manager) ═══ -->
+        <div id="dashTodayKPI" class="dash-kpi-row admin-only" style="display:none;margin-top:16px;">
+          <!-- rempli dynamiquement par dashboard.js -->
+        </div>
+
         <!-- ═══ WIDGETS D'ALERTE ═══ -->
         <div class="dash-alerts-section" style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">
           <!-- Widget DLC -->
@@ -526,6 +531,7 @@
           </nav>
         </div>
         <div class="header-right">
+          <span id="ws-pill" class="ws-pill" title="État de la connexion serveur" aria-live="polite" style="display:none">🔌 Hors-ligne</span>
           <span id="clock" class="clock"></span>
           <button class="btn btn-kbd" data-action="APP.toggleFullscreen" title="Plein écran"><i
               data-lucide="maximize"></i></button>
@@ -573,7 +579,7 @@
             <div class="search-bar" style="display:flex;gap:6px;">
               <input type="text" id="searchInput" placeholder="🔍 Rechercher ou Scanner (Entrée)..."
                 data-input-action="POS.searchProducts"
-                style="flex:1" autofocus>
+                style="flex:1">
             </div>
             <div class="products-grid" id="productsGrid"></div>
           </div>
@@ -635,7 +641,7 @@
               </div>
               <div class="total-row total-final">
                 <span>TOTAL TTC</span>
-                <span id="totalAmount">0.00 DH</span>
+                <span id="totalAmount" aria-live="polite" aria-atomic="true">0.00 DH</span>
               </div>
             </div>
 
@@ -660,41 +666,18 @@
               <div id="numpadDisplay"
                 style="grid-column:1/-1;text-align:right;font-size:1.3rem;font-weight:bold;color:var(--text);min-height:34px;padding:4px 10px;margin-bottom:4px;background:var(--bg-input);border-radius:6px;border:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;box-shadow:inset 0 1px 3px rgba(0,0,0,0.05)">
               </div>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="1">1</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="2">2</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="3">3</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="4">4</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="5">5</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="6">6</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="7">7</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="8">8</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="9">9</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:800;color:var(--danger);background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="C">C</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="0">0</button>
-              <button class="btn btn-primary" style="font-size:1.2rem;padding:10px;font-weight:700;"
-                data-action="POS.numpadAction" data-param="QTY">Qté</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="1">1</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="2">2</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="3">3</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="4">4</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="5">5</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="6">6</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="7">7</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="8">8</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="9">9</button>
+              <button class="numpad-btn numpad-btn--danger" data-action="POS.numpadAction" data-param="C">C</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="0">0</button>
+              <button class="numpad-btn numpad-btn--primary" data-action="POS.numpadAction" data-param="QTY">Qté</button>
             </div>
 
             <!-- Bouton de paiement Global -->
@@ -702,7 +685,7 @@
               <button class="btn btn-primary" data-action="POS.openPaymentModal" id="btnGlobalPay"
                 style="width:100%;font-size:1.5rem;padding:20px;font-weight:800;background:var(--success);border:none"
                 disabled>
-                💵 PAYER <span id="payBtnAmount" style="font-weight:400;margin-left:8px">0.00 DH</span>
+                💵 PAYER <span id="payBtnAmount" aria-live="polite" aria-atomic="true" style="font-weight:400;margin-left:8px">0.00 DH</span>
               </button>
               <button class="btn" data-action="POS.expressCash" id="btnExpressCash"
                 style="width:100%;padding:10px;font-weight:700;background:var(--warning);border:none;color:#fff;font-size:0.9rem"
