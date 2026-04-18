@@ -3,3 +3,5 @@ pos.db*
 test-pos-DO-NOT-USE*
 .env
 backups/
+# Native Node.js binaries — must be rebuilt per platform
+*.node

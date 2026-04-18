@@ -1,0 +1,55 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'server/**'
+      - '.github/workflows/test.yml'
+  pull_request:
+    branches: [main, master, develop]
+    paths:
+      - 'server/**'
+      - '.github/workflows/test.yml'
+
+jobs:
+  test:
+    name: Jest — Node ${{ matrix.node-version }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # Keep in sync with your production Node.js version
+        node-version: [20.x, 22.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      # better-sqlite3 ships as a pre-built Windows binary in committed node_modules.
+      # We must rebuild it from source for the current Linux/Node.js ABI.
+      - name: Install native build dependencies
+        run: sudo apt-get install -y python3 make g++
+
+      - name: Rebuild better-sqlite3 for Linux
+        working-directory: server
+        run: npm rebuild better-sqlite3
+
+      - name: Run tests
+        working-directory: server
+        run: npm test
+
+      - name: Upload test results (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jest-results-node${{ matrix.node-version }}
+          path: server/jest-results.json
+          retention-days: 7
