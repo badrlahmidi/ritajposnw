@@ -1721,10 +1721,31 @@ html[data-business] {
 /* ═══════════════ ADMIN TABS ═══════════════ */
 .admin-tabs {
   display: flex;
-  gap: 2px;
+  flex-wrap: wrap;
+  gap: 10px;
   background: var(--bg);
   border-radius: var(--radius);
-  padding: 2px;
+  padding: 8px;
+}
+
+.admin-tab-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px 4px 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.admin-tab-group-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-right: 6px;
+  white-space: nowrap;
 }
 
 .tab-btn {
@@ -2479,6 +2500,79 @@ html[data-business] {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
 }
+
+/* Undo toast variant (POS.clearCart and future undo flows) */
+.toast-undo {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  border-left-color: var(--warning, #e67e22) !important;
+}
+.toast-undo-btn {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  min-height: 32px;
+}
+.toast-undo-btn:hover { filter: brightness(0.92); }
+
+/* Body scroll-lock while a modal is open (applied by APP.openModal) */
+body.modal-open { overflow: hidden; }
+
+/* Empty states (shared) */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: var(--text-muted);
+}
+.empty-state-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+  filter: grayscale(0.2);
+}
+.empty-state-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+.empty-state-text {
+  max-width: 420px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 8px 0;
+}
+
+/* Date-preset chips */
+.date-presets {
+  display: inline-flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  min-height: 32px;
+}
+.chip:hover { background: var(--bg-hover); color: var(--text); }
+.chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
 /* Shared numpad button — replaces duplicated inline styles */
 .numpad-btn {
@@ -3518,7 +3612,7 @@ html {
   font-size: 0.78rem;
 }
 
-/* Compact launcher on small / tablet-portrait screens */
+/* Compact launcher + POS cart drag-handle on small / tablet-portrait screens */
 @media (max-width: 900px) {
   .launcher-panel {
     max-width: 100%;
@@ -3541,10 +3635,8 @@ html {
   .btn-launcher {
     padding: 6px 10px;
   }
-}
 
-/* --- Drag handle for the POS cart bottom-sheet (tablet portrait) --- */
-@media (max-width: 900px) {
+  /* Drag-handle hint for the POS cart bottom-sheet (tablet portrait) */
   .pos-cart::before {
     content: "";
     display: block;

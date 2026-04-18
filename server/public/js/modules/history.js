@@ -30,7 +30,13 @@ export const HISTORY = {
             const commandes = await api(url);
             const body = document.getElementById('historyBody');
             if (!commandes.length) {
-                body.innerHTML = '<p class="text-center text-muted p-16">Aucune commande trouvée</p>';
+                body.innerHTML = `
+                  <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <h3 class="empty-state-title">Aucune commande sur cette période</h3>
+                    <p class="empty-state-text">Essayez d'élargir la plage de dates ou utilisez un raccourci ci-dessus (7j / 30j / Mois).</p>
+                    <button class="btn btn-primary" data-action="APP.applyDatePreset" data-params='["history","7j"]'>Voir les 7 derniers jours</button>
+                  </div>`;
                 this.updateSelectionUI();
                 return;
             }

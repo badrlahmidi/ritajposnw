@@ -2,6 +2,7 @@ import { API, api } from './api.js';
 import { state, setUser, clearAuth } from './state.js';
 import * as UI from './ui.js';
 import { WS } from './ws.js';
+import './i18n.js';
 import { POS } from '../modules/pos.js';
 import { DASHBOARD } from '../modules/dashboard.js';
 import { HISTORY } from '../modules/history.js';
@@ -446,6 +447,36 @@ export const APP = {
         this.navigate('/dashboard');
     },
 
+    /** Quick date-preset chips on History/Stats views.
+     *  scope: 'history' | 'stats'
+     *  preset: 'today' | '7j' | '30j' | 'mois'
+     */
+    applyDatePreset(scope, preset) {
+        const today = new Date();
+        const iso = (d) => d.toISOString().slice(0, 10);
+        let start = new Date(today), end = new Date(today);
+        if (preset === '7j') start.setDate(today.getDate() - 6);
+        else if (preset === '30j') start.setDate(today.getDate() - 29);
+        else if (preset === 'mois') start = new Date(today.getFullYear(), today.getMonth(), 1);
+        // 'today' → start == end == today
+
+        const ids = scope === 'stats'
+            ? { debut: 'statsDate', fin: 'statsDateFin' }
+            : { debut: 'historyDate', fin: 'historyDateFin' };
+        const a = document.getElementById(ids.debut);
+        const b = document.getElementById(ids.fin);
+        if (a) a.value = iso(start);
+        if (b) { b.value = iso(end); b.style.display = ''; }
+
+        // Highlight active chip in that scope
+        document.querySelectorAll(`.date-presets [data-params*='"${scope}"']`).forEach(el => el.classList.remove('active'));
+        const current = document.querySelector(`.date-presets [data-params='["${scope}","${preset}"]']`);
+        if (current) current.classList.add('active');
+
+        if (scope === 'stats' && window.STATS && STATS.load) STATS.load();
+        else if (window.HISTORY && HISTORY.load) HISTORY.load();
+    },
+
     async loadPublicParams() {
         try {
             const res = await fetch(`${API}/parametres/public`);
@@ -716,7 +747,34 @@ export const APP = {
         document.getElementById('userDropdown').style.display = 'none';
     },
 
-    closeModal(id) { document.getElementById(id).style.display = 'none'; },
+    /** Unified modal open: adds body scroll-lock, Esc handler, ARIA attrs,
+     *  and focuses the first input. Use everywhere instead of direct
+     *  element.style.display = 'flex'. Idempotent. */
+    openModal(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.style.display = 'flex';
+        el.setAttribute('role', el.getAttribute('role') || 'dialog');
+        el.setAttribute('aria-modal', 'true');
+        el.classList.add('is-open');
+        document.body.classList.add('modal-open');
+        // Focus first focusable element
+        setTimeout(() => {
+            const focusable = el.querySelector('input:not([type=hidden]), select, textarea, button');
+            if (focusable && !focusable.disabled) try { focusable.focus(); } catch (e) { }
+        }, 60);
+    },
+
+    closeModal(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.style.display = 'none';
+        el.classList.remove('is-open');
+        // Unlock body only when no modal stays open
+        if (!document.querySelector('.modal-overlay.is-open')) {
+            document.body.classList.remove('modal-open');
+        }
+    },
 
     async checkStockAlerts() {
         try {

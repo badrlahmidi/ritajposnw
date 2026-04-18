@@ -703,6 +703,12 @@
           <div class="view-header">
             <h2>📜 Historique des Commandes</h2>
             <div class="view-filters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+              <div class="date-presets" role="group" aria-label="Plage rapide">
+                <button class="chip" data-action="APP.applyDatePreset" data-params='["history","today"]'>Aujourd'hui</button>
+                <button class="chip" data-action="APP.applyDatePreset" data-params='["history","7j"]'>7j</button>
+                <button class="chip" data-action="APP.applyDatePreset" data-params='["history","30j"]'>30j</button>
+                <button class="chip" data-action="APP.applyDatePreset" data-params='["history","mois"]'>Mois</button>
+              </div>
               <div style="display:flex;align-items:center;gap:5px">
                 <label style="font-size:0.8rem">De</label>
                 <input type="date" id="historyDate" data-change-action="HISTORY.load">
@@ -766,6 +772,12 @@
           <div class="view-header" style="flex-shrink:0;">
             <h2>📊 Rapports Professionnels</h2>
             <div class="view-filters" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <div class="date-presets" role="group" aria-label="Plage rapide">
+                <button class="chip" data-action="APP.applyDatePreset" data-params='["stats","today"]'>Aujourd'hui</button>
+                <button class="chip" data-action="APP.applyDatePreset" data-params='["stats","7j"]'>7j</button>
+                <button class="chip" data-action="APP.applyDatePreset" data-params='["stats","30j"]'>30j</button>
+                <button class="chip" data-action="APP.applyDatePreset" data-params='["stats","mois"]'>Mois</button>
+              </div>
               <input type="date" id="statsDate" data-change-action="STATS.load">
               <input type="date" id="statsDateFin" data-change-action="STATS.load" style="display:none;">
               <select id="statsUser" data-change-action="STATS.load" style="max-width:150px">
@@ -858,20 +870,39 @@
         <div class="view-container">
           <div class="view-header">
             <h2>⚙️ Administration</h2>
-            <div class="admin-tabs">
-              <button class="tab-btn active" data-action="ADMIN.switchTab" data-param="produits">🍞 Produits</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="categories">📂 Catégories</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="utilisateurs">👤 Utilisateurs</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="remises">🏷️ Remises</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="depenses">💸 Dépenses</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="fournisseurs">🚚 Fournisseurs</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="clients">👥 Clients</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="parametres">🔧 Paramètres</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="succursales">🏢 Succursales</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="backups">💾 Sauvegardes</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="imprimantes">🖨️ Imprimantes</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="cmi">💳 Paiement CMI</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="balance">⚖️ Balance</button>
+            <div class="admin-tabs" role="tablist" aria-label="Groupes de gestion">
+              <!-- Catalogue -->
+              <div class="admin-tab-group" role="group" aria-label="Catalogue">
+                <span class="admin-tab-group-label">Catalogue</span>
+                <button class="tab-btn active" data-action="ADMIN.switchTab" data-param="produits">🍞 Produits</button>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="categories">📂 Catégories</button>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="remises">🏷️ Remises</button>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="fournisseurs">🚚 Fournisseurs</button>
+              </div>
+              <!-- Équipe -->
+              <div class="admin-tab-group" role="group" aria-label="Équipe">
+                <span class="admin-tab-group-label">Équipe</span>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="utilisateurs">👤 Utilisateurs</button>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="succursales">🏢 Succursales</button>
+              </div>
+              <!-- Finances -->
+              <div class="admin-tab-group" role="group" aria-label="Finances">
+                <span class="admin-tab-group-label">Finances</span>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="depenses">💸 Dépenses</button>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="cmi">💳 Paiement CMI</button>
+              </div>
+              <!-- Matériel -->
+              <div class="admin-tab-group" role="group" aria-label="Matériel">
+                <span class="admin-tab-group-label">Matériel</span>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="imprimantes">🖨️ Imprimantes</button>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="balance">⚖️ Balance</button>
+              </div>
+              <!-- Système -->
+              <div class="admin-tab-group" role="group" aria-label="Système">
+                <span class="admin-tab-group-label">Système</span>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="parametres">🔧 Paramètres</button>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="backups">💾 Sauvegardes</button>
+              </div>
             </div>
           </div>
           <div id="adminBody" class="view-body"></div>
