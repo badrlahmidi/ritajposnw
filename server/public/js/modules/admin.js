@@ -829,6 +829,7 @@ export const ADMIN = {
     UI.viewLoading('adminBody');
     try {
       const succursales = await api('/succursales');
+      this._succursalesCache = succursales;
       const body = document.getElementById('adminBody');
       if (!body) return;
 
@@ -854,7 +855,7 @@ export const ADMIN = {
                   <td>${s.ice || '—'}</td>
                   <td>${s.actif ? '<span class="badge badge-success">Actif</span>' : '<span class="badge badge-danger">Inactif</span>'}</td>
                   <td>
-                    <button class="btn btn-sm btn-outline" onclick='ADMIN.openSuccursaleForm(${JSON.stringify(s).replace(/'/g, "&#39;")})'>✏️</button>
+                    <button class="btn btn-sm btn-outline" data-action="ADMIN.openSuccursaleFormById" data-param="${s.id}">✏️</button>
                     ${s.id !== 1 ? `<button class="btn btn-sm ${s.actif ? 'btn-danger' : 'btn-success'}" data-action="ADMIN.toggleSuccursale" data-param="${s.id}">${s.actif ? 'Désactiver' : 'Activer'}</button>` : ''}
                   </td>
                 </tr>
@@ -866,6 +867,11 @@ export const ADMIN = {
     } catch (e) {
       UI.toast('Erreur: ' + e.message, 'error');
     }
+  },
+
+  openSuccursaleFormById(id) {
+    const s = (this._succursalesCache || []).find(x => x.id == id) || null;
+    this.openSuccursaleForm(s);
   },
 
   openSuccursaleForm(s = null) {
