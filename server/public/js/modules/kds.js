@@ -38,7 +38,7 @@ export const KDS = {
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#aaa;gap:16px;padding-top:60px">
           <span style="font-size:4rem">🍽️</span>
           <p style="font-size:1.2rem">Aucune commande en cours en cuisine</p>
-          <button class="btn btn-outline btn-sm" onclick="KDS.load()">🔄 Actualiser</button>
+          <button class="btn btn-outline btn-sm" data-action="KDS.load">🔄 Actualiser</button>
         </div>`;
       return;
     }
@@ -49,7 +49,7 @@ export const KDS = {
     body.innerHTML = `
       <div class="kds-toolbar" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface)">
         <span style="font-weight:700;font-size:1rem">📺 KDS — ${commandes.length} commande${commandes.length > 1 ? 's' : ''} active${commandes.length > 1 ? 's' : ''}</span>
-        <button class="btn btn-sm btn-outline" onclick="KDS.load()">🔄 Actualiser</button>
+        <button class="btn btn-sm btn-outline" data-action="KDS.load">🔄 Actualiser</button>
         <span class="text-muted" style="margin-left:auto;font-size:12px">Rafraîchissement auto toutes les ${this._AUTO_REFRESH_MS / 1000}s</span>
       </div>
       <div class="kds-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;padding:16px;overflow-y:auto">
@@ -73,7 +73,7 @@ export const KDS = {
               </span>
               <button class="btn btn-sm ${l.statut_ligne === 'preparee' ? 'btn-outline' : 'btn-success'}"
                 style="padding:2px 8px;font-size:12px"
-                onclick="KDS.toggleLigne(${l.id}, '${l.statut_ligne}')">
+                data-action="KDS.toggleLigne" data-param="${l.id}" data-param2="${l.statut_ligne}">
                 ${l.statut_ligne === 'preparee' ? '↩️' : '✅'}
               </button>
             </div>`).join('')}
@@ -95,8 +95,8 @@ export const KDS = {
         </div>
         ${lignesHtml || '<p class="text-muted" style="font-size:13px">Toutes les lignes sont prêtes ✅</p>'}
         <div style="display:flex;gap:6px;margin-top:10px;border-top:1px solid var(--border);padding-top:10px">
-          <button class="btn btn-success btn-sm" style="flex:1" onclick="KDS.marquerPrete(${cmd.id})">✅ Prête</button>
-          <button class="btn btn-outline btn-sm" onclick="KDS.load()">🔄</button>
+          <button class="btn btn-success btn-sm" style="flex:1" data-action="KDS.marquerPrete" data-param="${cmd.id}">✅ Prête</button>
+          <button class="btn btn-outline btn-sm" data-action="KDS.load">🔄</button>
         </div>
       </div>`;
   },

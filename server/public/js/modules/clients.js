@@ -30,10 +30,10 @@ export const CLIENTS = {
         <td>${(c.total_achats || 0).toFixed(2)} DH</td>
         <td>${c.nb_visites || 0}</td>
         <td class="actions">
-          <button class="btn btn-sm btn-outline" onclick="CLIENTS.edit(${c.id})" title="Modifier">✏️</button>
-          ${c.solde_credit > 0 ? `<button class="btn btn-sm btn-success" onclick="CLIENTS.settleCredit(${c.id}, '${c.nom}', ${c.solde_credit})" title="Régler Dette">💰</button>` : ''}
-          <button class="btn btn-sm btn-outline" onclick="CLIENTS.exportReleve(${c.id})" title="Exporter Relevé">📄</button>
-          <button class="btn btn-sm btn-info" onclick="CLIENTS.viewHistory(${c.id})" title="Historique">📜</button>
+          <button class="btn btn-sm btn-outline" data-action="CLIENTS.edit" data-param="${c.id}" title="Modifier">✏️</button>
+          ${c.solde_credit > 0 ? `<button class="btn btn-sm btn-success" data-action="CLIENTS.settleCredit" data-params='${JSON.stringify([c.id, c.nom, c.solde_credit]).replace(/'/g, "&#39;")}' title="Régler Dette">💰</button>` : ''}
+          <button class="btn btn-sm btn-outline" data-action="CLIENTS.exportReleve" data-param="${c.id}" title="Exporter Relevé">📄</button>
+          <button class="btn btn-sm btn-info" data-action="CLIENTS.viewHistory" data-param="${c.id}" title="Historique">📜</button>
         </td>
       </tr>`).join('')}</tbody></table></div>`;
     },

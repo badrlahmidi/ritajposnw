@@ -85,7 +85,7 @@ export const POS = {
             const el = document.getElementById('posClientResults');
             if (!clients.length) { el.innerHTML = '<p class="text-muted text-center">Aucun client trouvé</p>'; return; }
             el.innerHTML = clients.map(c => `
-        <div class="cart-item" style="cursor:pointer" onclick="POS.selectClient(${c.id}, '${c.nom.replace(/'/g, "\\'")}', ${c.points_fidelite}, '${c.type_tarif}')">
+        <div class="cart-item" style="cursor:pointer" data-action="POS.selectClient" data-params='${JSON.stringify([c.id, c.nom, c.points_fidelite, c.type_tarif]).replace(/'/g, "&#39;")}'>
           <div class="cart-item-info">
             <div class="cart-item-name">${c.nom}</div>
             <div class="cart-item-price">${c.telephone || '—'} | ${c.points_fidelite} pts | ${c.nb_visites} visites</div>
@@ -155,13 +155,13 @@ export const POS = {
           <div class="modal-content" style="max-width:520px;width:95%">
             <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)">
               <h3 style="margin:0">🔀 ${parent.nom}</h3>
-              <button class="btn-ghost" onclick="APP.closeModal('varianteModal')" style="font-size:1.3rem">✕</button>
+              <button class="btn-ghost" data-action="APP.closeModal" data-param="varianteModal" style="font-size:1.3rem">✕</button>
             </div>
             <div style="padding:20px">
               <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px">Sélectionnez une variante :</p>
               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px">
                 ${variantes.map(v => `
-                  <button onclick="POS._selectVariante(${v.id});APP.closeModal('varianteModal')"
+                  <button data-action="POS._selectVariante" data-param="${v.id}"
                     style="background:var(--bg-card);border:2px solid var(--border);border-radius:10px;padding:14px 10px;cursor:pointer;transition:all 0.2s;text-align:center;display:flex;flex-direction:column;gap:4px;align-items:center"
                     onmouseenter="this.style.borderColor='var(--primary)';this.style.background='var(--primary-light)'"
                     onmouseleave="this.style.borderColor='var(--border)';this.style.background='var(--bg-card)'">
@@ -181,6 +181,11 @@ export const POS = {
     _selectVariante(varianteId) {
         const v = this._variantesCache?.[varianteId];
         if (v) this.addToCart(v);
+        APP.closeModal('varianteModal');
+    },
+
+    repeatLastOrderForSelected() {
+        if (this.selectedClient) this.repeatLastOrder(this.selectedClient.id);
     },
 
     // ─── Initialisation ─────────────────────────────────────────────────────

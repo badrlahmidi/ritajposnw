@@ -31,7 +31,7 @@ export const TABLES = {
         <div style="text-align:center;padding:48px;color:#aaa">
           <div style="font-size:4rem;margin-bottom:16px">🪑</div>
           <p style="font-size:1.1rem;margin-bottom:16px">Aucune salle configurée</p>
-          <button class="btn btn-primary" onclick="TABLES.openSalleForm()">+ Créer une salle</button>
+          <button class="btn btn-primary" data-action="TABLES.openSalleForm">+ Créer une salle</button>
         </div>`;
       return;
     }
@@ -46,9 +46,9 @@ export const TABLES = {
     body.innerHTML = `
       <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap">
         <span style="font-weight:700">🪑 Plan de Salle</span>
-        <button class="btn btn-primary btn-sm" onclick="TABLES.openSalleForm()">+ Salle</button>
-        <button class="btn btn-outline btn-sm" onclick="TABLES.openTableForm()">+ Table</button>
-        <button class="btn btn-outline btn-sm" onclick="TABLES.load()">🔄 Actualiser</button>
+        <button class="btn btn-primary btn-sm" data-action="TABLES.openSalleForm">+ Salle</button>
+        <button class="btn btn-outline btn-sm" data-action="TABLES.openTableForm">+ Table</button>
+        <button class="btn btn-outline btn-sm" data-action="TABLES.load">🔄 Actualiser</button>
         <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
           ${Object.entries(STATUT).map(([k, v]) =>
             `<span style="font-size:11px;padding:3px 8px;border-radius:12px;background:${v.bg};color:${v.color};font-weight:600">${v.label}</span>`
@@ -67,8 +67,8 @@ export const TABLES = {
           <div class="form-group mb-12"><label>Nom de la salle</label><input id="salleNom" class="input" placeholder="Salle principale"></div>
           <div class="form-group mb-12"><label>Ordre d'affichage</label><input id="salleOrdre" class="input" type="number" value="0"></div>
           <div style="display:flex;gap:8px">
-            <button class="btn btn-primary" onclick="TABLES.saveSalle()">💾 Enregistrer</button>
-            <button class="btn btn-outline" onclick="TABLES.closeModal('formSalle')">Annuler</button>
+            <button class="btn btn-primary" data-action="TABLES.saveSalle">💾 Enregistrer</button>
+            <button class="btn btn-outline" data-action="TABLES.closeModal" data-param="formSalle">Annuler</button>
           </div>
         </div>
       </div>
@@ -88,8 +88,8 @@ export const TABLES = {
             </select>
           </div>
           <div style="display:flex;gap:8px">
-            <button class="btn btn-primary" onclick="TABLES.saveTable()">💾 Enregistrer</button>
-            <button class="btn btn-outline" onclick="TABLES.closeModal('formTable')">Annuler</button>
+            <button class="btn btn-primary" data-action="TABLES.saveTable">💾 Enregistrer</button>
+            <button class="btn btn-outline" data-action="TABLES.closeModal" data-param="formTable">Annuler</button>
           </div>
         </div>
       </div>`;
@@ -106,8 +106,8 @@ export const TABLES = {
           ${salle.id ? `
             <button class="btn btn-sm btn-outline" style="margin-left:auto"
               data-salle-id="${salle.id}" data-salle-ordre="${salle.ordre || 0}"
-              onclick="TABLES.openSalleFormById(this)">✏️</button>
-            <button class="btn btn-sm btn-danger" onclick="TABLES.deleteSalle(${salle.id})">🗑️</button>` : ''}
+              data-action="TABLES.openSalleFormById" data-param="${salle.id}" data-param2="${salle.ordre || 0}">✏️</button>
+            <button class="btn btn-sm btn-danger" data-action="TABLES.deleteSalle" data-param="${salle.id}">🗑️</button>` : ''}
         </div>
         ${tables.length === 0 ? '<p class="text-muted" style="font-size:13px">Aucune table dans cette salle.</p>' : ''}
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px">
@@ -116,15 +116,15 @@ export const TABLES = {
             return `
             <div class="table-card" style="border:2px solid ${st.color};background:${st.bg};border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:transform .15s"
               onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform=''"
-              onclick="TABLES.tableAction(${t.id},'${t.statut || 'libre'}')">
+              data-action="TABLES.tableAction" data-param="${t.id}" data-param2="${t.statut || 'libre'}">
               <div style="font-size:1.6rem;font-weight:800;line-height:1">${t.numero}</div>
               <div style="font-size:11px;font-weight:600;color:${st.color};margin-top:4px">${st.label}</div>
               <div style="font-size:11px;color:#888">${t.capacite || '?'} couverts</div>
               <div style="display:flex;gap:4px;margin-top:8px;justify-content:center">
                 <button class="btn btn-sm btn-outline" style="padding:2px 6px;font-size:11px"
-                  onclick="event.stopPropagation();TABLES.openTableForm(${t.id})">✏️</button>
+                  data-action="TABLES.openTableForm" data-param="${t.id}">✏️</button>
                 <button class="btn btn-sm btn-danger" style="padding:2px 6px;font-size:11px"
-                  onclick="event.stopPropagation();TABLES.deleteTable(${t.id})">🗑️</button>
+                  data-action="TABLES.deleteTable" data-param="${t.id}">🗑️</button>
               </div>
             </div>`;
           }).join('')}
@@ -144,12 +144,11 @@ export const TABLES = {
   },
 
   /* ── Formulaires salle ── */
-  openSalleFormById(btn) {
-    const id    = parseInt(btn.dataset.salleId);
-    const ordre = parseInt(btn.dataset.salleOrdre) || 0;
-    // Find the nom from already-loaded data to avoid any injection path
-    const salle = this._salles.find(s => s.id === id);
-    this.openSalleForm(id, salle ? salle.nom : '', ordre);
+  openSalleFormById(id, ordre) {
+    const parsedId = parseInt(id);
+    const parsedOrdre = parseInt(ordre) || 0;
+    const salle = this._salles.find(s => s.id === parsedId);
+    this.openSalleForm(parsedId, salle ? salle.nom : '', parsedOrdre);
   },
 
   openSalleForm(id, nom = '', ordre = 0) {

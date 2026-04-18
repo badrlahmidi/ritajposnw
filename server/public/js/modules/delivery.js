@@ -38,8 +38,8 @@ export const LIVRAISON = {
             <td>${((l.commande_total || 0) + (l.frais_livraison || 0)).toFixed(2)} DH</td>
             <td><span class="badge badge-${l.statut === 'livree' ? 'success' : l.statut === 'en_cours' ? 'warning' : 'info'}">${l.statut}</span></td>
             <td class="actions">
-              <button class="btn btn-sm btn-outline" onclick="LIVRAISON.updateStatut(${l.id}, 'en_cours')">🚗 En cours</button>
-              <button class="btn btn-sm btn-success" onclick="LIVRAISON.updateStatut(${l.id}, 'livree')">✓ Livrée</button>
+              <button class="btn btn-sm btn-outline" data-action="LIVRAISON.updateStatut" data-param="${l.id}" data-param2="en_cours">🚗 En cours</button>
+              <button class="btn btn-sm btn-success" data-action="LIVRAISON.updateStatut" data-param="${l.id}" data-param2="livree">✓ Livrée</button>
             </td>
           </tr>`).join('')}
         </tbody>

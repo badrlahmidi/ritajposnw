@@ -48,22 +48,22 @@ export const ADMIN = {
     body.innerHTML = `
       <div class="flex-between mb-16">
         <div>
-          <input type="text" placeholder="Rechercher produit..." class="input" oninput="ADMIN.filterProducts(this.value)" style="width:250px">
+          <input type="text" placeholder="Rechercher produit..." class="input" data-input-action="ADMIN.filterProducts" style="width:250px">
           <span class="text-muted ml-8" style="font-size:0.85rem">${items.length} produits</span>
         </div>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-outline btn-sm" onclick="ADMIN.printLabels()"><span class="icon">🖨️</span> Étiquettes</button>
-          <button class="btn btn-outline btn-sm" onclick="ADMIN.triggerImportCSV()"><span class="icon">📥</span> Excel/CSV</button>
-          <button class="btn btn-danger btn-sm" id="btnBulkDelete" onclick="ADMIN.bulkDeleteProducts()" style="display:none">🗑️ Supprimer sélec.</button>
-          <button class="btn btn-primary btn-sm" onclick="ADMIN.openProduitForm()">+ Nouveau Produit</button>
-          <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="ADMIN.handleCSVUpload(event)">
+          <button class="btn btn-outline btn-sm" data-action="ADMIN.printLabels"><span class="icon">🖨️</span> Étiquettes</button>
+          <button class="btn btn-outline btn-sm" data-action="ADMIN.triggerImportCSV"><span class="icon">📥</span> Excel/CSV</button>
+          <button class="btn btn-danger btn-sm" id="btnBulkDelete" data-action="ADMIN.bulkDeleteProducts" style="display:none">🗑️ Supprimer sélec.</button>
+          <button class="btn btn-primary btn-sm" data-action="ADMIN.openProduitForm">+ Nouveau Produit</button>
+          <input type="file" id="csvFileInput" accept=".csv" style="display:none" data-change-event-action="ADMIN.handleCSVUpload">
         </div>
       </div>
       <div class="table-responsive">
       <table class="data-table">
         <thead>
           <tr>
-            <th style="width:40px"><input type="checkbox" onclick="ADMIN.toggleAllLabels(this)"></th>
+            <th style="width:40px"><input type="checkbox" data-change-check-action="ADMIN.toggleAllLabels"></th>
             <th>Réf/Code</th><th>Nom</th><th>Catégorie</th><th>Prix TTC</th><th>Stock</th><th>Actif</th><th>Actions</th>
           </tr>
         </thead>
@@ -76,7 +76,7 @@ export const ADMIN = {
 
   renderProductRow(p) {
     return `<tr style="${!p.actif ? 'opacity:0.5' : ''}">
-        <td><input type="checkbox" class="label-check" value="${p.id}" data-name="${p.nom.replace(/"/g, '&quot;')}" data-price="${p.prix_ttc}" data-code="${p.code_barre || ''}" onchange="ADMIN.updateBulkButtons()"></td>
+        <td><input type="checkbox" class="label-check" value="${p.id}" data-name="${p.nom.replace(/"/g, '&quot;')}" data-price="${p.prix_ttc}" data-code="${p.code_barre || ''}" data-change-action="ADMIN.updateBulkButtons"></td>
         <td><small>${p.code_barre || '—'}</small></td>
         <td><strong>${p.nom}</strong></td>
         <td><span class="badge" style="background:${p.categorie_couleur}22;color:${p.categorie_couleur}">${p.categorie_nom || '—'}</span></td>
@@ -84,10 +84,10 @@ export const ADMIN = {
         <td>${p.stock_quantite <= p.stock_seuil ? '<span class="text-danger">⚠️ ' + p.stock_quantite + '</span>' : p.stock_quantite}</td>
         <td>${p.actif ? '✅' : '❌'}</td>
         <td class="actions">
-          <button class="btn btn-sm ${p.est_favori ? 'btn-warning' : 'btn-outline'}" onclick="ADMIN.toggleProduitFavori(${p.id}, ${p.est_favori})" title="Définir Favori">⭐</button>
-          <button class="btn btn-sm btn-outline" onclick="ADMIN.editProduit(${p.id})" title="Modifier">✏️</button>
-          <button class="btn btn-sm ${p.actif ? 'btn-danger' : 'btn-success'}" onclick="ADMIN.toggleProduit(${p.id}, ${p.actif})" title="${p.actif ? 'Désactiver' : 'Activer'}">${p.actif ? '🚫' : '✅'}</button>
-          <button class="btn btn-sm btn-danger" onclick="ADMIN.deleteProduit(${p.id})" title="Supprimer">🗑️</button>
+          <button class="btn btn-sm ${p.est_favori ? 'btn-warning' : 'btn-outline'}" data-action="ADMIN.toggleProduitFavori" data-param="${p.id}" data-param2="${p.est_favori}" title="Définir Favori">⭐</button>
+          <button class="btn btn-sm btn-outline" data-action="ADMIN.editProduit" data-param="${p.id}" title="Modifier">✏️</button>
+          <button class="btn btn-sm ${p.actif ? 'btn-danger' : 'btn-success'}" data-action="ADMIN.toggleProduit" data-param="${p.id}" data-param2="${p.actif}" title="${p.actif ? 'Désactiver' : 'Activer'}">${p.actif ? '🚫' : '✅'}</button>
+          <button class="btn btn-sm btn-danger" data-action="ADMIN.deleteProduit" data-param="${p.id}" title="Supprimer">🗑️</button>
         </td>
       </tr>`;
   },
@@ -100,8 +100,8 @@ export const ADMIN = {
     if (tbody) tbody.innerHTML = filtered.map(p => this.renderProductRow(p)).join('');
   },
 
-  toggleAllLabels(source) {
-    document.querySelectorAll('.label-check').forEach(c => c.checked = source.checked);
+  toggleAllLabels(checked) {
+    document.querySelectorAll('.label-check').forEach(c => c.checked = checked);
     this.updateBulkButtons();
   },
 
@@ -410,7 +410,7 @@ export const ADMIN = {
       body.innerHTML = `
         <div class="flex-between mb-16">
           <p>${cats.length} catégorie(s)</p>
-          <button class="btn btn-primary btn-sm" onclick="ADMIN.addCategory()">+ Nouvelle Catégorie</button>
+          <button class="btn btn-primary btn-sm" data-action="ADMIN.addCategory">+ Nouvelle Catégorie</button>
         </div>
         <div class="table-responsive"><table class="data-table"><thead><tr><th>Icône</th><th>Nom</th><th>Couleur</th><th>Ordre</th><th>Actif</th><th>Actions</th></tr></thead>
         <tbody>${cats.map(c => `<tr style="${!c.actif ? 'opacity:0.5' : ''}">
@@ -420,8 +420,8 @@ export const ADMIN = {
           <td>${c.ordre}</td>
           <td>${c.actif ? '✅' : '❌'}</td>
           <td class="actions">
-             <button class="btn btn-sm btn-outline" onclick="ADMIN.editCategory(${c.id})" title="Modifier">✏️</button>
-             <button class="btn btn-sm ${c.actif ? 'btn-danger' : 'btn-success'}" onclick="ADMIN.toggleCategory(${c.id}, ${c.actif})">${c.actif ? '🚫' : '✅'}</button>
+             <button class="btn btn-sm btn-outline" data-action="ADMIN.editCategory" data-param="${c.id}" title="Modifier">✏️</button>
+             <button class="btn btn-sm ${c.actif ? 'btn-danger' : 'btn-success'}" data-action="ADMIN.toggleCategory" data-param="${c.id}" data-param2="${c.actif}">${c.actif ? '🚫' : '✅'}</button>
           </td>
         </tr>`).join('')}</tbody></table></div>`;
     } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }
@@ -439,7 +439,7 @@ export const ADMIN = {
               <div class="modal">
                 <div class="modal-header">
                   <h2 id="categoryFormTitle">📂 Catégorie</h2>
-                  <button class="btn btn-icon modal-close" onclick="APP.closeModal('categoryFormModal')">✕</button>
+                  <button class="btn btn-icon modal-close" data-action="APP.closeModal" data-param="categoryFormModal">✕</button>
                 </div>
                 <div class="modal-body">
                   <input type="hidden" id="categoryFormId">
@@ -457,8 +457,8 @@ export const ADMIN = {
                     </div>
                   </div>
                   <div class="form-actions">
-                    <button id="btnSaveCategory" class="btn btn-primary" onclick="ADMIN.saveCategory()">💾 Enregistrer</button>
-                    <button class="btn btn-secondary" onclick="APP.closeModal('categoryFormModal')">Annuler</button>
+                    <button id="btnSaveCategory" class="btn btn-primary" data-action="ADMIN.saveCategory">💾 Enregistrer</button>
+                    <button class="btn btn-secondary" data-action="APP.closeModal" data-param="categoryFormModal">Annuler</button>
                   </div>
                 </div>
               </div>`;
@@ -551,7 +551,7 @@ export const ADMIN = {
       body.innerHTML = `
         <div class="flex-between mb-16">
           <p>${users.length} utilisateur(s)</p>
-          <button class="btn btn-primary btn-sm" onclick="ADMIN.openUserForm()">+ Nouvel Utilisateur</button>
+          <button class="btn btn-primary btn-sm" data-action="ADMIN.openUserForm">+ Nouvel Utilisateur</button>
         </div>
         <div class="table-responsive"><table class="data-table"><thead><tr><th>Nom</th><th>Login</th><th>Rôle</th><th>Dernière connexion</th><th>Actif</th><th>Actions</th></tr></thead>
         <tbody>${users.map(u => `<tr style="${!u.actif ? 'opacity:0.5' : ''}">
@@ -561,8 +561,8 @@ export const ADMIN = {
           <td>${u.derniere_connexion ? new Date(u.derniere_connexion).toLocaleString('fr-FR') : '—'}</td>
           <td>${u.actif ? '✅' : '❌'}</td>
           <td class="actions">
-             <button class="btn btn-sm btn-outline" onclick="ADMIN.loadUserForEdit(${u.id})">✏️</button>
-             <button class="btn btn-sm btn-danger" onclick="ADMIN.deleteUser(${u.id})">🗑️</button>
+             <button class="btn btn-sm btn-outline" data-action="ADMIN.loadUserForEdit" data-param="${u.id}">✏️</button>
+             <button class="btn btn-sm btn-danger" data-action="ADMIN.deleteUser" data-param="${u.id}">🗑️</button>
           </td>
         </tr>`).join('')}</tbody></table></div>`;
     } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }
@@ -649,7 +649,7 @@ export const ADMIN = {
       body.innerHTML = `
         <div class="flex-between mb-16">
           <p>${remises.length} remise(s) active(s)</p>
-          <button class="btn btn-primary btn-sm" onclick="ADMIN.addRemise()">+ Nouvelle Remise</button>
+          <button class="btn btn-primary btn-sm" data-action="ADMIN.addRemise">+ Nouvelle Remise</button>
         </div>
         <div class="table-responsive"><table class="data-table"><thead><tr><th>Nom</th><th>Type</th><th>Valeur</th><th>Min.</th><th>Période</th><th>Actions</th></tr></thead>
         <tbody>${remises.map(r => `<tr>
@@ -659,7 +659,7 @@ export const ADMIN = {
           <td>${r.condition_min ? r.condition_min + ' DH min.' : '—'}</td>
           <td>${r.date_debut && r.date_fin ? r.date_debut + ' → ' + r.date_fin : 'Permanent'}</td>
           <td class="actions">
-             <button class="btn btn-sm btn-danger" onclick="ADMIN.deleteRemise(${r.id})">🗑️</button>
+             <button class="btn btn-sm btn-danger" data-action="ADMIN.deleteRemise" data-param="${r.id}">🗑️</button>
           </td>
         </tr>`).join('')}</tbody></table></div>`;
     } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }
@@ -696,7 +696,7 @@ export const ADMIN = {
       body.innerHTML = `
         <div class="flex-between mb-16">
           <p>${depenses.length} dépense(s)</p>
-          <button class="btn btn-primary btn-sm" onclick="ADMIN.addDepense()">+ Nouvelle Dépense</button>
+          <button class="btn btn-primary btn-sm" data-action="ADMIN.addDepense">+ Nouvelle Dépense</button>
         </div>
         <div class="table-responsive"><table class="data-table"><thead><tr><th>Date</th><th>Catégorie</th><th>Montant</th><th>Description</th><th>Paiement</th><th>Par</th><th>Actions</th></tr></thead>
         <tbody>${depenses.map(d => `<tr>
@@ -707,7 +707,7 @@ export const ADMIN = {
           <td>${d.mode_paiement === 'especes' ? '💵' : '💳'}</td>
           <td>${d.utilisateur_nom || '—'}</td>
           <td class="actions">
-             <button class="btn btn-sm btn-danger" onclick="ADMIN.deleteDepense(${d.id})">🗑️</button>
+             <button class="btn btn-sm btn-danger" data-action="ADMIN.deleteDepense" data-param="${d.id}">🗑️</button>
           </td>
         </tr>`).join('')}</tbody></table></div>`;
     } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }
@@ -738,11 +738,12 @@ export const ADMIN = {
     UI.viewLoading('adminBody');
     try {
       const fournisseurs = await api('/fournisseurs');
+      this._fournisseurs = fournisseurs;
       const body = document.getElementById('adminBody');
       body.innerHTML = `
         <div class="flex-between mb-16">
           <p>${fournisseurs.length} fournisseur(s) actif(s)</p>
-          <button class="btn btn-primary btn-sm" onclick="ADMIN.openFournisseurForm()">+ Nouveau Fournisseur</button>
+          <button class="btn btn-primary btn-sm" data-action="ADMIN.openFournisseurForm">+ Nouveau Fournisseur</button>
         </div>
         <div class="table-responsive"><table class="data-table">
           <thead><tr><th>Nom</th><th>Contact</th><th>Téléphone</th><th>Email</th><th>Actions</th></tr></thead>
@@ -753,8 +754,8 @@ export const ADMIN = {
               <td>${f.telephone || '—'}</td>
               <td>${f.email || '—'}</td>
               <td class="actions">
-                <button class="btn btn-sm btn-outline" onclick='ADMIN.openFournisseurForm(${JSON.stringify(f).replace(/'/g, "&#39;")})'>✏️</button>
-                <button class="btn btn-sm btn-danger" onclick="ADMIN.deleteFournisseur(${f.id})">🗑️</button>
+                <button class="btn btn-sm btn-outline" data-action="ADMIN.openFournisseurForm" data-param="${f.id}">✏️</button>
+                <button class="btn btn-sm btn-danger" data-action="ADMIN.deleteFournisseur" data-param="${f.id}">🗑️</button>
               </td>
             </tr>`).join('')}
           </tbody>
@@ -766,6 +767,10 @@ export const ADMIN = {
   },
 
   openFournisseurForm(f = null) {
+    if (typeof f === 'string' || typeof f === 'number') {
+      const id = Number(f);
+      f = (this._fournisseurs || []).find(x => x.id === id) || null;
+    }
     document.getElementById('fournisseurFormId').value = f ? f.id : '';
     document.getElementById('fournisseurFormNom').value = f ? f.nom : '';
     document.getElementById('fournisseurFormContact').value = f ? f.contact || '' : '';
@@ -824,13 +829,14 @@ export const ADMIN = {
     UI.viewLoading('adminBody');
     try {
       const succursales = await api('/succursales');
+      this._succursalesCache = succursales;
       const body = document.getElementById('adminBody');
       if (!body) return;
 
       body.innerHTML = `
         <div class="flex-between mb-16">
           <p>${succursales.length} succursale(s) au total</p>
-          <button class="btn btn-primary btn-sm" onclick="ADMIN.openSuccursaleForm()">+ Nouvelle Succursale</button>
+          <button class="btn btn-primary btn-sm" data-action="ADMIN.openSuccursaleForm">+ Nouvelle Succursale</button>
         </div>
         <div class="table-responsive">
           <table class="data-table">
@@ -849,8 +855,8 @@ export const ADMIN = {
                   <td>${s.ice || '—'}</td>
                   <td>${s.actif ? '<span class="badge badge-success">Actif</span>' : '<span class="badge badge-danger">Inactif</span>'}</td>
                   <td>
-                    <button class="btn btn-sm btn-outline" onclick='ADMIN.openSuccursaleForm(${JSON.stringify(s).replace(/'/g, "&#39;")})'>✏️</button>
-                    ${s.id !== 1 ? `<button class="btn btn-sm ${s.actif ? 'btn-danger' : 'btn-success'}" onclick="ADMIN.toggleSuccursale(${s.id})">${s.actif ? 'Désactiver' : 'Activer'}</button>` : ''}
+                    <button class="btn btn-sm btn-outline" data-action="ADMIN.openSuccursaleFormById" data-param="${s.id}">✏️</button>
+                    ${s.id !== 1 ? `<button class="btn btn-sm ${s.actif ? 'btn-danger' : 'btn-success'}" data-action="ADMIN.toggleSuccursale" data-param="${s.id}">${s.actif ? 'Désactiver' : 'Activer'}</button>` : ''}
                   </td>
                 </tr>
               `).join('')}
@@ -861,6 +867,11 @@ export const ADMIN = {
     } catch (e) {
       UI.toast('Erreur: ' + e.message, 'error');
     }
+  },
+
+  openSuccursaleFormById(id) {
+    const s = (this._succursalesCache || []).find(x => x.id == id) || null;
+    this.openSuccursaleForm(s);
   },
 
   openSuccursaleForm(s = null) {
@@ -876,7 +887,7 @@ export const ADMIN = {
       <div class="modal card" style="max-width:500px;width:95%">
         <div class="modal-header">
           <h2 id="succursaleFormTitle">${s ? '✏️ Modifier Succursale' : '🏢 Nouvelle Succursale'}</h2>
-          <button class="btn-icon modal-close" onclick="APP.closeModal('succursaleFormModal')">✕</button>
+          <button class="btn-icon modal-close" data-action="APP.closeModal" data-param="succursaleFormModal">✕</button>
         </div>
         <div class="modal-body">
           <input type="hidden" id="succFormId" value="${s ? s.id : ''}">
@@ -903,8 +914,8 @@ export const ADMIN = {
             </label>
           </div>` : ''}
           <div class="form-actions" style="margin-top:20px;justify-content:flex-end">
-            <button class="btn" onclick="APP.closeModal('succursaleFormModal')">Annuler</button>
-            <button id="btnSaveSucc" class="btn btn-primary" onclick="ADMIN.saveSuccursale()">✅ Enregistrer</button>
+            <button class="btn" data-action="APP.closeModal" data-param="succursaleFormModal">Annuler</button>
+            <button id="btnSaveSucc" class="btn btn-primary" data-action="ADMIN.saveSuccursale">✅ Enregistrer</button>
           </div>
         </div>
       </div>
@@ -967,7 +978,7 @@ export const ADMIN = {
       body.innerHTML = `
         <div class="flex-between mb-16">
           <p>${clients.length} client(s) au total</p>
-          <button class="btn btn-primary btn-sm" onclick="CLIENTS.openForm()">+ Nouveau Client</button>
+          <button class="btn btn-primary btn-sm" data-action="CLIENTS.openForm">+ Nouveau Client</button>
         </div>
         <div class="table-responsive"><table class="data-table">
           <thead><tr><th>Nom</th><th>Téléphone</th><th>Email</th><th>Tarif</th><th>Fidélité</th><th>Crédit</th><th>Actif</th><th>Actions</th></tr></thead>
@@ -981,8 +992,8 @@ export const ADMIN = {
               <td class="text-${c.solde_credit > 0 ? 'danger' : 'success'}">${(c.solde_credit || 0).toFixed(2)} DH</td>
               <td>${c.actif ? '✅' : '❌'}</td>
               <td class="actions">
-                <button class="btn btn-sm btn-outline" onclick="CLIENTS.edit(${c.id})" title="Modifier">✏️</button>
-                <button class="btn btn-sm ${c.actif ? 'btn-danger' : 'btn-success'}" onclick="ADMIN.toggleClient(${c.id}, ${c.actif})" title="${c.actif ? 'Désactiver' : 'Activer'}">${c.actif ? '🚫' : '✅'}</button>
+                <button class="btn btn-sm btn-outline" data-action="CLIENTS.edit" data-param="${c.id}" title="Modifier">✏️</button>
+                <button class="btn btn-sm ${c.actif ? 'btn-danger' : 'btn-success'}" data-action="ADMIN.toggleClient" data-param="${c.id}" data-param2="${c.actif}" title="${c.actif ? 'Désactiver' : 'Activer'}">${c.actif ? '🚫' : '✅'}</button>
               </td>
             </tr>`).join('')}
           </tbody>
@@ -1093,7 +1104,7 @@ export const ADMIN = {
         <div class="ticket-options-grid">
         ${featureOptions.map(([key, label, desc]) => {
         const isOn = params[key] !== '0';
-        return `<div class="ticket-option ${isOn ? 'active' : ''}" id="fopt_${key}" onclick="ADMIN.toggleTicketOption('${key}', 'fopt_')" title="${desc}">
+        return `<div class="ticket-option ${isOn ? 'active' : ''}" id="fopt_${key}" data-action="ADMIN.toggleTicketOption" data-param="${key}" data-param2="fopt_" title="${desc}">
             <div class="ticket-opt-toggle">${isOn ? '✅' : '⬜'}</div>
             <div class="ticket-opt-info">
               <div class="ticket-opt-label">${label}</div>
@@ -1110,7 +1121,7 @@ export const ADMIN = {
       <div class="ticket-options-grid">
         ${paymentOptions.map(([key, label, desc]) => {
         const isOn = params[key] !== '0';
-        return `<div class="ticket-option ${isOn ? 'active' : ''}" id="popt_${key}" onclick="ADMIN.toggleTicketOption('${key}', 'popt_')" title="${desc}">
+        return `<div class="ticket-option ${isOn ? 'active' : ''}" id="popt_${key}" data-action="ADMIN.toggleTicketOption" data-param="${key}" data-param2="popt_" title="${desc}">
             <div class="ticket-opt-toggle">${isOn ? '✅' : '⬜'}</div>
             <div class="ticket-opt-info">
               <div class="ticket-opt-label">${label}</div>
@@ -1127,7 +1138,7 @@ export const ADMIN = {
       <div class="ticket-options-grid">
         ${ticketOptions.map(([key, label, desc]) => {
         const isOn = params[key] !== '0';
-        return `<div class="ticket-option ${isOn ? 'active' : ''}" id="topt_${key}" onclick="ADMIN.toggleTicketOption('${key}', 'topt_')" title="${desc}">
+        return `<div class="ticket-option ${isOn ? 'active' : ''}" id="topt_${key}" data-action="ADMIN.toggleTicketOption" data-param="${key}" data-param2="topt_" title="${desc}">
             <div class="ticket-opt-toggle">${isOn ? '✅' : '⬜'}</div>
             <div class="ticket-opt-info">
               <div class="ticket-opt-label">${label}</div>
@@ -1145,8 +1156,8 @@ export const ADMIN = {
     </div>
 
     <div class="form-actions" style="margin-top:16px">
-      <button id="btnSaveParametres" class="btn btn-primary" onclick="ADMIN.saveParametres()">💾 Enregistrer tout</button>
-      <button class="btn btn-secondary" onclick="ADMIN.previewTicket()" style="margin-left:8px">👁️ Aperçu ticket</button>
+      <button id="btnSaveParametres" class="btn btn-primary" data-action="ADMIN.saveParametres">💾 Enregistrer tout</button>
+      <button class="btn btn-secondary" data-action="ADMIN.previewTicket" style="margin-left:8px">👁️ Aperçu ticket</button>
     </div>
 
     <div class="card danger-zone" style="margin-top:32px;border:2px solid var(--danger);background:#fff5f5">
@@ -1159,7 +1170,7 @@ export const ADMIN = {
               <option value="retail">🛒 Mode Retail / Superette</option>
             </select>
           </div>
-          <button class="btn btn-danger" onclick="ADMIN.resetDatabase()" style="margin-top:20px">💥 Réinitialiser / Changer Métier</button>
+          <button class="btn btn-danger" data-action="ADMIN.resetDatabase" style="margin-top:20px">💥 Réinitialiser / Changer Métier</button>
       </div>
     </div>`;
     } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }
@@ -1255,8 +1266,8 @@ export const ADMIN = {
            <h3 class="mb-8">📦 Gestion des Sauvegardes</h3>
            <p class="text-muted mb-16">Les sauvegardes manuelles et automatiques sont stockées localement. L'archivage légal génère un dossier conforme aux normes DGI.</p>
            <div style="display:flex;gap:12px">
-             <button class="btn btn-primary" onclick="ADMIN.createBackup()">💾 Backup Rapide</button>
-             <button class="btn btn-outline" onclick="ADMIN.createArchive()">⚖️ Archive Légale (DGI)</button>
+             <button class="btn btn-primary" data-action="ADMIN.createBackup">💾 Backup Rapide</button>
+             <button class="btn btn-outline" data-action="ADMIN.createArchive">⚖️ Archive Légale (DGI)</button>
            </div>
         </div>
         <div class="table-responsive">
@@ -1269,8 +1280,8 @@ export const ADMIN = {
                  <td>${(b.size / 1024 / 1024).toFixed(2)} MB</td>
                  <td><span class="badge ${b.filename.includes('archive') ? 'badge-info' : 'badge-success'}">${b.filename.includes('archive') ? 'DGI' : 'SQL'}</span></td>
                  <td class="actions">
-                    <button class="btn btn-sm btn-outline" onclick="ADMIN.downloadBackup('${b.filename}')" title="Télécharger">⬇️</button>
-                    <button class="btn btn-sm btn-outline" onclick="ADMIN.verifyBackup('${b.filename}')" title="Vérifier intégrité">🔍</button>
+                    <button class="btn btn-sm btn-outline" data-action="ADMIN.downloadBackup" data-param="${b.filename}" title="Télécharger">⬇️</button>
+                    <button class="btn btn-sm btn-outline" data-action="ADMIN.verifyBackup" data-param="${b.filename}" title="Vérifier intégrité">🔍</button>
                  </td>
               </tr>`).join('')}
             </tbody>
@@ -1342,7 +1353,7 @@ export const ADMIN = {
         <div class="card">
           <div class="flex-between mb-16">
             <h3>🖨️ Imprimantes thermiques</h3>
-            <button class="btn btn-primary btn-sm" onclick="ADMIN.openImprimanteForm()">+ Ajouter</button>
+            <button class="btn btn-primary btn-sm" data-action="ADMIN.openImprimanteForm">+ Ajouter</button>
           </div>
           ${list.length === 0 ? '<p class="text-muted">Aucune imprimante configurée.</p>' : `
           <table class="data-table">
@@ -1355,9 +1366,9 @@ export const ADMIN = {
                 <td>${imp.port}</td>
                 <td>${imp.actif ? '✅' : '⬜'}</td>
                 <td style="display:flex;gap:4px">
-                  <button class="btn btn-sm btn-outline" onclick="ADMIN.testImprimante('${imp.ip}',${imp.port})">🧪 Test</button>
-                  <button class="btn btn-sm btn-outline" onclick="ADMIN.openImprimanteForm(${imp.id})">✏️</button>
-                  <button class="btn btn-sm btn-danger" onclick="ADMIN.deleteImprimante(${imp.id})">🗑️</button>
+                  <button class="btn btn-sm btn-outline" data-action="ADMIN.testImprimante" data-param="${imp.ip}" data-param2="${imp.port}">🧪 Test</button>
+                  <button class="btn btn-sm btn-outline" data-action="ADMIN.openImprimanteForm" data-param="${imp.id}">✏️</button>
+                  <button class="btn btn-sm btn-danger" data-action="ADMIN.deleteImprimante" data-param="${imp.id}">🗑️</button>
                 </td>
               </tr>`).join('')}
             </tbody>
@@ -1381,11 +1392,16 @@ export const ADMIN = {
             <div class="form-group"><label>Port TCP</label><input id="impPort" class="input" type="number" value="9100"></div>
           </div>
           <div style="display:flex;gap:8px;margin-top:12px">
-            <button class="btn btn-primary" onclick="ADMIN.saveImprimante()">💾 Enregistrer</button>
-            <button class="btn btn-outline" onclick="document.getElementById('formImprimante').style.display='none'">Annuler</button>
+            <button class="btn btn-primary" data-action="ADMIN.saveImprimante">💾 Enregistrer</button>
+            <button class="btn btn-outline" data-action="ADMIN.hideImprimanteForm">Annuler</button>
           </div>
         </div>`;
     } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }
+  },
+
+  hideImprimanteForm() {
+    const f = document.getElementById('formImprimante');
+    if (f) f.style.display = 'none';
   },
 
   openImprimanteForm(id) {
@@ -1487,7 +1503,7 @@ export const ADMIN = {
           </div>
 
           <div style="display:flex;gap:8px;margin-top:16px">
-            <button class="btn btn-primary" onclick="ADMIN.saveCMI()">💾 Enregistrer</button>
+            <button class="btn btn-primary" data-action="ADMIN.saveCMI">💾 Enregistrer</button>
           </div>
 
           <div class="card" style="margin-top:24px;background:#f0f7ff;border:1px solid #c0dcff">
@@ -1587,15 +1603,15 @@ export const ADMIN = {
           </div>
 
           <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
-            <button class="btn btn-primary" onclick="ADMIN.saveBalance()">💾 Enregistrer</button>
-            <button class="btn btn-success" onclick="ADMIN.connectBalance()">🔌 Connecter</button>
-            <button class="btn btn-outline" onclick="ADMIN.disconnectBalance()" ${!connected ? 'disabled' : ''}>⏏️ Déconnecter</button>
-            <button class="btn btn-outline" onclick="ADMIN.readWeight()">⚖️ Lire poids</button>
+            <button class="btn btn-primary" data-action="ADMIN.saveBalance">💾 Enregistrer</button>
+            <button class="btn btn-success" data-action="ADMIN.connectBalance">🔌 Connecter</button>
+            <button class="btn btn-outline" data-action="ADMIN.disconnectBalance" ${!connected ? 'disabled' : ''}>⏏️ Déconnecter</button>
+            <button class="btn btn-outline" data-action="ADMIN.readWeight">⚖️ Lire poids</button>
           </div>
 
           ${connected ? `<div class="card" style="margin-top:16px;background:#f0fff4;border:1px solid #a3d9b1">
             <span style="font-size:1.5rem;font-weight:bold" id="balWeightDisplay">-- --</span>
-            <button class="btn btn-sm btn-outline" style="margin-left:12px" onclick="ADMIN.readWeight()">🔄 Actualiser</button>
+            <button class="btn btn-sm btn-outline" style="margin-left:12px" data-action="ADMIN.readWeight">🔄 Actualiser</button>
           </div>` : ''}
         </div>`;
     } catch (e) { UI.toast('Erreur: ' + e.message, 'error'); }

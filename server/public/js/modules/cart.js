@@ -256,7 +256,7 @@ export const CartModule = {
             if (solde > 0) {
                 banner.innerHTML = `
                   <span>⚠️ Ardoise <strong>${client.nom}</strong> : <strong style="font-size:1rem">${solde.toFixed(2)} DH</strong> dû</span>
-                  <button onclick="CLIENTS.settleCredit(${client.id}, '${client.nom.replace(/'/g, "\\'")}'  , ${solde})" style="background:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.5);color:#fff;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:0.8rem;white-space:nowrap">💰 Régler</button>`;
+                  <button data-action="CLIENTS.settleCredit" data-params='${JSON.stringify([client.id, client.nom, solde]).replace(/'/g, "&#39;")}' style="background:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.5);color:#fff;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:0.8rem;white-space:nowrap">💰 Régler</button>`;
                 banner.style.display = 'flex';
             } else {
                 banner.style.display = 'none';
@@ -336,22 +336,22 @@ export const CartModule = {
         }
 
         container.innerHTML = this.cart.map((item, i) => `
-      <div class="cart-item" onclick="POS.editQuantity(${i})" style="cursor:pointer;${item.quantite < 0 ? 'background:#fff0f0;border-left:4px solid var(--danger)' : ''}">
+      <div class="cart-item" data-action="POS.editQuantity" data-param="${i}" style="cursor:pointer;${item.quantite < 0 ? 'background:#fff0f0;border-left:4px solid var(--danger)' : ''}">
         <div class="cart-item-info">
           <div class="cart-item-name">
             ${item.nom} ${item.quantite < 0 ? '<small class="text-danger">(RETOUR)</small>' : ''}
-            <button onclick="event.stopPropagation(); POS.addNoteToItem(${i})" style="background:none;border:none;cursor:pointer;opacity:0.6;font-size:12px" title="Ajouter une note">📝</button>
+            <button data-action="POS.addNoteToItem" data-param="${i}" style="background:none;border:none;cursor:pointer;opacity:0.6;font-size:12px" title="Ajouter une note">📝</button>
           </div>
           <div class="cart-item-price">${item.prix_ttc.toFixed(2)} DH${item.taux_tva ? ' <small>(TVA ' + item.taux_tva + '%)</small>' : ''}</div>
           ${item.notes ? `<div style="font-size:12px;color:var(--primary);margin-top:2px;font-style:italic">👉 ${item.notes}</div>` : ''}
         </div>
         <div class="cart-item-qty">
-          <button onclick="event.stopPropagation(); POS.updateQty(${i},-1)">−</button>
+          <button data-action="POS.updateQty" data-param="${i}" data-param2="-1">−</button>
           <span>${item.quantite}</span>
-          <button onclick="event.stopPropagation(); POS.updateQty(${i},1)">+</button>
+          <button data-action="POS.updateQty" data-param="${i}" data-param2="1">+</button>
         </div>
         <div class="cart-item-total" style="${item.sous_total_ttc < 0 ? 'color:var(--danger)' : ''}">${item.sous_total_ttc.toFixed(2)}</div>
-        <button class="cart-item-remove" onclick="event.stopPropagation(); POS.removeFromCart(${i})">✕</button>
+        <button class="cart-item-remove" data-action="POS.removeFromCart" data-param="${i}">✕</button>
       </div>
     `).join('');
 

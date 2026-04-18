@@ -37,10 +37,10 @@ export const HISTORY = {
 
             body.innerHTML = `<div class="table-responsive"><table class="data-table">
         <thead><tr>
-          <th style="width:40px"><input type="checkbox" onchange="HISTORY.toggleAll(this.checked)"></th>
+          <th style="width:40px"><input type="checkbox" data-change-check-action="HISTORY.toggleAll"></th>
           <th>N°</th><th>Date</th><th>Type</th><th>Total</th><th>Paiement</th><th>Caissier</th><th>Statut</th><th>Actions</th></tr></thead>
         <tbody>${commandes.map(c => `<tr>
-          <td><input type="checkbox" class="order-checkbox" data-id="${c.id}" ${this.selectedOrders.has(c.id) ? 'checked' : ''} onchange="HISTORY.toggleOrder(${c.id}, this.checked)"></td>
+          <td><input type="checkbox" class="order-checkbox" data-id="${c.id}" ${this.selectedOrders.has(c.id) ? 'checked' : ''} data-change-check-action="HISTORY.toggleOrder" data-param="${c.id}"></td>
           <td><strong>${c.numero}</strong><br><small class="text-muted">${c.client_nom || ''}</small></td>
           <td>${new Date(c.date_creation).toLocaleString('fr-FR')}</td>
           <td>${c.type_commande === 'emporter' ? '🛍️' : c.type_commande === 'livraison' ? '🚗' : '🏠'}</td>
@@ -49,14 +49,14 @@ export const HISTORY = {
           <td>${c.caissier_nom || '—'}</td>
           <td><span class="badge badge-${c.statut === 'payee' ? 'success' : 'danger'}">${c.statut}</span></td>
           <td class="actions">
-            <button class="btn btn-sm btn-outline" onclick="HISTORY.detail(${c.id})" title="Détails">👁️</button>
-            <button class="btn btn-sm btn-outline" onclick="HISTORY.printReceipt(${c.id})" title="Reçu Thermique">🧾</button>
+            <button class="btn btn-sm btn-outline" data-action="HISTORY.detail" data-param="${c.id}" title="Détails">👁️</button>
+            <button class="btn btn-sm btn-outline" data-action="HISTORY.printReceipt" data-param="${c.id}" title="Reçu Thermique">🧾</button>
             ${c.numero_facture
-                    ? `<button class="btn btn-sm btn-info" onclick="HISTORY.exportPDF(${c.id})" title="Facture PDF (${c.numero_facture})">📄</button>`
-                    : `<button class="btn btn-sm btn-outline" onclick="HISTORY.generateFacture(${c.id})" title="Générer Facture">➕📄</button>`
+                    ? `<button class="btn btn-sm btn-info" data-action="HISTORY.exportPDF" data-param="${c.id}" title="Facture PDF (${c.numero_facture})">📄</button>`
+                    : `<button class="btn btn-sm btn-outline" data-action="HISTORY.generateFacture" data-param="${c.id}" title="Générer Facture">➕📄</button>`
                 }
-            ${c.statut === 'payee' ? `<button class="btn btn-sm btn-warning" onclick="POS.loadOrderForReturn(${c.id})" title="Retour / Remboursement">↩️</button>` : ''}
-            ${c.statut !== 'annulee' && (state.user.role === 'admin' || state.user.role === 'manager') ? `<button class="btn btn-sm btn-danger" onclick="HISTORY.annuler(${c.id})">✕</button>` : ''}
+            ${c.statut === 'payee' ? `<button class="btn btn-sm btn-warning" data-action="POS.loadOrderForReturn" data-param="${c.id}" title="Retour / Remboursement">↩️</button>` : ''}
+            ${c.statut !== 'annulee' && (state.user.role === 'admin' || state.user.role === 'manager') ? `<button class="btn btn-sm btn-danger" data-action="HISTORY.annuler" data-param="${c.id}">✕</button>` : ''}
           </td>
         </tr>`).join('')}</tbody></table></div>`;
 
