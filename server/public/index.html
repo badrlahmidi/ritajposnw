@@ -14,6 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/pos.css">
 </head>
 
@@ -469,6 +470,11 @@
           </div>
         </div>
 
+        <!-- ═══ KPI : Aujourd'hui en un coup d'œil (admin/manager) ═══ -->
+        <div id="dashTodayKPI" class="dash-kpi-row admin-only" style="display:none;margin-top:16px;">
+          <!-- rempli dynamiquement par dashboard.js -->
+        </div>
+
         <!-- ═══ WIDGETS D'ALERTE ═══ -->
         <div class="dash-alerts-section" style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">
           <!-- Widget DLC -->
@@ -525,6 +531,7 @@
           </nav>
         </div>
         <div class="header-right">
+          <span id="ws-pill" class="ws-pill" title="État de la connexion serveur" aria-live="polite" style="display:none">🔌 Hors-ligne</span>
           <span id="clock" class="clock"></span>
           <button class="btn btn-kbd" data-action="APP.toggleFullscreen" title="Plein écran"><i
               data-lucide="maximize"></i></button>
@@ -572,7 +579,7 @@
             <div class="search-bar" style="display:flex;gap:6px;">
               <input type="text" id="searchInput" placeholder="🔍 Rechercher ou Scanner (Entrée)..."
                 data-input-action="POS.searchProducts"
-                style="flex:1" autofocus>
+                style="flex:1">
             </div>
             <div class="products-grid" id="productsGrid"></div>
           </div>
@@ -634,7 +641,7 @@
               </div>
               <div class="total-row total-final">
                 <span>TOTAL TTC</span>
-                <span id="totalAmount">0.00 DH</span>
+                <span id="totalAmount" aria-live="polite" aria-atomic="true">0.00 DH</span>
               </div>
             </div>
 
@@ -659,41 +666,18 @@
               <div id="numpadDisplay"
                 style="grid-column:1/-1;text-align:right;font-size:1.3rem;font-weight:bold;color:var(--text);min-height:34px;padding:4px 10px;margin-bottom:4px;background:var(--bg-input);border-radius:6px;border:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;box-shadow:inset 0 1px 3px rgba(0,0,0,0.05)">
               </div>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="1">1</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="2">2</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="3">3</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="4">4</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="5">5</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="6">6</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="7">7</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="8">8</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="9">9</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:800;color:var(--danger);background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="C">C</button>
-              <button class="btn btn-outline"
-                style="font-size:1.2rem;padding:10px;font-weight:600;background:var(--bg-card);border-color:var(--border)"
-                data-action="POS.numpadAction" data-param="0">0</button>
-              <button class="btn btn-primary" style="font-size:1.2rem;padding:10px;font-weight:700;"
-                data-action="POS.numpadAction" data-param="QTY">Qté</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="1">1</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="2">2</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="3">3</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="4">4</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="5">5</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="6">6</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="7">7</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="8">8</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="9">9</button>
+              <button class="numpad-btn numpad-btn--danger" data-action="POS.numpadAction" data-param="C">C</button>
+              <button class="numpad-btn" data-action="POS.numpadAction" data-param="0">0</button>
+              <button class="numpad-btn numpad-btn--primary" data-action="POS.numpadAction" data-param="QTY">Qté</button>
             </div>
 
             <!-- Bouton de paiement Global -->
@@ -701,7 +685,7 @@
               <button class="btn btn-primary" data-action="POS.openPaymentModal" id="btnGlobalPay"
                 style="width:100%;font-size:1.5rem;padding:20px;font-weight:800;background:var(--success);border:none"
                 disabled>
-                💵 PAYER <span id="payBtnAmount" style="font-weight:400;margin-left:8px">0.00 DH</span>
+                💵 PAYER <span id="payBtnAmount" aria-live="polite" aria-atomic="true" style="font-weight:400;margin-left:8px">0.00 DH</span>
               </button>
               <button class="btn" data-action="POS.expressCash" id="btnExpressCash"
                 style="width:100%;padding:10px;font-weight:700;background:var(--warning);border:none;color:#fff;font-size:0.9rem"
@@ -719,6 +703,12 @@
           <div class="view-header">
             <h2>📜 Historique des Commandes</h2>
             <div class="view-filters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+              <div class="date-presets" role="group" aria-label="Plage rapide">
+                <button class="chip" data-action="APP.applyDatePreset" data-params='["history","today"]'>Aujourd'hui</button>
+                <button class="chip" data-action="APP.applyDatePreset" data-params='["history","7j"]'>7j</button>
+                <button class="chip" data-action="APP.applyDatePreset" data-params='["history","30j"]'>30j</button>
+                <button class="chip" data-action="APP.applyDatePreset" data-params='["history","mois"]'>Mois</button>
+              </div>
               <div style="display:flex;align-items:center;gap:5px">
                 <label style="font-size:0.8rem">De</label>
                 <input type="date" id="historyDate" data-change-action="HISTORY.load">
@@ -782,6 +772,12 @@
           <div class="view-header" style="flex-shrink:0;">
             <h2>📊 Rapports Professionnels</h2>
             <div class="view-filters" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <div class="date-presets" role="group" aria-label="Plage rapide">
+                <button class="chip" data-action="APP.applyDatePreset" data-params='["stats","today"]'>Aujourd'hui</button>
+                <button class="chip" data-action="APP.applyDatePreset" data-params='["stats","7j"]'>7j</button>
+                <button class="chip" data-action="APP.applyDatePreset" data-params='["stats","30j"]'>30j</button>
+                <button class="chip" data-action="APP.applyDatePreset" data-params='["stats","mois"]'>Mois</button>
+              </div>
               <input type="date" id="statsDate" data-change-action="STATS.load">
               <input type="date" id="statsDateFin" data-change-action="STATS.load" style="display:none;">
               <select id="statsUser" data-change-action="STATS.load" style="max-width:150px">
@@ -874,20 +870,39 @@
         <div class="view-container">
           <div class="view-header">
             <h2>⚙️ Administration</h2>
-            <div class="admin-tabs">
-              <button class="tab-btn active" data-action="ADMIN.switchTab" data-param="produits">🍞 Produits</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="categories">📂 Catégories</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="utilisateurs">👤 Utilisateurs</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="remises">🏷️ Remises</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="depenses">💸 Dépenses</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="fournisseurs">🚚 Fournisseurs</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="clients">👥 Clients</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="parametres">🔧 Paramètres</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="succursales">🏢 Succursales</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="backups">💾 Sauvegardes</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="imprimantes">🖨️ Imprimantes</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="cmi">💳 Paiement CMI</button>
-              <button class="tab-btn" data-action="ADMIN.switchTab" data-param="balance">⚖️ Balance</button>
+            <div class="admin-tabs" role="tablist" aria-label="Groupes de gestion">
+              <!-- Catalogue -->
+              <div class="admin-tab-group" role="group" aria-label="Catalogue">
+                <span class="admin-tab-group-label">Catalogue</span>
+                <button class="tab-btn active" data-action="ADMIN.switchTab" data-param="produits">🍞 Produits</button>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="categories">📂 Catégories</button>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="remises">🏷️ Remises</button>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="fournisseurs">🚚 Fournisseurs</button>
+              </div>
+              <!-- Équipe -->
+              <div class="admin-tab-group" role="group" aria-label="Équipe">
+                <span class="admin-tab-group-label">Équipe</span>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="utilisateurs">👤 Utilisateurs</button>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="succursales">🏢 Succursales</button>
+              </div>
+              <!-- Finances -->
+              <div class="admin-tab-group" role="group" aria-label="Finances">
+                <span class="admin-tab-group-label">Finances</span>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="depenses">💸 Dépenses</button>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="cmi">💳 Paiement CMI</button>
+              </div>
+              <!-- Matériel -->
+              <div class="admin-tab-group" role="group" aria-label="Matériel">
+                <span class="admin-tab-group-label">Matériel</span>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="imprimantes">🖨️ Imprimantes</button>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="balance">⚖️ Balance</button>
+              </div>
+              <!-- Système -->
+              <div class="admin-tab-group" role="group" aria-label="Système">
+                <span class="admin-tab-group-label">Système</span>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="parametres">🔧 Paramètres</button>
+                <button class="tab-btn" data-action="ADMIN.switchTab" data-param="backups">💾 Sauvegardes</button>
+              </div>
             </div>
           </div>
           <div id="adminBody" class="view-body"></div>

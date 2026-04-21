@@ -18,7 +18,16 @@ export const CLIENTS = {
     render(list) {
         const items = list || this.data;
         const body = document.getElementById('clientsBody');
-        if (!items.length) { body.innerHTML = '<p class="text-center text-muted p-16">Aucun client</p>'; return; }
+        if (!items.length) {
+            body.innerHTML = `
+              <div class="empty-state">
+                <div class="empty-state-icon">👥</div>
+                <h3 class="empty-state-title">Aucun client enregistré</h3>
+                <p class="empty-state-text">Ajoutez vos clients réguliers pour suivre leur fidélité, leurs ardoises et leur historique d'achats.</p>
+                <button class="btn btn-primary" data-action="CLIENTS.openForm">+ Ajouter votre premier client</button>
+              </div>`;
+            return;
+        }
         body.innerHTML = `<div class="table-responsive"><table class="data-table">
       <thead><tr><th>Nom</th><th>Téléphone</th><th>Email</th><th>Points</th><th>Solde Crédit</th><th>Achats</th><th>Visites</th><th>Actions</th></tr></thead>
       <tbody>${items.map(c => `<tr>
@@ -127,7 +136,7 @@ export const CLIENTS = {
             APP.closeModal('clientFormModal');
             this.load();
             if (document.getElementById('view-admin').classList.contains('active')) {
-                const btn = document.querySelector('.tab-btn[onclick*="clients"]');
+                const btn = document.querySelector('.tab-btn[data-param="clients"]');
                 if (btn) btn.click();
             }
         } catch (e) {

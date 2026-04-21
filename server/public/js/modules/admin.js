@@ -16,7 +16,7 @@ export const ADMIN = {
   switchTab(tab) {
     this.currentTab = tab;
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.tab-btn[onclick*="${tab}"]`)?.classList.add('active');
+    document.querySelector(`.tab-btn[data-param="${tab}"]`)?.classList.add('active');
     if (tab === 'produits') this.loadProduits();
     else if (tab === 'categories') this.loadCategories();
     else if (tab === 'utilisateurs') this.loadUsers();
@@ -1332,8 +1332,8 @@ export const ADMIN = {
     UI.viewLoading('adminBody');
     try {
       await api('/admin/reset-database', { method: 'POST', body: { mode, confirmation: 'RESET-DANGER' } });
-      alert('✅ Base de données réinitialisée avec succès !\n\nL\'application va maintenant se recharger avec le nouveau profil métier.');
-      window.location.reload();
+      UI.toast('✅ Base réinitialisée — rechargement avec le nouveau profil métier…', 'success');
+      setTimeout(() => window.location.reload(), 1500);
     } catch (e) {
       UI.toast('Erreur: ' + e.message, 'error');
       this.loadParametres();

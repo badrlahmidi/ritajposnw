@@ -361,7 +361,12 @@ export const STOCK = {
       const alertes = await api('/produits/dlc/alertes?jours=7');
       const body = document.getElementById('stockBody');
       if (!alertes.length) {
-        body.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted)">Aucun produit proche de la péremption (7 jours)</div>';
+        body.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">✅</div>
+            <h3 class="empty-state-title">Aucune alerte DLC</h3>
+            <p class="empty-state-text">Aucun produit n'expire dans les 7 prochains jours. Tout est sous contrôle !</p>
+          </div>`;
         return;
       }
       body.innerHTML = `<div class="table-responsive"><table class="data-table">

@@ -5,6 +5,10 @@ const { queryAll, queryOne, run, logAudit, saveDb } = require('../db');
 const v = require('../validators');
 const facture = require('../facture');
 
+// Modes de paiement acceptés. Aligné sur validators.createOrderRules.
+// Défini au niveau module pour éviter une réallocation à chaque requête.
+const ALLOWED_PAYMENT_MODES = new Set(['especes', 'carte', 'mixte', 'credit', 'attente', 'cheque', 'virement']);
+
 // Lister les commandes
 router.get('/', authMiddleware, asyncHandler((req, res) => {
     const { statut, date, date_debut, date_fin, client_id, search, limit: lim } = req.query;
@@ -31,7 +35,11 @@ router.get('/:id', authMiddleware, asyncHandler((req, res) => {
 
 // Créer une commande
 router.post('/', authMiddleware, v.createOrderRules, v.handleValidation, asyncHandler((req, res) => {
-    const { lignes, mode_paiement, client_id, client_nom, notes, type_commande, table_numero, montant_recu, remise_montant, remise_type, montant_especes, montant_carte, pourboire, statut, generate_facture, type_tarif } = req.body;
+    const { lignes, client_id, client_nom, notes, type_commande, table_numero, montant_recu, remise_montant, remise_type, montant_especes, montant_carte, pourboire, statut, generate_facture, type_tarif } = req.body;
+    // Normaliser le mode de paiement en amont pour éviter toute divergence
+    // entre la valeur persistée (commandes.mode_paiement) et la mise à jour
+    // comptable de la session de caisse (total_especes / total_carte).
+    const modePaiement = ALLOWED_PAYMENT_MODES.has(req.body.mode_paiement) ? req.body.mode_paiement : 'especes';
     if (!lignes || lignes.length === 0) return res.status(400).json({ error: 'Aucun article dans la commande' });
 
     // Numéro de commande unique
@@ -108,9 +116,9 @@ router.post('/', authMiddleware, v.createOrderRules, v.handleValidation, asyncHa
 
     let partEspeces = 0;
     let partCarte = 0;
-    if (mode_paiement === 'especes') partEspeces = total;
-    else if (mode_paiement === 'carte') partCarte = total;
-    else if (mode_paiement === 'mixte') {
+    if (modePaiement === 'especes') partEspeces = total;
+    else if (modePaiement === 'carte') partCarte = total;
+    else if (modePaiement === 'mixte') {
         partEspeces = parseFloat(montant_especes) || 0;
         partCarte = parseFloat(montant_carte) || (total - partEspeces);
     }
@@ -123,7 +131,7 @@ router.post('/', authMiddleware, v.createOrderRules, v.handleValidation, asyncHa
            montant_recu, monnaie_rendue, client_id, client_nom, table_numero, type_commande, notes,
          utilisateur_id, succursale_id, statut, points_gagnes, pourboire, type_tarif, session_id, montant_especes, montant_carte)
          VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-            [numero, sousTotal, totalTva, remise, remise_type || '', total, mode_paiement || 'especes',
+            [numero, sousTotal, totalTva, remise, remise_type || '', total, modePaiement,
                 mRecu, monnaie, client_id || null, client_nom || '', table_numero || '',
                 type_commande || 'sur_place', notes || '', req.user.id, req.user.succursale_id || 1, finalStatut, pointsGagnes, pourb, type_tarif || 'particulier',
                 sessionId, partEspeces, partCarte]
@@ -174,10 +182,10 @@ router.post('/', authMiddleware, v.createOrderRules, v.handleValidation, asyncHa
             }
 
             if (sessionId) {
-                if (mode_paiement === 'mixte') {
+                if (modePaiement === 'mixte') {
                     run('UPDATE sessions_caisse SET total_especes = total_especes + ?, total_carte = total_carte + ?, total_ventes = total_ventes + ?, nb_commandes = nb_commandes + 1, total_pourboires = total_pourboires + ? WHERE id = ?',
                         [partEspeces, partCarte, total, pourb, sessionId]);
-                } else if (mode_paiement === 'especes') {
+                } else if (modePaiement === 'especes') {
                     run('UPDATE sessions_caisse SET total_especes = total_especes + ?, total_ventes = total_ventes + ?, nb_commandes = nb_commandes + 1, total_pourboires = total_pourboires + ? WHERE id = ?', [total, total, pourb, sessionId]);
                 } else {
                     run('UPDATE sessions_caisse SET total_carte = total_carte + ?, total_ventes = total_ventes + ?, nb_commandes = nb_commandes + 1, total_pourboires = total_pourboires + ? WHERE id = ?', [total, total, pourb, sessionId]);
@@ -201,7 +209,7 @@ router.post('/', authMiddleware, v.createOrderRules, v.handleValidation, asyncHa
 
         logAudit(req.user.id, req.user.nom, finalStatut === 'attente' ? 'MISE_EN_ATTENTE' : 'VENTE', 'commande', commandeId, `Commande ${numero} — ${total} DH (${finalStatut})`);
 
-        return { id: commandeId, numero, numero_facture: numeroFacture, sous_total: sousTotal, total_tva: totalTva, remise, total, monnaie_rendue: monnaie, points_gagnes: pointsGagnes, lignes: lignesCalculees, mode_paiement: mode_paiement || 'especes', client_nom: client_nom || '', type_commande: type_commande || 'sur_place', caissier_nom: req.user.nom, statut: finalStatut };
+        return { id: commandeId, numero, numero_facture: numeroFacture, sous_total: sousTotal, total_tva: totalTva, remise, total, monnaie_rendue: monnaie, points_gagnes: pointsGagnes, lignes: lignesCalculees, mode_paiement: modePaiement, client_nom: client_nom || '', type_commande: type_commande || 'sur_place', caissier_nom: req.user.nom, statut: finalStatut };
     });
 
     res.json(resultPayload);

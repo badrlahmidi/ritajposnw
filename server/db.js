@@ -35,6 +35,11 @@ async function getDb() {
     db = new Database(DB_PATH); // Native synchronous connection
     db.pragma('journal_mode = WAL'); // Write-Ahead Logging for performance and robustness
     db.pragma('foreign_keys = ON');
+    // Déclencher un checkpoint automatique toutes les ~1000 pages WAL et
+    // effectuer un checkpoint immédiat au démarrage pour borner la taille de
+    // pos.db-wal entre les redémarrages.
+    db.pragma('wal_autocheckpoint = 1000');
+    try { db.pragma('wal_checkpoint(TRUNCATE)'); } catch (_) { /* fresh db */ }
 
     // Vérifier intégrité sommaire (si table parametres existe ou non)
     const tableCheck = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='parametres'").get();
@@ -47,7 +52,7 @@ async function getDb() {
 
       if (hasBackups && !dbExists) {
         console.warn("⚠️ DB vide mais backups détectés -> Recovery Mode");
-        recoveryMode = true;
+        enterRecoveryMode('Base de données vide mais des sauvegardes existent');
       }
 
       createTables();
@@ -55,17 +60,17 @@ async function getDb() {
       if (!recoveryMode) {
         await seedInitialData();
       }
+    } else {
+      // Base existante : s'assurer que les migrations d'index sont appliquées
+      // même sur des installations antérieures.
+      ensureIndexes();
     }
-
-    // Backup automatique régulier (toutes les 4 heures)
-    // Utilise l'API backup native de SQLite
-    setInterval(() => createBackup(), 4 * 60 * 60 * 1000);
 
     return db;
 
   } catch (err) {
     console.error("❌ Fatal DB Error:", err);
-    recoveryMode = true;
+    enterRecoveryMode('Erreur fatale à l\'ouverture : ' + (err && err.code ? err.code : err.message));
     // En cas d'erreur fatale (fichier corrompu qui empêche l'ouverture),
     // better-sqlite3 throw direct.
     // On pourrait essayer de renommer le fichier corrompu et en créer un nouveau vide?
@@ -74,7 +79,14 @@ async function getDb() {
         const corruptedPath = DB_PATH + '.corrupted.' + Date.now();
         fs.renameSync(DB_PATH, corruptedPath);
         console.error(`Moved corrupted DB to ${corruptedPath}`);
-        return getDb(); // Retry with fresh check
+        const fresh = await getDb(); // Retry with fresh check
+        // Si la relance réussit et qu'on n'est plus en défaut, on peut sortir du
+        // mode récupération.
+        if (fresh) {
+          recoveryMode = false;
+          recoveryToken = null;
+        }
+        return fresh;
       } catch (e) {
         throw e;
       }
@@ -313,10 +325,46 @@ function restoreLatestBackup() {
 
 // ═══════════════════ RECOVERY ═══════════════════
 
+// Jeton de récupération à usage unique, généré et imprimé dans les logs locaux
+// dès que recoveryMode passe à true. Il n'existe qu'en mémoire et disparaît
+// à l'arrêt du serveur — l'accès physique à la console est donc requis.
+let recoveryToken = null;
+
+function enterRecoveryMode(reason) {
+  recoveryMode = true;
+  recoveryToken = require('crypto').randomBytes(24).toString('base64url');
+  console.warn('');
+  console.warn('  ⚠️  MODE RÉCUPÉRATION ACTIVÉ — ' + (reason || 'cause inconnue'));
+  console.warn('     Jeton de récupération à usage unique (non stocké) :');
+  console.warn('     ' + recoveryToken);
+  console.warn('     Fournissez-le dans l\'en-tête HTTP "X-Recovery-Token" pour');
+  console.warn('     appeler /system/restore-latest ou /system/ack-reset.');
+  console.warn('');
+}
+
+function verifyAndConsumeRecoveryToken(provided) {
+  if (!recoveryMode || !recoveryToken || !provided) return false;
+  // Comparaison en temps constant pour éviter les attaques de timing.
+  try {
+    const a = Buffer.from(String(provided));
+    const b = Buffer.from(recoveryToken);
+    if (a.length !== b.length) return false;
+    const ok = require('crypto').timingSafeEqual(a, b);
+    if (ok) {
+      // Usage unique : invalider le jeton après consommation réussie.
+      recoveryToken = null;
+    }
+    return ok;
+  } catch (_) {
+    return false;
+  }
+}
+
 function isRecoveryMode() { return recoveryMode; }
 
 async function disableRecoveryMode() {
   recoveryMode = false;
+  recoveryToken = null;
   await seedInitialData();
   // No saveDb needed
 }
@@ -672,6 +720,49 @@ function createTables() {
     }
 
   })();
+
+  // Créer/maintenir les index critiques pour la performance et l'unicité.
+  ensureIndexes();
+}
+
+/**
+ * Crée ou met à jour les index métier critiques. Idempotent (CREATE INDEX IF NOT EXISTS).
+ * - commandes.numero a déjà une contrainte UNIQUE au niveau schéma.
+ * - numero_facture : indexé UNIQUE partiel (ignore les valeurs vides issues des commandes "attente").
+ */
+function ensureIndexes() {
+  if (!db) return;
+  const indexes = [
+    // Intégrité — un numéro de facture ne peut jamais être attribué deux fois.
+    // Partial index : les commandes en "attente" ont numero_facture = "" et sont exclues.
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_commandes_numero_facture_unique ON commandes(numero_facture) WHERE numero_facture IS NOT NULL AND numero_facture <> ''",
+
+    // Lookups fréquents sur la liste des commandes
+    'CREATE INDEX IF NOT EXISTS idx_commandes_date_succ_statut ON commandes(date_creation, succursale_id, statut)',
+    'CREATE INDEX IF NOT EXISTS idx_commandes_client ON commandes(client_id)',
+    'CREATE INDEX IF NOT EXISTS idx_commandes_session ON commandes(session_id)',
+
+    // Lignes de commande (join répété)
+    'CREATE INDEX IF NOT EXISTS idx_commande_lignes_cmd ON commande_lignes(commande_id)',
+    'CREATE INDEX IF NOT EXISTS idx_commande_lignes_produit ON commande_lignes(produit_id)',
+
+    // Stock (lookup par produit+succursale à chaque vente)
+    'CREATE INDEX IF NOT EXISTS idx_stock_produit_succ ON stock(produit_id, succursale_id)',
+    'CREATE INDEX IF NOT EXISTS idx_mouvements_stock_produit ON mouvements_stock(produit_id, date_mouvement)',
+
+    // Scan code-barres
+    'CREATE INDEX IF NOT EXISTS idx_produits_code_barre ON produits(code_barre) WHERE code_barre IS NOT NULL AND code_barre <> ""',
+
+    // Caisse
+    'CREATE INDEX IF NOT EXISTS idx_mouvements_caisse_session ON mouvements_caisse(session_id)',
+
+    // Audit log (filtrage par plage de dates et par utilisateur)
+    'CREATE INDEX IF NOT EXISTS idx_audit_log_date ON audit_log(date_action)',
+    'CREATE INDEX IF NOT EXISTS idx_audit_log_user ON audit_log(utilisateur_id, date_action)',
+  ];
+  for (const sql of indexes) {
+    try { db.prepare(sql).run(); } catch (_) { /* index column may not exist on very old schema */ }
+  }
 }
 
 async function seedInitialData() {
@@ -905,5 +996,6 @@ module.exports = {
   saveDb, createBackup, createArchiveBackup, // saveDb is no-op
   verifyBackupIntegrity, listBackups, logAudit,
   applyBusinessProfile, isSetupCompleted,
-  isRecoveryMode, disableRecoveryMode, restoreLatestBackup
+  isRecoveryMode, disableRecoveryMode, restoreLatestBackup,
+  verifyAndConsumeRecoveryToken, ensureIndexes,
 };

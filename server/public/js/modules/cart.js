@@ -225,12 +225,49 @@ export const CartModule = {
 
     clearCart() {
         if (!this.cart.length) return;
+        // Snapshot for undo
+        const snapshot = {
+            cart: JSON.parse(JSON.stringify(this.cart)),
+            discount: this.discount ? JSON.parse(JSON.stringify(this.discount)) : null,
+            selectedClient: this.selectedClient,
+            deliveryInfo: this.deliveryInfo,
+            orderType: this.orderType,
+        };
         this.cart = []; this.discount = null; this.selectedClient = null;
         this.deliveryInfo = null; this.orderType = 'emporter';
         const cc = document.getElementById('cartClient'); if (cc) cc.style.display = 'none';
         const rr = document.getElementById('remiseRow'); if (rr) rr.style.display = 'none';
         this._hideDebtBanner();
         this.renderCart(); this.hideChangeSection();
+        // Show undo toast
+        this._showUndoToast(snapshot);
+    },
+
+    _showUndoToast(snapshot) {
+        const existing = document.getElementById('undoClearToast');
+        if (existing) existing.remove();
+        const t = document.createElement('div');
+        t.id = 'undoClearToast';
+        t.className = 'toast toast-undo';
+        t.innerHTML = `
+            <span>🗑️ Ticket vidé</span>
+            <button class="toast-undo-btn" type="button">↩️ Annuler</button>
+        `;
+        document.body.appendChild(t);
+        const timer = setTimeout(() => t.remove(), 6000);
+        t.querySelector('.toast-undo-btn').addEventListener('click', () => {
+            clearTimeout(timer);
+            this.cart = snapshot.cart;
+            this.discount = snapshot.discount;
+            this.selectedClient = snapshot.selectedClient;
+            this.deliveryInfo = snapshot.deliveryInfo;
+            this.orderType = snapshot.orderType;
+            if (this.selectedClient) {
+                const cc = document.getElementById('cartClient'); if (cc) cc.style.display = 'flex';
+            }
+            this.renderCart();
+            t.remove();
+        });
     },
 
     _hideDebtBanner() {

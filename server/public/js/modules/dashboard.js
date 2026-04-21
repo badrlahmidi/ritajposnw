@@ -19,9 +19,45 @@ export const DASHBOARD = {
 
     async _loadAlertWidgets() {
         await Promise.allSettled([
+            this._loadTodayKPI(),
             this._loadDLCWidget(),
             this._loadDebtWidget()
         ]);
+    },
+
+    async _loadTodayKPI() {
+        const kpi = document.getElementById('dashTodayKPI');
+        if (!kpi) return;
+        // Admin/manager only (endpoint is adminOnly)
+        const role = state.user && state.user.role;
+        if (role !== 'admin' && role !== 'manager') { kpi.style.display = 'none'; return; }
+
+        try {
+            const today = new Date().toISOString().slice(0, 10);
+            const data = await api(`/stats/jour?date=${today}`);
+            const ca = Number(data.total_ventes || 0);
+            const nb = Number(data.nb_commandes || 0);
+            const moyen = Number(data.panier_moyen || 0);
+            const devise = (state.params && state.params.monnaie) || 'DH';
+            const fmt = (n) => n.toFixed(2) + ' ' + devise;
+            kpi.style.display = 'grid';
+            kpi.innerHTML = `
+                <div class="dash-kpi-card">
+                    <div class="dash-kpi-label">CA du jour</div>
+                    <div class="dash-kpi-value" aria-live="polite">${fmt(ca)}</div>
+                </div>
+                <div class="dash-kpi-card">
+                    <div class="dash-kpi-label">Tickets</div>
+                    <div class="dash-kpi-value">${nb}</div>
+                </div>
+                <div class="dash-kpi-card">
+                    <div class="dash-kpi-label">Panier moyen</div>
+                    <div class="dash-kpi-value">${fmt(moyen)}</div>
+                </div>
+            `;
+        } catch (e) {
+            kpi.style.display = 'none';
+        }
     },
 
     async _loadDLCWidget() {

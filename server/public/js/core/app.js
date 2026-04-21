@@ -1,6 +1,8 @@
 import { API, api } from './api.js';
 import { state, setUser, clearAuth } from './state.js';
 import * as UI from './ui.js';
+import { WS } from './ws.js';
+import './i18n.js';
 import { POS } from '../modules/pos.js';
 import { DASHBOARD } from '../modules/dashboard.js';
 import { HISTORY } from '../modules/history.js';
@@ -251,6 +253,7 @@ export const APP = {
         this.setupTheme();
         this.setupVirtualNumpad();
         this._setupModalKeyboardFix();
+        this._setupOfflinePill();
         SHORTCUTS.init();
 
         // 1. SETUP STATUS
@@ -402,37 +405,76 @@ export const APP = {
             const res = await fetch(`${API}/system/restore-latest`, { method: 'POST' });
             const data = await res.json();
             if (data.success) {
-                alert(`✅ Restauration Réussie !\n\nBackup utilisé : ${data.filename}\n\nLe système va redémarrer.`);
-                window.location.reload();
+                UI.toast(`✅ Restauration réussie — ${data.filename}. Redémarrage…`, 'success');
+                setTimeout(() => window.location.reload(), 1500);
             } else {
                 throw new Error(data.error || 'Erreur inconnue');
             }
         } catch (e) {
-            alert('❌ Échec de la restauration : ' + e.message);
+            UI.toast('❌ Échec de la restauration : ' + e.message, 'error');
         } finally {
             UI.btnLoading(btn, false, 'Tentative de Récupération');
         }
     },
 
     async ackReset() {
-        if (!confirm('⚠️ ATTENTION : TOUTES LES DONNÉES SERONT PERDUES.\n\nÊtes-vous sûr de vouloir repartir de zéro ?')) return;
+        const ok = await UI.confirmDialog(
+            '⚠️ Réinitialiser à zéro ?',
+            'TOUTES LES DONNÉES SERONT PERDUES. Êtes-vous sûr de vouloir repartir de zéro ?',
+            { danger: true, confirmText: 'OUI, TOUT EFFACER' }
+        );
+        if (!ok) return;
 
         try {
             const res = await fetch(`${API}/system/ack-reset`, { method: 'POST' });
             const data = await res.json();
             if (data.success) {
-                alert('Système réinitialisé. Redirection vers le Setup...');
-                window.location.reload();
+                UI.toast('Système réinitialisé. Redirection vers le Setup…', 'info');
+                setTimeout(() => window.location.reload(), 1200);
             }
-        } catch (e) { alert('Erreur: ' + e.message); }
+        } catch (e) { UI.toast('Erreur : ' + e.message, 'error'); }
     },
 
     showSupport() {
-        alert('📞 CONTACT SUPPORT PRO\n\nSociété : RITAJ INFORMATIQUE\nTéléphone : +212 7 08 19 36 05\n\nDisponibilité : 9h00 - 18h00 (Lun-Ven)');
+        UI.confirmDialog(
+            '📞 Support Technique',
+            'RITAJ INFORMATIQUE — +212 7 08 19 36 05<br><span style="color:var(--text-muted)">Disponibilité : 9h00 – 18h00 (Lun–Ven)</span>',
+            { icon: '📞', confirmText: 'OK', cancelText: '' }
+        );
     },
 
     goHome() {
         this.navigate('/dashboard');
+    },
+
+    /** Quick date-preset chips on History/Stats views.
+     *  scope: 'history' | 'stats'
+     *  preset: 'today' | '7j' | '30j' | 'mois'
+     */
+    applyDatePreset(scope, preset) {
+        const today = new Date();
+        const iso = (d) => d.toISOString().slice(0, 10);
+        let start = new Date(today), end = new Date(today);
+        if (preset === '7j') start.setDate(today.getDate() - 6);
+        else if (preset === '30j') start.setDate(today.getDate() - 29);
+        else if (preset === 'mois') start = new Date(today.getFullYear(), today.getMonth(), 1);
+        // 'today' → start == end == today
+
+        const ids = scope === 'stats'
+            ? { debut: 'statsDate', fin: 'statsDateFin' }
+            : { debut: 'historyDate', fin: 'historyDateFin' };
+        const a = document.getElementById(ids.debut);
+        const b = document.getElementById(ids.fin);
+        if (a) a.value = iso(start);
+        if (b) { b.value = iso(end); b.style.display = ''; }
+
+        // Highlight active chip in that scope
+        document.querySelectorAll(`.date-presets [data-params*='"${scope}"']`).forEach(el => el.classList.remove('active'));
+        const current = document.querySelector(`.date-presets [data-params='["${scope}","${preset}"]']`);
+        if (current) current.classList.add('active');
+
+        if (scope === 'stats' && window.STATS && STATS.load) STATS.load();
+        else if (window.HISTORY && HISTORY.load) HISTORY.load();
     },
 
     async loadPublicParams() {
@@ -476,6 +518,24 @@ export const APP = {
                 try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) { /* older browsers */ }
             }, 150);
         });
+    },
+
+    _setupOfflinePill() {
+        if (this._offlinePillInstalled) return;
+        this._offlinePillInstalled = true;
+        const update = () => {
+            const pill = document.getElementById('ws-pill');
+            if (!pill) return;
+            const online = WS && WS.isConnected && WS.isConnected();
+            pill.style.display = online ? 'none' : 'inline-flex';
+            pill.className = 'ws-pill ' + (online ? 'online' : 'offline');
+            pill.textContent = online ? '🟢 En ligne' : '🔌 Hors-ligne';
+        };
+        window.addEventListener('ws:connected', update);
+        window.addEventListener('ws:disconnected', update);
+        window.addEventListener('online', update);
+        window.addEventListener('offline', update);
+        setTimeout(update, 500);
     },
 
     applyBusinessTheme() {
@@ -642,10 +702,10 @@ export const APP = {
             const res = await fetch(`${API}/system/restore-latest`, { method: 'POST' }).then(r => r.json());
             if (res.error) throw new Error(res.error);
 
-            alert(`✅ Restauration réussie !\nBackup utilisé : ${res.filename}\n\nL'application va redémarrer.`);
-            window.location.reload();
+            UI.toast(`✅ Restauration réussie — ${res.filename}. Redémarrage…`, 'success');
+            setTimeout(() => window.location.reload(), 1500);
         } catch (e) {
-            alert(`❌ Erreur : ${e.message}`);
+            UI.toast(`❌ Erreur : ${e.message}`, 'error');
             UI.btnLoading(btn, false);
         }
     },
@@ -662,13 +722,17 @@ export const APP = {
 
             window.location.reload();
         } catch (e) {
-            alert(`❌ Erreur : ${e.message}`);
+            UI.toast(`❌ Erreur : ${e.message}`, 'error');
             UI.btnLoading(btn, false);
         }
     },
 
     showSupport() {
-        alert('📞 RITAJ INFORMATIQUE\n\nSupport Technique : +212 7 08 19 36 05');
+        UI.confirmDialog(
+            'Support Technique',
+            'RITAJ INFORMATIQUE<br><strong>+212 7 08 19 36 05</strong><br><span style="color:var(--text-muted)">Disponibilité : 9h00 – 18h00 (Lun–Ven)</span>',
+            { icon: '📞', confirmText: 'OK', cancelText: '' }
+        );
     },
 
     toggleUserMenu() {
@@ -683,7 +747,34 @@ export const APP = {
         document.getElementById('userDropdown').style.display = 'none';
     },
 
-    closeModal(id) { document.getElementById(id).style.display = 'none'; },
+    /** Unified modal open: adds body scroll-lock, Esc handler, ARIA attrs,
+     *  and focuses the first input. Use everywhere instead of direct
+     *  element.style.display = 'flex'. Idempotent. */
+    openModal(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.style.display = 'flex';
+        el.setAttribute('role', el.getAttribute('role') || 'dialog');
+        el.setAttribute('aria-modal', 'true');
+        el.classList.add('is-open');
+        document.body.classList.add('modal-open');
+        // Focus first focusable element
+        setTimeout(() => {
+            const focusable = el.querySelector('input:not([type=hidden]), select, textarea, button');
+            if (focusable && !focusable.disabled) try { focusable.focus(); } catch (e) { }
+        }, 60);
+    },
+
+    closeModal(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.style.display = 'none';
+        el.classList.remove('is-open');
+        // Unlock body only when no modal stays open
+        if (!document.querySelector('.modal-overlay.is-open')) {
+            document.body.classList.remove('modal-open');
+        }
+    },
 
     async checkStockAlerts() {
         try {

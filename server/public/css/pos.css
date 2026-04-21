@@ -1721,10 +1721,31 @@ html[data-business] {
 /* ═══════════════ ADMIN TABS ═══════════════ */
 .admin-tabs {
   display: flex;
-  gap: 2px;
+  flex-wrap: wrap;
+  gap: 10px;
   background: var(--bg);
   border-radius: var(--radius);
-  padding: 2px;
+  padding: 8px;
+}
+
+.admin-tab-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px 4px 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.admin-tab-group-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-right: 6px;
+  white-space: nowrap;
 }
 
 .tab-btn {
@@ -2424,10 +2445,154 @@ html[data-business] {
 
 .dashboard-container {
   width: 100%;
-  max-width: 1000px;
+  max-width: 1400px;
   margin: 0 auto;
   animation: fadeIn 0.3s ease;
 }
+
+/* Today-at-a-glance KPI strip (admin/manager) */
+.dash-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.dash-kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.dash-kpi-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.dash-kpi-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1.1;
+}
+
+/* Offline pill (header) */
+.ws-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  animation: wsPillPulse 2s ease-in-out infinite;
+  margin-right: 8px;
+}
+.ws-pill.online { background: #dcfce7; color: #166534; border-color: #bbf7d0; animation: none; }
+@keyframes wsPillPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Undo toast variant (POS.clearCart and future undo flows) */
+.toast-undo {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  border-left-color: var(--warning, #e67e22) !important;
+}
+.toast-undo-btn {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  min-height: 32px;
+}
+.toast-undo-btn:hover { filter: brightness(0.92); }
+
+/* Body scroll-lock while a modal is open (applied by APP.openModal) */
+body.modal-open { overflow: hidden; }
+
+/* Empty states (shared) */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: var(--text-muted);
+}
+.empty-state-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+  filter: grayscale(0.2);
+}
+.empty-state-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+.empty-state-text {
+  max-width: 420px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 8px 0;
+}
+
+/* Date-preset chips */
+.date-presets {
+  display: inline-flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  min-height: 32px;
+}
+.chip:hover { background: var(--bg-hover); color: var(--text); }
+.chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+/* Shared numpad button — replaces duplicated inline styles */
+.numpad-btn {
+  font-size: 1.2rem;
+  padding: 10px;
+  font-weight: 600;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+  min-height: 48px;
+}
+.numpad-btn:hover { background: var(--bg-hover); }
+.numpad-btn:active { transform: scale(0.97); }
+.numpad-btn--danger { color: var(--danger); font-weight: 800; }
+.numpad-btn--primary { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
+.numpad-btn--primary:hover { background: var(--primary-hover, var(--primary)); }
+
 
 .dash-header {
   display: flex;
@@ -3084,7 +3249,14 @@ html[data-business] {
 }
 
 /* ═══════════════ OPTIMISATION 1366x768 & COMPACT SCREENS ═══════════════ */
-@media screen and (max-width: 1400px),
+/* Compact mode — active uniquement quand la place manque VERTICALEMENT.
+   Avant : `max-width:1400px` seul déclenchait le mode compact sur les écrans
+   17" 5:4 (1280×1024) et forçait 0.85rem / padding 10px alors qu'il y a
+   1024px de hauteur — ça gâche l'espace et dégrade le design tactile.
+   Désormais la branche largeur exige ALSO height ≤ 900px, ce qui couvre
+   bien les cibles (1280×800, 1366×768, 1024×600) sans pénaliser les
+   panneaux 17" 5:4 et les grands écrans. */
+@media screen and (max-width: 1400px) and (max-height: 900px),
 screen and (max-height: 800px) {
 
   /* Réduire les espacements globaux */
@@ -3440,7 +3612,7 @@ html {
   font-size: 0.78rem;
 }
 
-/* Compact launcher on small / tablet-portrait screens */
+/* Compact launcher + POS cart drag-handle on small / tablet-portrait screens */
 @media (max-width: 900px) {
   .launcher-panel {
     max-width: 100%;
@@ -3463,10 +3635,8 @@ html {
   .btn-launcher {
     padding: 6px 10px;
   }
-}
 
-/* --- Drag handle for the POS cart bottom-sheet (tablet portrait) --- */
-@media (max-width: 900px) {
+  /* Drag-handle hint for the POS cart bottom-sheet (tablet portrait) */
   .pos-cart::before {
     content: "";
     display: block;

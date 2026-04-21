@@ -202,6 +202,42 @@ describe('Validation des commandes', () => {
 
     expect(res.status).toBe(400);
   });
+
+  // Régression Sprint 0.3 — Bug comptabilité caisse :
+  // Si mode_paiement est omis, la commande était persistée en 'especes' (valeur
+  // par défaut à l'INSERT) mais la session de caisse créditait total_carte,
+  // causant une divergence systématique espèces/carte dès la 1ʳᵉ vente.
+  // Le handler normalise désormais la valeur en amont : aucune divergence.
+  test("régression : omission de mode_paiement est comptée en espèces (pas en carte)", async () => {
+    // S'assurer que la caisse est ouverte
+    const statut = await request(app).get('/pos/api/caisse/statut').set(authHeaders());
+    if (!statut.body || statut.body.statut !== 'ouverte') {
+      await request(app).post('/pos/api/caisse/ouvrir').set(authHeaders()).send({ fond_caisse: 500 });
+    }
+    const avant = await request(app).get('/pos/api/caisse/statut').set(authHeaders());
+    const espAvant = Number((avant.body && avant.body.total_especes) || 0);
+    const carteAvant = Number((avant.body && avant.body.total_carte) || 0);
+
+    const vente = await request(app)
+      .post('/pos/api/commandes')
+      .set(authHeaders())
+      .send({
+        lignes: [{ produit_id: 1, quantite: 1 }],
+        montant_recu: 1000,
+        // mode_paiement volontairement omis
+      });
+    expect(vente.status).toBe(200);
+    // Le serveur doit répondre avec mode_paiement = 'especes'.
+    expect(vente.body.mode_paiement).toBe('especes');
+
+    const apres = await request(app).get('/pos/api/caisse/statut').set(authHeaders());
+    const espApres = Number((apres.body && apres.body.total_especes) || 0);
+    const carteApres = Number((apres.body && apres.body.total_carte) || 0);
+
+    // total_especes doit avoir augmenté du total de la vente ; total_carte inchangé.
+    expect(espApres).toBeGreaterThan(espAvant);
+    expect(carteApres).toBe(carteAvant);
+  });
 });
 
 describe('GET /pos/api/stats/jour', () => {
