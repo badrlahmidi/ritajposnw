@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interface Caissier - Ritaj POS</title>
+  <link rel="stylesheet" href="/css/pos.css">
+  <link rel="stylesheet" href="/css/waiter.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-left">
+      <h1><i class="fas fa-utensil"></i> Interface Caissier</h1>
+      <span class="user-info">Bonjour Administrateur</span>
+    </div>
+    <div class="header-right">
+      <span class="table-status" id="table-status">Table: Aucune</span>
+    </div>
+  </header>
+
+  <main class="app-container">
+    <!-- Tables Grid -->
+    <section class="tables-section">
+      <h2><i class="fas fa-table"></i> Tables</h2>
+      <div class="tables-grid" id="tablesGrid">
+        <!-- Tables injected by JS -->
+      </div>
+    </section>
+
+    <!-- Menu Categories -->
+    <section class="menu-section">
+      <h2><i class="fas fa-burger"></i> Menu</h2>
+      <div class="categories-bar" id="categoriesBar">
+        <button class="category-btn active" data-categorie="1">Entrées</button>
+        <button class="category-btn" data-categorie="2">Plats</button>
+        <button class="category-btn" data-categorie="3">Boissons</button>
+      </div>
+    </section>
+
+    <!-- Current Order -->
+    <section class="order-section">
+      <h2><i class="fas fa-shopping-cart"></i> Commande en cours</h2>
+      <div class="order-empty" id="order-empty">
+        <p>Aucune commande sélectionnée</p>
+      </div>
+      <div class="order-active" id="order-active" style="display:none;">
+        <div class="order-items" id="order-items">
+          <!-- Items will be injected here -->
+        </div>
+        <div class="order-footer">
+          <div class="order-summary">
+            <span>Sous-total:</span>
+            <span class="total-ttc">0,00 €</span>
+          </div>
+          <button class="btn-print" onclick="printReceipt()" disabled>
+            <i class="fas fa-print"></i> Imprimer
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Payment Section -->
+    <section class="payment-section" id="paymentSection" style="display:none;">
+      <h2><i class="fas fa-money-bill-wave"></i> Règlement</h2>
+      <div class="payment-methods">
+        <div class="payment-method">
+          <input type="radio" id="paiement-especes" name="mode-paiement" value="especes" checked>
+          <label for="paiement-especes">Espèces</label>
+        </div>
+        <div class="payment-method">
+          <input type="radio" id="paiement-carte" name="mode-paiement" value="carte">
+          <label for="paiement-carte">Carte</label>
+        </div>
+      </div>
+      <div class="payment-total">
+        <span>Total TTC:</span>
+        <strong class="total-ttc-paiement">0,00 €</strong>
+      </div>
+      <button class="btn-payer" onclick="executerReglement()" disabled>Régler</button>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>RITAJ SMART POS - Interface Caissier - LAN Access</p>
+  </footer>
+
+  <script src="/js/waiter.js"></script>
+</body>
+</html>

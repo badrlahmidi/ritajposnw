@@ -32,6 +32,7 @@ const supplierRoutes = require('./routes/suppliers');
 const expenseRoutes = require('./routes/expenses');
 const discountRoutes = require('./routes/discounts');
 const caisseRoutes = require('./routes/caisse');
+const waiterRoutes = require('./routes/waiter');
 const statsRoutes = require('./routes/stats');
 const systemRoutes = require('./routes/system'); // Handles setup, params, backup, audit, system
 const succursalesRoutes = require('./routes/succursales');
@@ -130,6 +131,7 @@ apiRouter.use('/fournisseurs', supplierRoutes);
 apiRouter.use('/depenses', expenseRoutes);
 apiRouter.use('/remises', discountRoutes);
 apiRouter.use('/caisse', caisseRoutes);
+apiRouter.use('/waiter', waiterRoutes);
 apiRouter.use('/stats', statsRoutes);
 apiRouter.use('/succursales', succursalesRoutes);
 apiRouter.use('/tables', tablesRoutes);

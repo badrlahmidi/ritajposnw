@@ -1,0 +1,448 @@
+/* ═══════════════════════════════════════════════════════════════
+   RITAJ SMART POS — Interface Caissier
+   Interface optimisée pour touch, simplicité, LAN
+   ═══════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+/* ═══════════════ RESET & VARIABLES ═══════════════ */
+:root {
+  --primary: #d35400;
+  --primary-light: #e67e22;
+  --primary-dark: #a04000;
+  --success: #1abc9c;
+  --danger: #e74c3c;
+  --bg: #f5f7fa;
+  --bg-card: #ffffff;
+  --bg-hover: #f1f3f6;
+  --bg-input: #ffffff;
+  --border: #e4e7ec;
+  --border-focus: #d35400;
+  --text: #1d1e2e;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --transition: all 0.25s ease;
+  --radius: 12px;
+}
+
+/* Dark mode support */
+[data-theme="dark"] {
+  --bg: #0f111a;
+  --bg-card: #181b24;
+  --bg-hover: #222533;
+  --bg-input: #181b24;
+  --border: #2b2f42;
+  --border-focus: #e67e22;
+  --text: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+}
+
+/* Typography */
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow-x: hidden;
+}
+
+/* App container */
+.app-container {
+  flex: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Header */
+.app-header {
+  background: var(--header-bg);
+  padding: 20px 30px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  margin: -20px -20px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+}
+
+.user-info {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Tables Section */
+.tables-section {
+  margin-bottom: 20px;
+}
+
+.tables-section h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+}
+
+/* Table Card */
+.table-card {
+  background: var(--bg-card);
+  border: 2px var(--border) solid;
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+}
+
+.table-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow);
+}
+
+.table-card.selected {
+  border-color: var(--primary);
+  background: var(--bg-hover);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.table-number {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.table-status {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table-status.actif {
+  background: #d5f5e3;
+  color: var(--success);
+}
+
+.table-status.fermee {
+  background: #fadbd8;
+  color: var(--danger);
+}
+
+/* Menu Section */
+.menu-section {
+  margin-bottom: 20px;
+}
+
+.menu-section h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.categories-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.categories-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.category-btn {
+  background: var(--bg-card);
+  border: 2px var(--border) solid;
+  border-radius: var(--radius);
+  padding: 10px 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.category-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.category-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* Order Section */
+.order-section {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.order-section h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.order-section .order-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.order-active {
+  display: none;
+}
+
+.order-items {
+  margin: -20px -20px -10px;
+}
+
+.order-line {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+
+.order-line:last-child {
+  border-bottom: none;
+}
+
+.order-line-name {
+  flex: 1;
+  color: var(--text);
+}
+
+.order-line-qte {
+  margin: 0 10px;
+  color: var(--text-secondary);
+  min-width: 40px;
+  text-align: center;
+}
+
+.order-line-prix {
+  color: var(--primary);
+  font-weight: 600;
+  min-width: 60px;
+  text-align: right;
+}
+
+.order-line .btn-remove {
+  background: none;
+  border: none;
+  color: var(--danger);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border);
+}
+
+.order-summary span {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.total-ttc {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+.payment-section {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+  display: none;
+}
+
+.payment-section h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.payment-methods {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.payment-method {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.payment-method input {
+  margin: 0;
+  flex: 0 0 20px;
+  height: 20px;
+  width: 20px;
+  cursor: pointer;
+}
+
+.payment-method label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.payment-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid var(--border);
+}
+
+.payment-total span {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.payment-total .total-ttc-paiement {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: center;
+}
+
+.btn:focus-visible {
+  outline: 2px var(--primary) solid;
+  outline-offset: 2px;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+}
+
+.btn-secondary {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.btn-secondary:hover {
+  background: #dde0e5;
+}
+
+.btn-danger {
+  background: #fee2e2;
+  color: var(--danger);
+}
+
+.btn-print,
+.btn-payer {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Order Empty/Active */
+.order-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.order-active {
+  display: block;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .tables-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+  
+  .table-card {
+    padding: 15px;
+  }
+  
+  .category-btn {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+  }
+  
+  .order-line {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+  }
+}
